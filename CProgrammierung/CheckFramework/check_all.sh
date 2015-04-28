@@ -2,17 +2,23 @@
 
 # do code similarity tests
 # and draw "copy-cat" graphs as well as check simialrity based on 5 severity levels
-sh check-plagiarism.sh
-rm *.allocated
+
+echo "CHECKING FOR PLAGIARISM ..."
+
+sh check-plagiarism.sh >/dev/null 2>/dev/null
+rm *.allocated >/dev/null 2>/dev/null 
+
+echo "COMPILING *.c FILES"
 
 # build all c files, in the Files/ students directories
 find ./Files -type f -name "*.c" -print0 |
 while IFS= read -r -d '' pathname; do
-    gcc -o "${pathname%.c}.app" "$pathname"
+    gcc -w -o "${pathname%.c}.app" "$pathname"
 done
 
 # check all compiles programs inside a chroot, and print back result summary file
 
+echo "VALGIND CHECKS HAVE BEEN STARTED ..."
 
 # chroot it with that command prepended
 # chroot chroot_dir 
@@ -20,10 +26,12 @@ find ./Files -type f -name "*.c" -print0 |
 while IFS= read -r -d '' pathname; do
     /bin/bash -c "valgrind --log-file=\"${pathname%.c}.test1.valgrind\" ./${pathname%.c}.app Tests/input1.data > \"${pathname%.c}.test1.result\""
     /bin/bash -c "valgrind --log-file=\"${pathname%.c}.test2.valgrind\" ./${pathname%.c}.app Tests/input2.data > \"${pathname%.c}.test2.result\""
-    echo "T" > $(dirname "${pathname}")/$(grep "total heap usage" "${pathname%.c}.test1.valgrind" | awk '{print $9}').allocated
+    echo "T" > $(dirname "${pathname}")/$(grep "total heap usage" "${pathname%.c}.test1.valgrind" | awk '{print $9 "-" $5 "-" $7}').allocated
     #chroot chroot_dir /bin/bash -c "./${pathname%.c}.app Tests/input3.data > \"${pathname%.c}.test3.result\""
     #chroot chroot_dir /bin/bash -c "./${pathname%.c}.app Tests/input4.data > \"${pathname%.c}.test4.result\""
 done
+
+echo "COLLECTING RESULTS ..."
 
 find ./Files -type f -name "*.test1.result" -print0 |
 while IFS= read -r -d '' pathname; do

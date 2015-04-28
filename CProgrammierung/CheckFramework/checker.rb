@@ -75,15 +75,18 @@ end
 
 
 infile.each_line do |inputline|
-
-  input = inputline.split(",").collect{|id| id.to_i}
-  optimal = solve(input)
-
-  testline = testfile.readline
-  testdata = testline.split(" ").collect{|s| s.split(",").collect{|i| i.to_i}}
-  testnumstacks = testdata.shift.first
+  begin
+    input = inputline.split(",").collect{|id| id.to_i}
+    optimal = solve(input)
+    
+    testline = testfile.readline
+    testdata = testline.split(" ").collect{|s| s.split(",").collect{|i| i.to_i}}
+    testnumstacks = testdata.shift.first
   
-  puts
+    puts
+  rescue StandardError => bang
+    break
+  end
   
   # TEST 1: IS THE OUTPUT CONSISTENT?
   

@@ -15,7 +15,7 @@ end
 
 def numcontainers
   #rand(1000) + 1
-  15
+  666
 end
 
 

@@ -23,7 +23,7 @@ void *malloc(size_t size)
 
     // hier mit 10% wahrscheinlichkeit NULL zurückgeben, ansonsten malloc() durchreichen
     short variable;
-    variable=rand()%10000;
+    variable=rand()%100;
     void *p = NULL;
 
     if(variable<=10) return p; // NULL (simuliert vollen speicher)

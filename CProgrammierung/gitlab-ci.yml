@@ -1,0 +1,13 @@
+build-programmieraufgabe-pdf:
+  image: "gitlab.informatik.hu-berlin.de:4567/ti/software/docker-paperbuilder/ubuntu1804:144dc62463072b1070e14313304a903b38f3bd90"
+  script:
+    - env -C CProgrammierung/aufgabenstellung latexmk
+
+  only:
+    changes:
+      - CProgrammierung/aufgabenstellung/programmieraufgabe.tex
+      - CProgrammierung/aufgabenstellung/.latexmkrc
+
+  artifacts:
+    paths:
+      - CProgrammierung/aufgabenstellung/programmieraufgabe.pdf

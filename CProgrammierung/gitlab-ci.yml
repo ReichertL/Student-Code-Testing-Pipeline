@@ -3,10 +3,12 @@ build-programmieraufgabe-pdf:
   script:
     - env -C CProgrammierung/aufgabenstellung latexmk
 
-  only:
-    changes:
-      - CProgrammierung/aufgabenstellung/programmieraufgabe.tex
-      - CProgrammierung/aufgabenstellung/.latexmkrc
+  # # though using `only` would be correct here, gitlab is broken as of now,
+  # # so artifact download url gives 404 if this is only built on change
+  # only:
+  #   changes:
+  #     - CProgrammierung/aufgabenstellung/programmieraufgabe.tex
+  #     - CProgrammierung/aufgabenstellung/.latexmkrc
 
   artifacts:
     paths:

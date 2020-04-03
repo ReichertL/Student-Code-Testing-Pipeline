@@ -1,4 +1,5 @@
 build-programmieraufgabe-pdf:
+  stage: build
   image: "gitlab.informatik.hu-berlin.de:4567/ti/software/docker-paperbuilder/ubuntu1804:144dc62463072b1070e14313304a903b38f3bd90"
   script:
     - env -C CProgrammierung/aufgabenstellung latexmk
@@ -13,3 +14,15 @@ build-programmieraufgabe-pdf:
   artifacts:
     paths:
       - CProgrammierung/aufgabenstellung/programmieraufgabe.pdf
+
+pylint-programmieraufgabe:
+  stage: test
+  image: $CI_REGISTRY_IMAGE/cprojekt
+  script:
+    - . /venv_cprogrammierung/bin/activate
+    - cd CProgrammierung/auswertung
+    - pylint *.py | sed -n 's;Your code has been rated at \([0-9.]*\)/10.*$;\1;p' | tee pylint.score
+    - anybadge --overwrite --label pylint --suffix ' / 10' --value $(cat pylint.score) --file pylint.svg 5=red 7=orange 9=yellow 9.5=lime 10=green
+  artifacts:
+    paths:
+      - CProgrammierung/auswertung/pylint.svg

@@ -6,3 +6,7 @@ __pycache__/
 *.out
 *.pdf
 *.synctex.gz
+
+.coverage
+pytest-cov.xml
+pytest.xml

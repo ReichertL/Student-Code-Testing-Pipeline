@@ -33,5 +33,9 @@ unittests-programmieraufgabe:
   script:
     - . /venv_cprogrammierung/bin/activate
     - cd CProgrammierung/auswertung
-    - py.test --cov
+    - py.test --cov --cov-report=term --cov-report='xml:pytest-cov.xml' --junit-xml=pytest.xml
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
+  artifacts:
+    reports:
+      junit: CProgrammierung/auswertung/pytest.xml
+      cobertura: CProgrammierung/auswertung/pytest-cov.xml

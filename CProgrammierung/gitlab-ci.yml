@@ -26,3 +26,12 @@ pylint-programmieraufgabe:
   artifacts:
     paths:
       - CProgrammierung/auswertung/pylint.svg
+
+unittests-programmieraufgabe:
+  stage: test
+  image: $CI_REGISTRY_IMAGE/cprojekt
+  script:
+    - . /venv_cprogrammierung/bin/activate
+    - cd CProgrammierung/auswertung
+    - py.test --cov
+  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'

@@ -12,4 +12,4 @@ RUN apt-get -q update && apt-get -qy upgrade && apt-get -qy install sudo time
 RUN groupadd -r wheel && echo '%wheel ALL=(ALL) ALL' >> /etc/sudoers
 RUN groupadd -g 1000 ubuntu && useradd ubuntu -u 1000 -g 1000 -G wheel -p '' -m
 RUN groupadd -g 2000 cpr && useradd cpr -u 2000 -g 2000
-RUN . /venv_cprogrammierung/bin/activate && pip install pylint anybadge
+RUN . /venv_cprogrammierung/bin/activate && pip install pylint anybadge pytest-cov

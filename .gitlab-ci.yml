@@ -1,0 +1,6 @@
+include:
+  - local: '/CProgrammierung/gitlab-ci.yml'
+
+stages:
+  - build
+  - test

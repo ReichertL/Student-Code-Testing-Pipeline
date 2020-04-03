@@ -21,8 +21,8 @@ pylint-programmieraufgabe:
   script:
     - . /venv_cprogrammierung/bin/activate
     - cd CProgrammierung/auswertung
-    - pylint *.py | sed -n 's;Your code has been rated at \([0-9.]*\)/10.*$;\1;p' | tee pylint.score
-    - anybadge --overwrite --label pylint --suffix ' / 10' --value $(cat pylint.score) --file pylint.svg 5=red 7=orange 9=yellow 9.5=lime 10=green
+    - pylint --exit-zero *.py | sed -n 's;Your code has been rated at \([0-9.]*\)/10.*$;\1;p' | tee pylint.score
+    - anybadge --overwrite --label pylint --suffix ' / 10' --value $(cat pylint.score) --file pylint.svg 5=red 7=orange 8=yellow 9=brightyellow 9.5=lime 10=green
   artifacts:
     paths:
       - CProgrammierung/auswertung/pylint.svg

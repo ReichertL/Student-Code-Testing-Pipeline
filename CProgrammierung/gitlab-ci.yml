@@ -39,3 +39,13 @@ unittests-programmieraufgabe:
     reports:
       junit: CProgrammierung/auswertung/pytest.xml
       cobertura: CProgrammierung/auswertung/pytest-cov.xml
+
+test-programmieraufgabe-musterloesungen:
+  stage: test
+  image: $CI_REGISTRY_IMAGE/cprojekt
+  script:
+    - . /venv_cprogrammierung/bin/activate
+    - cd CProgrammierung/musterloesung/tests
+    - bash ./setup.sh && cd auswertung
+    - ./check.py -c
+    - ./check.py --exit-status -d Leonie Mark

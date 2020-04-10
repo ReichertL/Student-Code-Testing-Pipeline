@@ -10,3 +10,7 @@ __pycache__/
 .coverage
 pytest-cov.xml
 pytest.xml
+
+/musterloesung/tests/auswertung
+
+/auswertung/teilnehmer.json

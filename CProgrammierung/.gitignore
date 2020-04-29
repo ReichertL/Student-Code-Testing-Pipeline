@@ -6,11 +6,12 @@ __pycache__/
 *.out
 *.pdf
 *.synctex.gz
-
+*/vgcore*
 .coverage
 pytest-cov.xml
 pytest.xml
 
 /musterloesung/tests/auswertung
+/musterloesung/Testcase_Generatror/*
 
 /auswertung/teilnehmer.json

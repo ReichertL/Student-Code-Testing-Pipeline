@@ -21,8 +21,7 @@ class SQLiteDatabaseManager(PersistenceManager):
 
     def create(self):
         cursor = self.database.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS students
-            (student_name, student_id, submission_id)''', )
+        self.create_student_table(cursor)
         self.create_submission_table(cursor)
         self.create_test_case_table(cursor)
 
@@ -38,9 +37,15 @@ class SQLiteDatabaseManager(PersistenceManager):
         self.database.commit()
         self.database.close()
 
-    def create_submission_table(self, cursor):
+    @staticmethod
+    def create_student_table(cursor):
+        cursor.execute('''CREATE TABLE IF NOT EXISTS students
+            (student_name, student_id, submission_id)''')
+
+    @staticmethod
+    def create_submission_table(cursor):
         cursor.execute('''CREATE TABLE IF NOT EXISTS submissions
-                    (    timestamp,mtime,tests_bad_input,tests_good_input, tests_performance,compilation,fast,timing)''', )
+                    (    timestamp,mtime,tests_bad_input,tests_good_input, tests_performance,compilation,fast,timing)''')
 
     @staticmethod
     def create_test_case_table(cursor):
@@ -59,4 +64,4 @@ class SQLiteDatabaseManager(PersistenceManager):
                    return_code,
                    output_correct,
                    errormsg_quality,
-                   error_line)''', )
+                   error_line)''')

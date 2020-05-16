@@ -9,7 +9,7 @@ submissionsParameter: none, reads commandline arguments to determine behavior
 from logic.moodle_reporter import MoodleReporter
 from logic.moodle_submission_fetcher import MoodleSubmissionFetcher
 from logic.test_case_executor import TestCaseExecutor
-from models.student import Student
+
 from persistence.database_manager import SQLiteDatabaseManager
 from util.argument_extractor import ArgumentExtractor
 from util.playground import Playground
@@ -27,8 +27,6 @@ def run():
     verbosity = args.verbose
     persistence_manager = SQLiteDatabaseManager()
     persistence_manager.create()
-    persistence_manager.insert_student(Student("hallo", "15255", "1266"))
-    persistence_manager.insert_student(Student("hallo", "15255", "1263"))
 
     # Execute Submission Fetching if needed determined by the provided args
     fetcher = MoodleSubmissionFetcher(args)
@@ -36,6 +34,7 @@ def run():
     # Execute test cases if needed determined by the provided args
     executor = TestCaseExecutor(args)
     executor.run()
+    tests = executor.test_cases
 
     # Send Moodle feedback to students if needed determined by args
     reporter = MoodleReporter(args)

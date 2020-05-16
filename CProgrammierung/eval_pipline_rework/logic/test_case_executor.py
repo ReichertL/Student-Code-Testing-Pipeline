@@ -97,7 +97,7 @@ class TestCaseExecutor:
     def load_tests(self):
         """
         Loads the in the config file specified testcases for good bad and extra
-        :return: dictionary of dictionaries of pairs type -> path -> (input, output)
+        :return: dictionary of dictionaries of pairs test_case_type -> path -> (input, output)
         """
         test_cases = {}
         extensions = {"BAD": self.configuration["TESTS_BAD_EXTENSION"],
@@ -125,7 +125,7 @@ class TestCaseExecutor:
                                 test_output = output_file.read()
 
                         test_case = TestCase(path, test_input, test_output, key == "BAD")
-                        print(test_case)
+                        # print(test_case)
                         test_case_input.update({path: (test_input, test_output)})
 
                         path_mapping = [(key, test_case_input)]

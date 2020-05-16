@@ -22,7 +22,7 @@ _RE_FORMAT_SPEC = re.compile(r'(?:(?P<fill>.)?(?P<align>[<>=^]))?'
                              r'(?P<width>\d+)?'
                              r'(?P<comma>,)?'
                              r'(?:\.(?P<precision>\d+))?'
-                             r'(?P<type>[a-zA-Z%])?')
+                             r'(?P<test_case_type>[a-zA-Z%])?')
 
 
 def _parse_format_spec(format_spec):
@@ -37,9 +37,9 @@ Parse the string format_spec and return a dict with the following entries:
   width : int      minimum width
   comma            use comma as thousands seperator
   precision : int  number of digits after decimal point
-  type             character describing conversion type
+  test_case_type             character describing conversion test_case_type
 
-Default values for type and alignment are set appropriately.
+Default values for test_case_type and alignment are set appropriately.
 
 Examples:
 
@@ -48,11 +48,11 @@ Examples:
 
 >>> _parse_format_spec('d')
 {'fill': '', 'align': '>', 'sign': None, 'alternate': None, 'zero': None,\
- 'width': None, 'comma': None, 'precision': None, 'type': 'd'}
+ 'width': None, 'comma': None, 'precision': None, 'test_case_type': 'd'}
 
 >>> _parse_format_spec('=^-#06,.3f')
 {'fill': '=', 'align': '^', 'sign': '-', 'alternate': '#', 'zero': '0',\
- 'width': '6', 'comma': ',', 'precision': '3', 'type': 'f'}
+ 'width': '6', 'comma': ',', 'precision': '3', 'test_case_type': 'f'}
 
 """
 
@@ -60,12 +60,12 @@ Examples:
     if match_object is None:
         raise ValueError()
     res = match_object.groupdict()
-    if res['type'] is None:  # the default type is 's'
-        res['type'] = 's'
+    if res['test_case_type'] is None:  # the default test_case_type is 's'
+        res['test_case_type'] = 's'
     if res['fill'] is None:
         res['fill'] = ''
     if res['align'] is None:  # assign the default alignment
-        if res['type'] in 'bcdoxXneEfFgGn%':
+        if res['test_case_type'] in 'bcdoxXneEfFgGn%':
             res['align'] = '>'
         else:
             res['align'] = '<'
@@ -91,17 +91,17 @@ ValueError: "ab" is longer than 1
 
 
 def _format_is_float(fspec):
-    """Return if type is 'f' and precision unequal to zero.
+    """Return if test_case_type is 'f' and precision unequal to zero.
 
->>> _format_is_float({'type': 'f', 'precision': None})
+>>> _format_is_float({'test_case_type': 'f', 'precision': None})
 True
->>> _format_is_float({'type': 'f', 'precision': '0'})
+>>> _format_is_float({'test_case_type': 'f', 'precision': '0'})
 False
->>> _format_is_float({'type': 'f', 'precision': '1'})
+>>> _format_is_float({'test_case_type': 'f', 'precision': '1'})
 True
     """
     prec = fspec['precision']
-    return fspec['type'] == 'f' and (prec is None or int(prec) > 0)
+    return fspec['test_case_type'] == 'f' and (prec is None or int(prec) > 0)
 
 
 def list_from_dict(keys, dictionary):
@@ -117,11 +117,11 @@ def list_from_dict(keys, dictionary):
 def format_or_empty(value, fmt, spec):
     """Format `value` according to `fmt`. Return `''` if `value` is `None`.
 
-    If spec['type'] is 's' (string), just return value.
+    If spec['test_case_type'] is 's' (string), just return value.
     """
     if value is None:
         return ''
-    if spec['type'] in 's':
+    if spec['test_case_type'] in 's':
         return value
     return format(value, fmt)
 

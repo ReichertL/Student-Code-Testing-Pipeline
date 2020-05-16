@@ -1,4 +1,4 @@
-"""Implements abstraction for TestCase type"""
+"""Implements abstraction for TestCase test_case_type"""
 
 
 class TestCase:
@@ -22,6 +22,10 @@ class TestCase:
         self.error_expected = error_expected
 
     def __str__(self):
+        """
+        Returns a string representation of the testcase
+        :return: String representation of the testcase
+        """
         return f"Path: {self.path}\n" \
                f"Input:\n{self.test_input}\n" \
                f"Output:\n{self.test_output}\n" \

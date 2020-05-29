@@ -36,7 +36,7 @@ class TestCase:
         defines quality,
         which is the case if they are loaded from the same source
         """
-        if isinstance(self.__class__, other):
+        if isinstance(self, type(other)):
             return self.path == other.path
 
         return False

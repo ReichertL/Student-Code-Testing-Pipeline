@@ -112,7 +112,7 @@ class SQLiteDatabaseManager(PersistenceManager):
             [student_key, submission_key]).fetchall()
 
         if len(raw_results) != 1:
-            raise ValueError("Compilation not found!")
+            return None
         result = Compilation(raw_results[0][2],
                              raw_results[0][3],
                              raw_results[0][4])
@@ -196,9 +196,18 @@ class SQLiteDatabaseManager(PersistenceManager):
         )
         results = cursor.fetchall()
         submission.submission_key = len(results)
-        cursor.execute("""INSERT INTO submissions VALUES (?,?,?)""",
+        cursor.execute("""INSERT INTO submissions VALUES (?,?,?,?,?,?,?)""",
                        [submission.student_key,
-                        submission.submission_key, datetime.now()])
+                        submission.submission_key,
+                        submission.timestamp,
+                        submission.path,
+                        (1 if submission.is_checked else 0),
+                        (1 if submission.fast else 0),
+                        submission.mtime,
+                        ])
+        compilation_result = submission.compilation
+        if compilation_result is not None:
+            self.insert_compilation_result(student, submission, compilation_result)
 
         self.database.commit()
 
@@ -218,13 +227,16 @@ class SQLiteDatabaseManager(PersistenceManager):
         )
         results = cursor.fetchall()
         submissions = []
-
         for result in results:
             submission = Submission()
             submission.student_key = result[0]
             submission.submission_key = result[1]
             submission.timestamp = datetime.fromisoformat(result[2])
-
+            submission.path = result[3]
+            submission.is_checked = False if result[4] == '0' else True
+            submission.fast = False if result[5] == '0' else True
+            submission.mtime = result[6]
+            submission.compilation = self.get_compilation_result(student, submission)
             submissions.append(submission)
         return submissions
 
@@ -365,6 +377,21 @@ class SQLiteDatabaseManager(PersistenceManager):
         submission_key = submission.submission_key
         return submission_key
 
+    def get_all_students(self):
+        """
+        Retrieves all students from the database
+        :return: List of all students
+        """
+        cursor = self.database.cursor()
+        cursor.execute("""SELECT * FROM students""")
+        raw_students = cursor.fetchall()
+        parsed_students = []
+        for raw_student in raw_students:
+            parsed_students.append(Student(raw_student[1],
+                                           raw_student[2],
+                                           student_key=raw_student[0]))
+        return parsed_students
+
     def create(self):
         """
          calls create methods
@@ -408,7 +435,12 @@ class SQLiteDatabaseManager(PersistenceManager):
         cursor.execute('''CREATE TABLE IF NOT EXISTS submissions
                     (student_key  INTEGER ,
                     submission_key  INTEGER,
-                    submission_timestamp TIMESTAMP 
+                    submission_timestamp TIMESTAMP,
+                    submission_path TEXT NOT NULL,
+                    submission_is_checked INTEGER,
+                    submission_fast INTEGER,
+                    submission_mtime INTEGER
+                    
                     )''')
 
     # ,

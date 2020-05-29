@@ -28,6 +28,22 @@ class Student:
     def __str__(self):
         return f"{self.data_base_key} {self.name} {self.moodle_id}"
 
+    def earliest_submission(self, database_manager):
+        submissions = database_manager.get_submissions_for_student(self)
+
+        if len(submissions) > 0:
+            return submissions[0]
+
+        return None
+
+    def latest_submission(self, database_manager):
+        submissions = database_manager.get_submissions_for_student(self)
+
+        if len(submissions) > 0:
+            return submissions[-1]
+
+        return None
+
     def set_database_key(self, database_manager):
         """
         aquires a database key which is unique among all students

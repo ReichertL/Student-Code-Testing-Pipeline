@@ -4,6 +4,7 @@
 """
 import sqlite3
 from datetime import datetime
+from os.path import getmtime
 
 from models.compilation import Compilation
 from models.student import Student
@@ -23,6 +24,148 @@ class SQLiteDatabaseManager(PersistenceManager):
         super().__init__()
         self.database = sqlite3.connect("./resources/test.db")
 
+    def is_empty(self):
+        cursor = self.database.cursor()
+        cursor.execute("""SELECT * FROM students""")
+        results = cursor.fetchone()
+        return results is None or len(results) <= 0
+
+    def insert_valgrind_result(self, student_key, submission_key, test_case_result):
+        vg = test_case_result.vg
+        ok = 1 if vg["ok"] else 0
+        invalid_read_count = vg["invalid_read_count"] if "invalid_read_count" in vg.keys() else 0
+        invalid_write_count = vg["invalid_write_count"] if "invalid_write_count" in vg.keys() else 0
+        in_use_at_exit = vg["in_use_at_exit"] if "in_use_at_exit" in vg.keys() else (0, 0)
+        total_heap_usage = vg["total_heap_usage"] if "total_heap_usage" in vg.keys() else (0, 0, 0)
+        leak_summary = vg["leak_summary"] if "leak_summary" in vg.keys() else {'definitely lost': (0, 0),
+                                                                               'indirectly lost': (0, 0),
+                                                                               'possibly lost': (0, 0),
+                                                                               'still reachable': (0, 0),
+                                                                               'suppressed': (0, 0)}
+        definitely_lost = leak_summary["definitely lost"]
+        indirectly_lost = leak_summary["indirectly lost"]
+        possibly_lost = leak_summary["possibly lost"]
+        still_reachable = leak_summary["still reachable"]
+        suppressed = leak_summary["suppressed"]
+        error_summary = vg["error_summary"] if "error_summary" in vg.keys() else (0, 0, 0, 0)
+
+        test_id = test_case_result.id
+        cursor = self.database.cursor()
+        cursor.execute("""SELECT * FROM valgrind WHERE student_key=? AND submission_key=? AND test_id=?""",
+                       [student_key, submission_key, test_id])
+        result = cursor.fetchall()
+        if result is None or len(result) == 0:
+            cursor.execute("""INSERT INTO valgrind VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """,
+                           [
+                               student_key,
+                               submission_key,
+                               test_id,
+                               1 if ok else 0,
+                               invalid_read_count,
+                               invalid_write_count,
+                               in_use_at_exit[0],
+                               in_use_at_exit[1],
+                               total_heap_usage[0],
+                               total_heap_usage[1],
+                               total_heap_usage[2],
+                               definitely_lost[0],
+                               definitely_lost[1],
+                               indirectly_lost[0],
+                               indirectly_lost[1],
+                               possibly_lost[0],
+                               possibly_lost[1],
+                               still_reachable[0],
+                               still_reachable[1],
+                               suppressed[0],
+                               suppressed[1],
+                               error_summary[0],
+                               error_summary[1],
+                               error_summary[2],
+                               error_summary[3],
+
+                           ])
+        else:
+            cursor.execute("""UPDATE valgrind
+            SET ok=?,
+            invalid_read_count=?,
+            invalid_write_count=?,
+            in_use_at_exit_bytes=?,
+            in_use_at_exit_blocks=?,
+            total_heap_usage_allocs=?,
+            total_heap_usage_frees=?,
+            total_heap_usage_bytes=?,
+            definitely_lost_bytes=?,
+            definitely_lost_blocks=?,
+            indirectly_lost_bytes=?,
+            indirectly_lost_blocks=?,
+            possibly_lost_bytes=?,
+            possibly_lost_blocks=?,
+            still_reachable_bytes=?,
+            still_reachable_blocks=?,
+            suppressed_bytes=?,
+            suppressed_blocks=?,
+            summary_errors=?,
+            summary_contexts=?,
+            summary_suppressed_bytes=?,
+            summary_suppressed_blocks=?
+            WHERE student_key=? AND submission_key=? AND test_id=?
+            """, [
+
+                1 if ok else 0,
+                invalid_read_count,
+                invalid_write_count,
+                in_use_at_exit[0],
+                in_use_at_exit[1],
+                total_heap_usage[0],
+                total_heap_usage[1],
+                total_heap_usage[2],
+                definitely_lost[0],
+                definitely_lost[1],
+                indirectly_lost[0],
+                indirectly_lost[1],
+                possibly_lost[0],
+                possibly_lost[1],
+                still_reachable[0],
+                still_reachable[1],
+                suppressed[0],
+                suppressed[1],
+                error_summary[0],
+                error_summary[1],
+                error_summary[2],
+                error_summary[3],
+                student_key,
+                submission_key,
+                test_id
+
+            ])
+
+    def get_valgrind_result(self, student_key, submission_key, test_id):
+        vg = {}
+        cursor = self.database.cursor()
+        cursor.execute("""SELECT * FROM valgrind WHERE student_key=? AND submission_key=? AND test_id=?""",
+                       [student_key, submission_key, test_id])
+        result = cursor.fetchall()
+        if result is not None and len(result) > 0:
+            raw_result = result[0]
+        else:
+            return None
+        ok = vg.update({"ok": raw_result[3] == 1})
+        vg.update({"invalid_read_count": raw_result[4]})
+        vg.update({"invalid_write_count": raw_result[5]})
+        vg.update({"in_use_at_exit": (raw_result[6], raw_result[7])})
+        vg.update({"total_heap_usage": (raw_result[8], raw_result[9], raw_result[10])})
+        leak_summary = {'definitely lost': (raw_result[11], raw_result[12]),
+                        'indirectly lost': (raw_result[13], raw_result[14]),
+                        'possibly lost': (raw_result[15], raw_result[16]),
+                        'still reachable': (raw_result[17], raw_result[18]),
+                        'suppressed': (raw_result[19], raw_result[20])}
+
+        vg.update({"leak_summary": leak_summary})
+        vg.update({"error_summary": (raw_result[21], raw_result[22], raw_result[23], raw_result[24])})
+
+        return vg
+
     def get_test_case_result(self, student, submission):
         """
         Retrieves all test case results
@@ -41,11 +184,27 @@ class SQLiteDatabaseManager(PersistenceManager):
             WHERE student_key=? AND submission_key=?
         """, [student_key, submission_key])
         raw_results = cursor.fetchall()
-        results = [TestCaseResult(raw_test_case_result[2])
-                   for raw_test_case_result in raw_results]
-        for test_case_result in results:
+        results = []
+        for result in raw_results:
+            test_case_result = TestCaseResult(result[4])
             test_case_result.student_key = student_key
             test_case_result.submission_key = submission_key
+            test_case_result.id = result[2]
+            test_case_result.type = result[3]
+            test_case_result.error_line = result[5]
+            test_case_result.error_msg_quality = result[6]
+            test_case_result.output_correct = result[7]
+            test_case_result.return_code = result[8]
+            test_case_result.type_good_input = result[9]
+            test_case_result.signal = result[10]
+            test_case_result.segfault = result[11]
+            test_case_result.timeout = result[12]
+            test_case_result.cpu_time = result[13]
+            test_case_result.realtime = result[14]
+            test_case_result.tictoc = result[15]
+            test_case_result.mrss = result[16]
+            test_case_result.vg = self.get_valgrind_result(student_key, submission_key, test_case_result.id)
+            results.append(test_case_result)
         return results
 
     def insert_test_case_result(self, student, submission, test_case_result):
@@ -61,38 +220,81 @@ class SQLiteDatabaseManager(PersistenceManager):
 
         student_key = self.get_student_key(student)
         submission_key = self.get_submission_key(student, submission)
+        test_id = test_case_result.id
         cursor = self.database.cursor()
 
         cursor.execute("""SELECT * FROM test_results
                             WHERE student_key=?
-                                    AND submission_key=? """,
+                                    AND submission_key=? AND test_id=?""",
                        [student_key,
-                        submission_key])
+                        submission_key, test_id])
         results = cursor.fetchall()
         already_in = False
         for i in results:
-            if test_case_result.path == i[2]:
+            if test_case_result.path == i[4]:
                 already_in = True
         if not already_in:
-            cursor.execute("""INSERT INTO test_results VALUES (?,?,?)
+            cursor.execute("""INSERT INTO test_results VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
                            [
                                student_key,
                                submission_key,
-                               test_case_result.path
+                               test_id,
+                               test_case_result.type,
+                               test_case_result.path,
+                               test_case_result.error_line,
+                               test_case_result.error_msg_quality,
+                               test_case_result.output_correct,
+                               test_case_result.return_code,
+                               test_case_result.type_good_input,
+                               test_case_result.signal,
+                               test_case_result.segfault,
+                               test_case_result.timeout,
+                               test_case_result.cpu_time,
+                               test_case_result.realtime,
+                               test_case_result.tictoc,
+                               test_case_result.mrss
                            ])
         else:
-            cursor.execute("""UPDATE test_results SET path=?
-            WHERE student_key=? AND submission_key=? AND path=?
+            cursor.execute("""UPDATE test_results
+            SET test_type=?,
+            path=?,
+            error_line=?,
+            error_quality=?,
+            output_correct=?,
+            return_code=?,
+            good_input=?,
+            signal=?,
+            segfault=?,
+            timeout=?,
+            cpu_time=?,
+            real_time=?,
+            tictoc=?,
+            mrss=?
+            WHERE student_key=? AND submission_key=? AND test_id=?
             """,
                            [
+                               test_case_result.type,
                                test_case_result.path,
+                               test_case_result.error_line,
+                               test_case_result.error_msg_quality,
+                               test_case_result.output_correct,
+                               test_case_result.return_code,
+                               test_case_result.type_good_input,
+                               test_case_result.signal,
+                               test_case_result.segfault,
+                               test_case_result.timeout,
+                               test_case_result.cpu_time,
+                               test_case_result.realtime,
+                               test_case_result.tictoc,
+                               test_case_result.mrss,
                                student_key,
                                submission_key,
-                               test_case_result.path
+                               test_id
                            ])
 
-        self.database.commit()
+            self.insert_valgrind_result(student_key, submission_key, test_case_result)
+            self.database.commit()
 
     def get_compilation_result(self, student, submission):
         """
@@ -119,6 +321,7 @@ class SQLiteDatabaseManager(PersistenceManager):
         result.student_key = raw_results[0][0]
         result.submission_key = raw_results[0][1]
         self.database.commit()
+
         return result
 
     def insert_compilation_result(self, student, submission, compilation):
@@ -174,14 +377,19 @@ class SQLiteDatabaseManager(PersistenceManager):
         :param submission: the respective submission
         :return: nothing
         """
+        submission.mtime = int(getmtime(submission.path))
         cursor = self.database.cursor()
         cursor.execute(
             """SELECT * FROM submissions
-                WHERE student_key =? AND submission_key=?"""
-            , [submission.student_key, submission.submission_key]
+                WHERE student_key =?"""
+            , [student.data_base_key]
         )
-        is_already_in = cursor.fetchone()
-        if is_already_in is not None and len(is_already_in) > 0:
+        submissions = cursor.fetchall()
+        is_already_in = False
+        for current_submission in submissions:
+            if current_submission[3] == submission.path:
+                is_already_in = True
+        if is_already_in:
             return
         key = student.data_base_key
         if key < 0:
@@ -196,7 +404,7 @@ class SQLiteDatabaseManager(PersistenceManager):
         )
         results = cursor.fetchall()
         submission.submission_key = len(results)
-        cursor.execute("""INSERT INTO submissions VALUES (?,?,?,?,?,?,?)""",
+        cursor.execute("""INSERT INTO submissions VALUES (?,?,?,?,?,?,?,?)""",
                        [submission.student_key,
                         submission.submission_key,
                         submission.timestamp,
@@ -204,11 +412,33 @@ class SQLiteDatabaseManager(PersistenceManager):
                         (1 if submission.is_checked else 0),
                         (1 if submission.fast else 0),
                         submission.mtime,
+                        (1 if submission.passed else 0),
                         ])
         compilation_result = submission.compilation
         if compilation_result is not None:
             self.insert_compilation_result(student, submission, compilation_result)
 
+        self.database.commit()
+
+    def set_submission_checked(self, submission):
+        cursor = self.database.cursor()
+        cursor.execute(
+            """SELECT * FROM submissions
+                WHERE student_key =? AND submission_key=?"""
+            , [submission.student_key, submission.submission_key]
+        )
+        is_already_in = cursor.fetchone()
+        if is_already_in is not None and len(is_already_in) > 0:
+            cursor.execute("""UPDATE submissions SET submission_is_checked=?, submission_passed=?
+                        WHERE student_key=? AND submission_key=?
+                        """,
+                           [
+                               1 if submission.is_checked else 0,
+                               1 if submission.passed else 0,
+                               submission.student_key,
+                               submission.submission_key,
+
+                           ])
         self.database.commit()
 
     def get_submissions_for_student(self, student):
@@ -233,10 +463,11 @@ class SQLiteDatabaseManager(PersistenceManager):
             submission.submission_key = result[1]
             submission.timestamp = datetime.fromisoformat(result[2])
             submission.path = result[3]
-            submission.is_checked = False if result[4] == '0' else True
-            submission.fast = False if result[5] == '0' else True
+            submission.is_checked = False if result[4] == 0 else True
+            submission.fast = False if result[5] == 0 else True
             submission.mtime = result[6]
             submission.compilation = self.get_compilation_result(student, submission)
+            submission.fast = False if result[7] == 0 else True
             submissions.append(submission)
         return submissions
 
@@ -266,10 +497,10 @@ class SQLiteDatabaseManager(PersistenceManager):
             """SELECT * FROM students"""
         )
                              .fetchall())
-        cursor.execute("""INSERT INTO students VALUES (?,?,?)""",
+        cursor.execute("""INSERT INTO students VALUES (?,?,?,?)""",
                        [new_student_id,
                         student.name,
-                        student.moodle_id])
+                        student.moodle_id, student.passed])
 
         self.database.commit()
         return new_student_id
@@ -295,6 +526,7 @@ class SQLiteDatabaseManager(PersistenceManager):
             students[0][1],
             students[0][2],
             student_key=students[0][0])
+        retrieved_students.passed = students[0][3] == 1
         return retrieved_students
 
     def get_student_by_name(self, name):
@@ -317,6 +549,7 @@ class SQLiteDatabaseManager(PersistenceManager):
             students[0][1],
             students[0][2],
             student_key=students[0][0])
+        retrieved_students.passed = students[0][3] == 1
         return retrieved_students
 
     def get_student_by_moodle_id(self, moodle_id):
@@ -341,6 +574,7 @@ class SQLiteDatabaseManager(PersistenceManager):
             students[0][1],
             students[0][2],
             student_key=students[0][0])
+        retrieved_students.passed = students[0][3] == 1
         return retrieved_students
 
     def get_student_key(self, student):
@@ -362,6 +596,24 @@ class SQLiteDatabaseManager(PersistenceManager):
             raise ValueError("Student not found!")
 
         return student_key
+
+    def set_student_passed(self, student):
+        cursor = self.database.cursor()
+        cursor.execute(
+            """SELECT * FROM students
+                WHERE student_key =?"""
+            , [student.data_base_key]
+        )
+        is_already_in = cursor.fetchone()
+        if is_already_in is not None and len(is_already_in) > 0:
+            cursor.execute("""UPDATE students SET student_passed=?
+                        WHERE student_key=?
+                        """,
+                           [
+                               1 if student.passed else 0,
+                               student.data_base_key,
+                           ])
+        self.database.commit()
 
     def get_submission_key(self, student, submission):
         """
@@ -387,9 +639,11 @@ class SQLiteDatabaseManager(PersistenceManager):
         raw_students = cursor.fetchall()
         parsed_students = []
         for raw_student in raw_students:
-            parsed_students.append(Student(raw_student[1],
-                                           raw_student[2],
-                                           student_key=raw_student[0]))
+            parsed_student = Student(raw_student[1],
+                                     raw_student[2],
+                                     student_key=raw_student[0])
+            parsed_student.passed = raw_student[3] == 1
+            parsed_students.append(parsed_student)
         return parsed_students
 
     def create(self):
@@ -403,6 +657,7 @@ class SQLiteDatabaseManager(PersistenceManager):
         self.create_submission_table(cursor)
         self.create_test_case_table(cursor)
         self.create_compilation_table(cursor)
+        self.create_valgrind_table(cursor)
         self.database.commit()
 
     def close(self):
@@ -423,7 +678,8 @@ class SQLiteDatabaseManager(PersistenceManager):
         cursor.execute('''CREATE TABLE IF NOT EXISTS students
             (student_key  INTEGER ,
             student_name TEXT NOT NULL ,  
-           student_moodle_id INTEGER)''')
+           student_moodle_id INTEGER,
+           student_passed INTEGER)''')
 
     @staticmethod
     def create_submission_table(cursor):
@@ -432,6 +688,7 @@ class SQLiteDatabaseManager(PersistenceManager):
         :param cursor: pointer to the database
         :return: nothing
         """
+
         cursor.execute('''CREATE TABLE IF NOT EXISTS submissions
                     (student_key  INTEGER ,
                     submission_key  INTEGER,
@@ -439,19 +696,9 @@ class SQLiteDatabaseManager(PersistenceManager):
                     submission_path TEXT NOT NULL,
                     submission_is_checked INTEGER,
                     submission_fast INTEGER,
-                    submission_mtime INTEGER
-                    
+                    submission_mtime INTEGER,
+                    submission_passed INTEGER                    
                     )''')
-
-    # ,
-    # timestamp,
-    # mtime,
-    # tests_bad_input,
-    # tests_good_input,
-    # tests_performance,
-    # compilation,
-    # fast,
-    # timing
 
     @staticmethod
     def create_test_case_table(cursor):
@@ -460,27 +707,28 @@ class SQLiteDatabaseManager(PersistenceManager):
         :param cursor: pointer to the database
         :return: nothing
         """
+
         cursor.execute('''CREATE TABLE IF NOT EXISTS test_results
                    (
                    student_key INTEGER ,
                    submission_key INTEGER,
-                   path TEXT NOT NULL
+                   test_id INTEGER ,
+                   test_type TEXT NOT NULL,
+                   path TEXT NOT NULL,
+                   error_line TEXT NOT NULL,
+                   error_quality INTEGER,
+                   output_correct INTEGER,
+                   return_code INTEGER,
+                   good_input INTEGER,
+                   signal INTEGER,
+                   segfault INTEGER,
+                   timeout INTEGER,
+                   cpu_time REAL,
+                   real_time REAL,
+                   tictoc REAL,
+                   mrss INTEGER
+                   
                    )''')
-        # testcase_id,
-        # vg_info,
-        # ignore,
-        # type_good_input,
-        # signal,
-        # segfault,
-        # timeout,
-        # cpu_time,
-        # real_time,
-        # tictoc,
-        # mrss,
-        # return_code,
-        # output_correct,
-        # errormsg_quality,
-        # error_line
 
     @staticmethod
     def create_compilation_table(cursor):
@@ -497,18 +745,50 @@ class SQLiteDatabaseManager(PersistenceManager):
                            commandline TEXT NOT NULL,
                            compiler_output TEXT NOT NULL                           
                            )''')
-        # testcase_id,
-        # vg_info,
-        # ignore,
-        # type_good_input,
-        # signal,
-        # segfault,
-        # timeout,
-        # cpu_time,
-        # real_time,
-        # tictoc,
-        # mrss,
-        # return_code,
-        # output_correct,
-        # errormsg_quality,
-        # error_line
+
+    @staticmethod
+    def create_valgrind_table(cursor):
+
+        cursor.execute('''CREATE TABLE IF NOT EXISTS valgrind
+                           (
+                           student_key INTEGER ,
+                           submission_key INTEGER,
+                           test_id INTEGER,
+                           ok INTEGER,
+                           invalid_read_count INTEGER ,
+                           invalid_write_count INTEGER,
+                           in_use_at_exit_bytes INTEGER,
+                           in_use_at_exit_blocks INTEGER,
+                           total_heap_usage_allocs INTEGER,
+                           total_heap_usage_frees INTEGER,
+                           total_heap_usage_bytes INTEGER,
+                           definitely_lost_bytes INTEGER,
+                           definitely_lost_blocks INTEGER,
+                           indirectly_lost_bytes INTEGER,                           
+                           indirectly_lost_blocks INTEGER,
+                           possibly_lost_bytes INTEGER,                           
+                           possibly_lost_blocks INTEGER,                        
+                           still_reachable_bytes INTEGER,
+                           still_reachable_blocks INTEGER,
+                           suppressed_bytes INTEGER,
+                           suppressed_blocks INTEGER,
+                           summary_errors INTEGER ,                                                     
+                           summary_contexts INTEGER ,                                                     
+                           summary_suppressed_bytes INTEGER ,                                                     
+                           summary_suppressed_blocks INTEGER                                                
+                           )''')
+
+
+""" ok: False
+        invalid_read_count: 0
+        invalid_write_count: 0
+        in_use_at_exit: (4104, 2)
+        total_heap_usage: (5, 3, 8216)
+        leak_summary:
+        definitely lost: (0, 0)
+        indirectly lost: (0, 0)
+        possibly lost: (0, 0)
+        still reachable: (4104, 2)
+        suppressed: (0, 0)
+
+        error_summary: (0, 0, 0, 0)"""

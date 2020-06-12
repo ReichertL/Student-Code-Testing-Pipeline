@@ -6,6 +6,8 @@ class Student:
     name: str = ''
     moodle_id: str = ''
     data_base_key = -1
+    submissions = None
+    passed = False
 
     def __init__(self, student_name, student_id, persistence_manager=None, student_key=None):
         """
@@ -26,7 +28,19 @@ class Student:
             self.data_base_key = student_key
 
     def __str__(self):
-        return f"{self.data_base_key} {self.name} {self.moodle_id}"
+        submission_representation = ""
+        if self.submissions is not None:
+            for submission in self.submissions:
+                submission_representation = submission_representation + f"\n\t{submission}"
+        return f"Student(\ndata_base_key={self.data_base_key}\n" \
+               f"name={self.name}\n" \
+               f"moodle_id={self.moodle_id}\n" \
+               f"passed={self.passed}\n" \
+               f"submissions=[{submission_representation}])"
+
+    def get_all_submissions(self, database_manager):
+        self.submissions = database_manager.get_submissions_for_student(self)
+        return self.submissions
 
     def earliest_submission(self, database_manager):
         submissions = database_manager.get_submissions_for_student(self)
@@ -54,3 +68,10 @@ class Student:
     def get_database_entry(self):
         """Generates a database entry for that student"""
         return [self.data_base_key, self.moodle_id, self.name]
+
+    def passed_assignment(self):
+        self.passed = True
+
+    def get_unchecked_submissions(self):
+        return self.submissions
+        """[i for i in self.submissions if i.is_checked is False]"""

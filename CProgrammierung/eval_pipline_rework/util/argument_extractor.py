@@ -55,7 +55,7 @@ class ArgumentExtractor:
                           dest='compile',
                           type=str,
                           default='',
-                          help='just compile this path')
+                          help='just compile this configuration')
         self \
             .parser \
             .add_argument('-e', '--extra',
@@ -71,7 +71,7 @@ class ArgumentExtractor:
                           dest='stats',
                           action='store_true',
                           help='print stats only, '
-                               'do test new path files')
+                               'do test new configuration files')
         self \
             .parser \
             .add_argument('-v', '--verbose',

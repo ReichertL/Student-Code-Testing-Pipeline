@@ -2,15 +2,17 @@
 
 
 class TestCase:
-    """Abstraction of TestCase Type consists of path input, output, error"""
+    """Abstraction of TestCase Type consists of configuration input, output, error"""
     path: str = ""
     test_input: str = ""
     test_output: str = ""
     error_expected: bool = False
+    valgrind_needed = False
+    id = -1
 
     def __init__(self, path, test_input, test_output, error_expected):
         """
-        :param path: base path where this testcase is loaded from
+        :param path: base configuration where this testcase is loaded from
         :param test_input: test input
         :param test_output:
         expected output for error testcases this is an empty string
@@ -29,7 +31,8 @@ class TestCase:
         return f"Path: {self.path}\n" \
                f"Input:\n{self.test_input}\n" \
                f"Output:\n{self.test_output}\n" \
-               f"Error expected: {self.error_expected}\n"
+               f"Error expected: {self.error_expected}\n" \
+               f"id: {self.id}\n"
 
     def __eq__(self, other):
         """
@@ -37,7 +40,7 @@ class TestCase:
         which is the case if they are loaded from the same source
         """
         if isinstance(self, type(other)):
-            return self.path == other.path
+            return self.path == other.configuration
 
         return False
 

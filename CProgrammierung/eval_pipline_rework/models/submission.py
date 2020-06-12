@@ -2,10 +2,8 @@
 Data abstraction for a submission by a specific student
 """
 from datetime import datetime
-from typing import Dict
 
 from models.compilation import Compilation
-from models.test_case_result import TestCaseResult
 
 
 class Submission:
@@ -21,10 +19,8 @@ class Submission:
     mtime: int = -1
     timing: dict
     compilation: Compilation = None
-
-    tests_bad_input: Dict[str, TestCaseResult]
-    tests_good_input: Dict[str, TestCaseResult]
-    tests_performance: Dict[str, TestCaseResult]
+    passed = False
+    is_performant = True
 
     def __init__(self, timestamp=None, mtime=-1, compilation=None, fast=False, timing=None):
         if timestamp is not None:
@@ -45,12 +41,19 @@ class Submission:
         """
 
         return f"Submission(" \
-               f"\n\t{self.student_key}" \
-               f" {self.submission_key}" \
-               f" {self.timestamp}" \
-               f" {self.path}" \
-               f" {self.is_checked}" \
-               f" {self.fast}" \
-               f" {self.mtime} " \
-               f"\n\t\t{self.compilation}" \
+               f"\n\tstudent_key={self.student_key}" \
+               f" submission_key={self.submission_key}" \
+               f" timestamp={self.timestamp}" \
+               f" path={self.path}" \
+               f" is_checked={self.is_checked}" \
+               f" fast={self.fast}" \
+               f" mtime={self.mtime} " \
+               f" passed={self.passed} " \
+               f"\n\t\tCompilation({self.compilation})" \
                f"\n)"
+
+    def __bool__(self):
+        return self.passed
+
+    def is_performant(self):
+        return self.is_performant

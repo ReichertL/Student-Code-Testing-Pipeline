@@ -11,6 +11,10 @@ if sys.stdout.isatty():
     def green(s):
         return ColoredString('\033[32m' + s + '\033[0m', len(s))
 
+
+    def yellow(s):
+        return ColoredString('\033[1;33m' + s + '\033[0m', len(s))
+
 else:
 
     def red(s):
@@ -18,6 +22,10 @@ else:
 
 
     def green(s):
+        return s
+
+
+    def yellow(s):
         return s
 
 

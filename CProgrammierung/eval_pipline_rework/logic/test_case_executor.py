@@ -432,6 +432,6 @@ class TestCaseExecutor:
         resource.setrlimit(resource.RLIMIT_CPU, 2 * (self.configuration["RLIMIT_CPU"],))
 
     def set_limits_valgrind(self):
-        resource.setrlimit(resource.RLIMIT_DATA, 2 * (2 ** 30,))
-        resource.setrlimit(resource.RLIMIT_STACK, 2 * (2 ** 29,))
-        resource.setrlimit(resource.RLIMIT_CPU, 2 * (240,))
+        resource.setrlimit(resource.RLIMIT_DATA, 2 * (self.configuration["VALGRIND_DATA"],))
+        resource.setrlimit(resource.RLIMIT_STACK, 2 * (self.configuration["VALGRIND_STACK"],))
+        resource.setrlimit(resource.RLIMIT_CPU, 2 * (self.configuration["VALGRIND_CPU"],))

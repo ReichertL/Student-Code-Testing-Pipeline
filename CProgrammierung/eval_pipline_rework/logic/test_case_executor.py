@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from pathlib import Path
 
 from models.compilation import Compilation
 from models.test_case import TestCase
@@ -83,7 +84,9 @@ class TestCaseExecutor:
     unshare = [unshare_path, '-r', '-n']
 
     def __init__(self, args):
-        config_path = "./resources/config_test_case_executor.config"
+        file_name = sys.argv[0]
+        file_name = file_name.replace("__main__.py", "").replace(".", "")
+        config_path = Path(file_name + "resources/config_test_case_executor.config").resolve()
         configuration = ConfigReader().read_file(os.path.abspath(config_path))
         self.configuration = configuration
         self.test_cases = self.load_tests()
@@ -140,7 +143,10 @@ class TestCaseExecutor:
                 student.get_all_submissions(database_manager)
                 unchecked_submissions = []
                 if student.submissions is not None:
-                    unchecked_submissions = student.get_unchecked_submissions()
+                    if not self.args.rerun:
+                        unchecked_submissions = student.get_unchecked_submissions()
+                    else:
+                        unchecked_submissions = student.submissions
                 if len(unchecked_submissions) > 0:
                     submissions.update({student.data_base_key: unchecked_submissions})
 
@@ -201,7 +207,6 @@ class TestCaseExecutor:
                         replace(".stdout", "")
 
                     if path not in test_case_input:
-                        test_input = ""
                         test_output = ""
                         with open(f"{path}.stdin") as input_file:
                             test_input = input_file.read()
@@ -218,6 +223,7 @@ class TestCaseExecutor:
         for key in test_cases:
             for test_case in test_cases[key]:
                 test_case.valgrind_needed = False if key == "EXTRA" else True
+                test_case.type_good_input = False if key == "BAD" else True
                 test_case.id = id
                 id = id + 1
                 all_test_cases.append(test_case)
@@ -229,7 +235,6 @@ class TestCaseExecutor:
     def check(self, student,
               submission,
               force=False,
-              verbose=False,
               force_performance=False,
               strict=True):
         """
@@ -249,7 +254,8 @@ class TestCaseExecutor:
         if submission.is_checked:
             if self.args.rerun:
                 Warn(f'You forced to re-run tests on submission by '
-                     f'{student.name}, submitted on {submission.mtime}.')
+                     f'{student.name}, submitted on {submission.mtime}.\n'
+                     f'This is his {submission.submission_key + 1}. submission, saved as {submission.path}')
             else:
                 return False
         print(f'running tests for {student.name} ', end='')
@@ -257,10 +263,10 @@ class TestCaseExecutor:
         submission.compilation = self.compile_single_submission(source)
         all_results = []
 
+        bad_input_results = []
+        good_input_results = []
+        extra_input_results = []
         if submission.compilation.return_code == 0:
-            bad_input_results = []
-            good_input_results = []
-            extra_input_results = []
             for test in self.test_cases["BAD"]:
                 result = self.check_for_error(submission, test)
                 result.type = "BAD"
@@ -272,13 +278,15 @@ class TestCaseExecutor:
                 result.type = "GOOD"
                 result.id = test.id
                 good_input_results.append(result)
-        passed = True
+
+        passed = submission.compilation.return_code == 0
         for i in bad_input_results:
             all_results.append(i)
         for i in good_input_results:
             all_results.append(i)
         for i in all_results:
-            passed = passed and i.output_correct
+            passed = passed and i.passed()
+
         submission.passed = passed
         submission.is_checked = True
         submission.timestamp = datetime.datetime.now()
@@ -295,17 +303,21 @@ class TestCaseExecutor:
         for i in extra_input_results:
             all_results.append(i)
 
+        submission.tests_good_input = good_input_results
+        submission.tests_bad_input = bad_input_results
+        submission.tests_extra_input = extra_input_results
+
         if submission.passed:
             Passed()
 
         else:
             Failed()
-            if verbose:
-                # submission.print_stats()
+            if self.args.verbose:
+                submission.print_stats()
                 pass
         return all_results
 
-    def check_for_error(self, submission, test, verbose=False):
+    def check_for_error(self, submission, test):
         """
         checks a submission for a bad input test case
         :param submission: the submission to test
@@ -313,7 +325,7 @@ class TestCaseExecutor:
         :param verbose: enables verbose output
         :return: returns the result of the testcase
         """
-        test_case_result = self.execute_test_case(submission, test, verbose)
+        test_case_result = self.execute_test_case(test)
         test_case_result.error_line = ''
         test_case_result.output_correct = True
         parser = ResultParser()
@@ -328,7 +340,7 @@ class TestCaseExecutor:
         test_case_result.submission_key = submission.submission_key
         return test_case_result
 
-    def check_output(self, submission, test, comparator, verbose=False):
+    def check_output(self, submission, test, comparator):
         """
         Checks a testcase that should be successful
         :param test: test case to execute
@@ -337,7 +349,7 @@ class TestCaseExecutor:
         :param comparator: compares to results
         :return: a TestCaseResult object encapsulating the results
         """
-        test_case_result = self.execute_test_case(submission, test, verbose)
+        test_case_result = self.execute_test_case(test)
         test_case_result.output_correct = comparator('test.stdout',
                                                      os.path.join(test.path + '.stdout'))
         unlink_safe("test.stderr")
@@ -347,7 +359,7 @@ class TestCaseExecutor:
 
         return test_case_result
 
-    def execute_test_case(self, submission, test_case, verbose=False):
+    def execute_test_case(self, test_case):
         """
         tests a submission with a testcase
         :param submission: the submission to test
@@ -359,8 +371,8 @@ class TestCaseExecutor:
         input_path = test_case.path + ".stdin"
         tic = time.time()
         parser = ResultParser()
-        if verbose:
-            print(f'--- executing ./loesung < {test_case.path} ---')
+        if self.args.verbose:
+            print(f'--- executing ./loesung < {test_case.short_id} ---')
         with NamedPipeOpen(input_path) as fin, \
                 open('test.stdout', 'bw') as fout, \
                 open('test.stderr', 'bw') as ferr:
@@ -392,13 +404,13 @@ class TestCaseExecutor:
             result.tictoc = duration
             fin.close()
 
-            if verbose:
-                print(f'--- executing ./loesung < {test_case.path} ---')
+            if self.args.verbose:
+                print(f'--- executing ./loesung < {test_case.short_id} ---')
 
         if test_case.valgrind_needed and result.timeout and result.segfault:
             result.vg['ok'] = False
-            if verbose:
-                print(f'--- executing valgrind ./loesung < {test_case.path} ---')
+            if self.args.verbose:
+                print(f'--- executing valgrind ./loesung < {test_case.short_id} ---')
             with NamedPipeOpen(input_path) as fin:
                 p = subprocess.Popen(self.sudo + self.unshare + [self.configuration["VALGRIND_PATH"],
                                                                  '--log-file=' + self.configuration[
@@ -420,8 +432,8 @@ class TestCaseExecutor:
                         result.vg = parser.parse_valgrind_file(f)
                 except FileNotFoundError:
                     result.vg['ok'] = None
-            if verbose:
-                print(f'--- finished valgrind ./loesung < {test_case.path} ---')
+            if self.args.verbose:
+                print(f'--- finished valgrind ./loesung < {test_case.short_id} ---')
             unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)
 
         return result

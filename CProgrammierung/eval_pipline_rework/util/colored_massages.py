@@ -43,3 +43,22 @@ class Passed:
 class Failed:
     def __init__(self, failed="failed"):
         print(red(failed))
+
+
+rc = {True: green('passed'),
+      False: red('failed'),
+      None: 'ignore'}
+
+
+def redgreen(x, good):
+    if good:
+        return green(str(x))
+    else:
+        return red(str(x))
+
+
+ind = {True: ' ', False: red('*')}
+
+
+def errok(d):
+    return green(str(d)) if d else red('failed')

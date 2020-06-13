@@ -28,34 +28,35 @@ def run():
     verbosity = args.verbose
     persistence_manager = SQLiteDatabaseManager()
     persistence_manager.create()
-    test = True
-    if not test:
-        database_integrator = DatabaseIntegrator()
-        database_integrator.integrate_submission_dir(persistence_manager)
+    if args.fetch or args.fetch_only:
+        test = False
+        # Execute Submission Fetching if needed determined by the provided args
+        # fetcher = MoodleSubmissionFetcher(args)
+        if not test:
+            database_integrator = DatabaseIntegrator()
+            database_integrator.integrate_submission_dir(persistence_manager)
 
-    if persistence_manager.is_empty() and test:
-        test_sub = Submission()
-        test_sub.path = \
-            "/home/mark/Uni/SHK2020/ds/CProgrammierung/musterloesung/" \
-            "Musterloesung_Mark/loesung.c"
-        new_student_one = \
-            Student("Mark Spitzner", "MoodelID", persistence_manager)
-        persistence_manager.insert_submission(new_student_one, test_sub)
-        test_sub = Submission()
-        test_sub.path = \
-            "/home/mark/projects/eval_pipline_rework/resources/test.c"
-        # persistence_manager.insert_submission(new_student_one, test_sub)
+        if persistence_manager.is_empty() and test:
+            test_sub = Submission()
+            test_sub.path = \
+                "/home/mark/Uni/SHK2020/ds/CProgrammierung/musterloesung/" \
+                "Musterloesung_Mark/loesung.c"
+            new_student_one = \
+                Student("Mark Spitzner", "MoodelID", persistence_manager)
+            persistence_manager.insert_submission(new_student_one, test_sub)
+            test_sub = Submission()
+            test_sub.path = \
+                "/home/mark/projects/eval_pipline_rework/resources/test.c"
+            persistence_manager.insert_submission(new_student_one, test_sub)
 
     studentlog = persistence_manager.get_all_students()
     for student in studentlog:
         student.get_all_submissions(persistence_manager)
 
-    # Execute Submission Fetching if needed determined by the provided args
-    # fetcher = MoodleSubmissionFetcher(args)
-
-    # Execute test cases if needed determined by the provided args
-    executor = TestCaseExecutor(args)
-    executor.run(database_manager=persistence_manager, verbosity=verbosity)
+    if not args.fetch_only:
+        # Execute test cases if needed determined by the provided args
+        executor = TestCaseExecutor(args)
+        executor.run(database_manager=persistence_manager, verbosity=verbosity)
 
     # Send Moodle feedback to students if needed determined by args
     # reporter = MoodleReporter(args)

@@ -73,5 +73,4 @@ class Student:
         self.passed = True
 
     def get_unchecked_submissions(self):
-        return self.submissions
-        """[i for i in self.submissions if i.is_checked is False]"""
+        return [i for i in self.submissions if i.is_checked is False]

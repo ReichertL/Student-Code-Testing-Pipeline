@@ -1,4 +1,5 @@
 """Implements abstraction for TestCase test_case_type"""
+import os
 
 
 class TestCase:
@@ -9,6 +10,7 @@ class TestCase:
     error_expected: bool = False
     valgrind_needed = False
     id = -1
+    short_id = ""
 
     def __init__(self, path, test_input, test_output, error_expected):
         """
@@ -19,6 +21,7 @@ class TestCase:
         :param error_expected: indicates whether an error is expected or not.
         """
         self.path = path
+        self.short_id = path.split(os.path.sep)[-1]
         self.test_input = test_input
         self.test_output = test_output
         self.error_expected = error_expected

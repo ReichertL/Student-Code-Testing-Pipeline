@@ -3,14 +3,17 @@
     in this case, SQLite database
 """
 import sqlite3
+import sys
 from datetime import datetime
 from os.path import getmtime
+from pathlib import Path
 
 from models.compilation import Compilation
 from models.student import Student
 from models.submission import Submission
 from models.test_case_result import TestCaseResult
 from persistence.persistence_manager import PersistenceManager
+from util.config_reader import ConfigReader
 
 
 class SQLiteDatabaseManager(PersistenceManager):
@@ -22,7 +25,12 @@ class SQLiteDatabaseManager(PersistenceManager):
 
     def __init__(self):
         super().__init__()
-        self.database = sqlite3.connect("./resources/test.db")
+
+        file_name = sys.argv[0]
+        file_name = file_name.replace("__main__.py", "").replace(".", "")
+        p = Path(file_name + "resources/config_database_manager.config").resolve()
+        configuration = ConfigReader().read_file(str(p))
+        self.database = sqlite3.connect(configuration["DATABASE_PATH"])
 
     def is_empty(self):
         cursor = self.database.cursor()
@@ -468,7 +476,16 @@ class SQLiteDatabaseManager(PersistenceManager):
             submission.mtime = result[6]
             submission.compilation = self.get_compilation_result(student, submission)
             submission.fast = False if result[7] == 0 else True
+            test_case_results = self.get_test_case_result(student, submission)
+            for test_case_result in test_case_results:
+                if test_case_result.type == "BAD":
+                    submission.tests_bad_input.append(test_case_result)
+                if test_case_result.type == "GOOD":
+                    submission.tests_good_input.append(test_case_result)
+                if test_case_result.type == "EXTRA":
+                    submission.tests_extra_input.append(test_case_result)
             submissions.append(submission)
+
         return submissions
 
     def register_student(self, student):

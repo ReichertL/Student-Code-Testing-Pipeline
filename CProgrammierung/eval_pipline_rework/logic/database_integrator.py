@@ -1,4 +1,6 @@
 import os
+import sys
+from pathlib import Path
 
 from models.student import Student
 from models.submission import Submission
@@ -9,8 +11,10 @@ class DatabaseIntegrator:
     configuration: str
 
     def __init__(self):
-        config_path = "./resources/config_database_integrator.config"
-        configuration = ConfigReader().read_file(os.path.abspath(config_path))
+        file_name = sys.argv[0]
+        file_name = file_name.replace("__main__.py", "").replace(".", "")
+        config_path = Path(file_name + "resources/config_database_integrator.config").resolve()
+        configuration = ConfigReader().read_file(config_path)
         self.configuration = configuration
 
     def integrate_submission_dir(self, database_manager):

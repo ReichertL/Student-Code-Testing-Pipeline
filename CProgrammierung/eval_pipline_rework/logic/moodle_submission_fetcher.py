@@ -3,7 +3,6 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn
@@ -21,6 +20,8 @@ def mkdir(path):
 class MoodleSubmissionFetcher:
     def __init__(self, args):
         config_path = resolve_absolute_path("resources/config_submission_fetcher.config")
+        config_path = resolve_absolute_path("/resources/config_submission_fetcher.config")
+
         configuration = ConfigReader().read_file(os.path.abspath(config_path))
         self.configuration = configuration
         self.args = args

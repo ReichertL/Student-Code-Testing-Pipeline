@@ -88,6 +88,8 @@ class TestCaseExecutor:
         file_name = sys.argv[0]
         file_name = file_name.replace("__main__.py", "").replace(".", "")
         config_path = Path(file_name + "resources/config_test_case_executor.config").resolve()
+        config_path = resolve_absolute_path("/resources/config_test_case_executor.config")
+
         configuration = ConfigReader().read_file(os.path.abspath(config_path))
         self.configuration = configuration
         self.test_cases = self.load_tests()

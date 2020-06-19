@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 from models.submission import Submission
+from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
 
 
@@ -13,6 +14,7 @@ class DatabaseIntegrator:
         file_name = sys.argv[0]
         file_name = file_name.replace("__main__.py", "").replace(".", "")
         config_path = Path(file_name + "resources/config_database_integrator.config").resolve()
+        config_path = resolve_absolute_path("/resources/config_database_integrator.config")
         configuration = ConfigReader().read_file(config_path)
         self.configuration = configuration
 

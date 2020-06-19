@@ -165,7 +165,7 @@ class MoodleSession:
 
     def dump_state(self):
         """Dump the current session's cookie and key to disk."""
-        session_data_path=resolve_absolute_path(self.configuration["SESSION_DATA_PATH"])
+        session_data_path = resolve_absolute_path(self.configuration["SESSION_DATA_PATH"])
 
         if not self.username:
             return

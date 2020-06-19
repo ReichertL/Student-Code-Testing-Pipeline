@@ -13,6 +13,7 @@ from models.student import Student
 from models.submission import Submission
 from models.test_case_result import TestCaseResult
 from persistence.persistence_manager import PersistenceManager
+from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
 
 
@@ -29,6 +30,7 @@ class SQLiteDatabaseManager(PersistenceManager):
         file_name = sys.argv[0]
         file_name = file_name.replace("__main__.py", "").replace(".", "")
         p = Path(file_name + "resources/config_database_manager.config").resolve()
+        p = resolve_absolute_path("/resources/config_database_manager.config")
         configuration = ConfigReader().read_file(str(p))
         self.database = sqlite3.connect(configuration["DATABASE_PATH"])
 

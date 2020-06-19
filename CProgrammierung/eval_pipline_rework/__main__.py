@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.8
 """
 main module of the reworked evaluation script
 """

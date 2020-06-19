@@ -13,6 +13,7 @@ from pathlib import Path
 from models.compilation import Compilation
 from models.test_case import TestCase
 from models.test_case_result import TestCaseResult
+from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn, Passed, Failed
 from util.config_reader import ConfigReader
 from util.named_pipe_open import NamedPipeOpen
@@ -91,8 +92,8 @@ class TestCaseExecutor:
         self.configuration = configuration
         self.test_cases = self.load_tests()
         self.args = args
-        self.sudo_path = configuration["sudo_path"]
-        self.sudo_user = configuration["sudo_user"]
+        self.sudo_path = configuration["SUDO_PATH"]
+        self.sudo_user = configuration["SUDO_USER"]
         self.sudo = [self.sudo_path, '-u', self.sudo_user]
 
         self.unshare_path = configuration["UNSHARE_PATH"]
@@ -206,7 +207,12 @@ class TestCaseExecutor:
                         replace(".stdin", ""). \
                         replace(".stdout", "")
 
-                    if path not in test_case_input:
+                    alreadyIn = False
+                    for i in test_case_input:
+                        if i.path == path:
+                            alreadyIn = True
+
+                    if not alreadyIn:
                         test_output = ""
                         with open(f"{path}.stdin") as input_file:
                             test_input = input_file.read()
@@ -234,23 +240,18 @@ class TestCaseExecutor:
 
     def check(self, student,
               submission,
-              force=False,
               force_performance=False,
               strict=True):
         """
         checks the submission of a student
         :param student: the student which is the author of this submission
         :param submission: the submission to test
-        :param force: this forces a rerun
-        :param verbose: enables vebose output
         :param force_performance: tests test_cases for performance too
         :param strict: manipulates compiler flags
         :return: true if a check was conducted, else false
         """
 
-        source = submission.path
-        mtime = submission.mtime
-        timestamp = datetime.time()
+        source = resolve_absolute_path(submission.path)
         if submission.is_checked:
             if self.args.rerun:
                 Warn(f'You forced to re-run tests on submission by '

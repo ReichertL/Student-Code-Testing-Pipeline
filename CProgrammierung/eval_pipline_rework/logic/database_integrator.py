@@ -2,7 +2,6 @@ import os
 import sys
 from pathlib import Path
 
-from models.student import Student
 from models.submission import Submission
 from util.config_reader import ConfigReader
 
@@ -29,7 +28,7 @@ class DatabaseIntegrator:
             student_moodle_id = student_details[student_details.find("_") + 1:]
 
             if len(student_name) > 0 and len(student_moodle_id) > 0:
-                new_student = Student(student_name, student_moodle_id, persistence_manager=database_manager)
+                new_student = database_manager.get_student_by_name(student_name)
             for file in files:
                 new_submission = Submission()
                 new_submission.path = root + os.path.sep + file

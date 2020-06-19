@@ -1,0 +1,7 @@
+# Project exclude paths
+/venv/
+/resources/
+/util/constants.py
+/.idea/
+test.*
+*html

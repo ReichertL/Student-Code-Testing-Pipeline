@@ -560,7 +560,7 @@ class SQLiteDatabaseManager(PersistenceManager):
         )
         students = cursor.fetchall()
         if len(students) != 1:
-            raise ValueError
+            print(f"----found more than one student with name: {name}----\n{students}")
 
         retrieved_students = Student(
             students[0][1],

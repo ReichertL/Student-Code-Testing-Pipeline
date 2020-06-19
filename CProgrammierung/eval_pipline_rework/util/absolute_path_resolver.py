@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def resolve_absolute_path(s):
-    file_name = sys.argv[0]
+    file_name = os.path.realpath(sys.argv[0])
     file_name = file_name.replace("__main__.py", "").replace(".", "")
     if not len(file_name) > 0:
         if s[0] == os.path.sep:

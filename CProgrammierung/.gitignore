@@ -1,17 +1,34 @@
 
-auto/
-__pycache__/
+# latex
 *.aux
+*.fdb_latexmk
+*.fls
 *.log
 *.out
 *.pdf
 *.synctex.gz
+
+# valgrind
 */vgcore*
+
+# python
+auto/
+__pycache__/
 .coverage
 pytest-cov.xml
 pytest.xml
+
+# archives
+*.tar.bz2
+*.tar.gz
+*.zip
 
 /musterloesung/tests/auswertung
 /musterloesung/Testcase_Generatror/*
 
 /auswertung/teilnehmer.json
+
+# musterloesung binary executables
+
+/musterloesung/Musterloesung_Mark/loesung
+/musterloesung/Musterloesung_Leonie/loesung

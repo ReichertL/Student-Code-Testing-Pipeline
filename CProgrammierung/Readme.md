@@ -11,3 +11,15 @@ Resources
 ----
 
   - [Aufgabenblatt](https://gitlab.informatik.hu-berlin.de/ti/teaching/ds/-/jobs/artifacts/master/raw/CProgrammierung/aufgabenstellung/programmieraufgabe.pdf?job=build-programmieraufgabe-pdf)
+
+Plagiat Check with JPlag
+---
+
+```
+java -jar jplag-2.12.1-SNAPSHOT-jar-with-dependencies.jar -l c/c++ -r /tmp/test -s musterloesung
+
+```
+* -r Tells programm where the folders/files are for student submissions
+* -s Location where html page displaying results will be saved to 
+
+

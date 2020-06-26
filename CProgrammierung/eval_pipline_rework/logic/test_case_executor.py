@@ -8,7 +8,6 @@ import subprocess
 import sys
 import tempfile
 import time
-from pathlib import Path
 
 from models.compilation import Compilation
 from models.test_case import TestCase
@@ -85,10 +84,8 @@ class TestCaseExecutor:
     unshare = [unshare_path, '-r', '-n']
 
     def __init__(self, args):
-        file_name = sys.argv[0]
-        file_name = file_name.replace("__main__.py", "").replace(".", "")
-        config_path = Path(file_name + "resources/config_test_case_executor.config").resolve()
-        config_path = resolve_absolute_path("/resources/config_test_case_executor.config")
+
+        config_path = resolve_absolute_path("/resources.template/config_test_case_executor.config")
 
         configuration = ConfigReader().read_file(os.path.abspath(config_path))
         self.configuration = configuration
@@ -253,11 +250,11 @@ class TestCaseExecutor:
         :return: true if a check was conducted, else false
         """
 
-        source = resolve_absolute_path(submission.path)
+        source = submission.path
         if submission.is_checked:
             if self.args.rerun:
                 Warn(f'You forced to re-run tests on submission by '
-                     f'{student.name}, submitted on {submission.mtime}.\n'
+                     f'{student.name}, submitted on {submission.timestamp}.\n'
                      f'This is his {submission.submission_key + 1}. submission, saved as {submission.path}')
             else:
                 return False

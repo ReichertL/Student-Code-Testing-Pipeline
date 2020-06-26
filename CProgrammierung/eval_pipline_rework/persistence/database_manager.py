@@ -3,21 +3,19 @@
     in this case, SQLite database
 """
 import sqlite3
-import sys
 from datetime import datetime
 from os.path import getmtime
-from pathlib import Path
 
 from models.compilation import Compilation
+from models.mail_information import MailInformation
 from models.student import Student
 from models.submission import Submission
 from models.test_case_result import TestCaseResult
-from persistence.persistence_manager import PersistenceManager
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
 
 
-class SQLiteDatabaseManager(PersistenceManager):
+class SQLiteDatabaseManager:
     """
     implements PersistenceManager
 
@@ -27,10 +25,7 @@ class SQLiteDatabaseManager(PersistenceManager):
     def __init__(self):
         super().__init__()
 
-        file_name = sys.argv[0]
-        file_name = file_name.replace("__main__.py", "").replace(".", "")
-        p = Path(file_name + "resources/config_database_manager.config").resolve()
-        p = resolve_absolute_path("/resources/config_database_manager.config")
+        p = resolve_absolute_path("/resources.template/config_database_manager.config")
         configuration = ConfigReader().read_file(str(p))
         self.database = sqlite3.connect(configuration["DATABASE_PATH"])
 
@@ -39,6 +34,50 @@ class SQLiteDatabaseManager(PersistenceManager):
         cursor.execute("""SELECT * FROM students""")
         results = cursor.fetchone()
         return results is None or len(results) <= 0
+
+    def insert_mail_information(self, student, submission, text):
+        cursor = self.database.cursor()
+        student_key = student.data_base_key
+        submission_key = submission.submission_key
+
+        cursor.execute("""SELECT * FROM mail_log WHERE student_key=? AND submission_key=?""",
+                       [student_key, submission_key])
+        result = cursor.fetchall()
+        if result is None or len(result) == 0:
+            cursor.execute("""INSERT INTO mail_log VALUES (?,?,?,?)
+            """, [student_key, submission_key, datetime.now(), text])
+
+        else:
+            cursor.execute("""UPDATE mail_log
+                       SET 
+                       last_mailed=?,
+                       massage=?
+                       WHERE student_key=? AND submission_key=?
+                       """, [datetime.now(), text, student_key, submission_key])
+
+        self.database.commit()
+
+    def get_all_mail_information(self, student):
+        submissions = self.get_submissions_for_student(student)
+        mail_infos = []
+        for submission in submissions:
+            mail_info = self.get_mail_information(student, submission)
+            if mail_info is not None:
+                mail_infos.append(mail_info)
+
+        return mail_infos
+
+    def get_mail_information(self, student, submission):
+        cursor = self.database.cursor()
+        student_key = student.data_base_key
+        submission_key = submission.submission_key
+        cursor.execute("""SELECT * FROM mail_log WHERE student_key=? AND submission_key=?""",
+                       [student_key, submission_key])
+        result = cursor.fetchall()
+        if result is None or len(result) != 1:
+            return None
+        else:
+            return MailInformation(result)
 
     def insert_valgrind_result(self, student_key, submission_key, test_case_result):
         vg = test_case_result.vg
@@ -195,6 +234,7 @@ class SQLiteDatabaseManager(PersistenceManager):
         """, [student_key, submission_key])
         raw_results = cursor.fetchall()
         results = []
+
         for result in raw_results:
             test_case_result = TestCaseResult(result[4])
             test_case_result.student_key = student_key
@@ -241,7 +281,7 @@ class SQLiteDatabaseManager(PersistenceManager):
         results = cursor.fetchall()
         already_in = False
         for i in results:
-            if test_case_result.path == i[4]:
+            if test_case_result.path == i[4] and student_key == i[0] and submission_key == i[1]:
                 already_in = True
         if not already_in:
             cursor.execute("""INSERT INTO test_results VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
@@ -303,8 +343,8 @@ class SQLiteDatabaseManager(PersistenceManager):
                                test_id
                            ])
 
-            self.insert_valgrind_result(student_key, submission_key, test_case_result)
-            self.database.commit()
+        self.insert_valgrind_result(student_key, submission_key, test_case_result)
+        self.database.commit()
 
     def get_compilation_result(self, student, submission):
         """
@@ -479,6 +519,9 @@ class SQLiteDatabaseManager(PersistenceManager):
             submission.compilation = self.get_compilation_result(student, submission)
             submission.fast = False if result[7] == 0 else True
             test_case_results = self.get_test_case_result(student, submission)
+            submission.tests_good_input = []
+            submission.tests_bad_input = []
+            submission.tests_extra_input = []
             for test_case_result in test_case_results:
                 if test_case_result.type == "BAD":
                     submission.tests_bad_input.append(test_case_result)
@@ -486,6 +529,7 @@ class SQLiteDatabaseManager(PersistenceManager):
                     submission.tests_good_input.append(test_case_result)
                 if test_case_result.type == "EXTRA":
                     submission.tests_extra_input.append(test_case_result)
+
             submissions.append(submission)
 
         return submissions
@@ -677,6 +721,7 @@ class SQLiteDatabaseManager(PersistenceManager):
         self.create_test_case_table(cursor)
         self.create_compilation_table(cursor)
         self.create_valgrind_table(cursor)
+        self.create_mail_log(cursor)
         self.database.commit()
 
     def close(self):
@@ -797,17 +842,12 @@ class SQLiteDatabaseManager(PersistenceManager):
                            summary_suppressed_blocks INTEGER                                                
                            )''')
 
+    @staticmethod
+    def create_mail_log(cursor):
 
-""" ok: False
-        invalid_read_count: 0
-        invalid_write_count: 0
-        in_use_at_exit: (4104, 2)
-        total_heap_usage: (5, 3, 8216)
-        leak_summary:
-        definitely lost: (0, 0)
-        indirectly lost: (0, 0)
-        possibly lost: (0, 0)
-        still reachable: (4104, 2)
-        suppressed: (0, 0)
-
-        error_summary: (0, 0, 0, 0)"""
+        cursor.execute('''CREATE TABLE IF NOT EXISTS mail_log
+                           (student_key INTEGER,
+                           submission_key INTEGER,
+                           last_mailed TIMESTAMP,
+                           massage TEXT NOT NULL                                            
+                           )''')

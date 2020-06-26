@@ -19,13 +19,12 @@ def mkdir(path):
 
 class MoodleSubmissionFetcher:
     def __init__(self, args):
-        config_path = resolve_absolute_path("resources/config_submission_fetcher.config")
-        config_path = resolve_absolute_path("/resources/config_submission_fetcher.config")
-
-        configuration = ConfigReader().read_file(os.path.abspath(config_path))
+        config_path = resolve_absolute_path("/resources.template/config_submission_fetcher.config")
+        configuration = ConfigReader().read_file(config_path)
         self.configuration = configuration
         self.args = args
         self.submission_base_dir = resolve_absolute_path(self.configuration["SUBMISSION_BASE_DIR"])
+        self.moodle_session = None
 
     def run(self, database_manager):
         username, session_state = self.get_login_data()
@@ -53,7 +52,7 @@ class MoodleSubmissionFetcher:
             except OSError:
                 pass
         if not username:
-            if (len(self.configuration["MOODLE_OWN_USER_IDS"]) > 0):
+            if len(self.configuration["MOODLE_OWN_USER_IDS"]) > 0:
                 username = list(self.configuration["MOODLE_OWN_USER_IDS"])[0]
         if not username:
             if d:
@@ -114,7 +113,8 @@ class MoodleSubmissionFetcher:
         #     shutil.rmtree(new_submissions_dir)
         return new
 
-    def dirname_to_student(self, d, database_manager):
+    @staticmethod
+    def dirname_to_student(d, database_manager):
         re_submission_dir = re.compile(r'(.+)_(\d+)_assignsubmission_file_')
         mo = re_submission_dir.match(d)
         student_name = mo.group(1)

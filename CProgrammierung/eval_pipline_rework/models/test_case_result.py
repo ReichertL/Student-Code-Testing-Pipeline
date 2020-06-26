@@ -35,6 +35,41 @@ class TestCaseResult:
     def __init__(self, test_case_identifier):
         self.path = test_case_identifier
         self.short_id = test_case_identifier.split(os.path.sep)[-1]
+
+    def get_failed_description(self, description=None):
+        if description is None:
+            description = {}
+        if not self.timeout:
+            description.update({"timeout": "timeout"})
+
+        if self.timeout and not self.segfault:
+            description.update({"segfault": "segfault"})
+
+        if self.vg is not None and len(self.vg.keys()) > 0:
+            if not self.vg["ok"]:
+                if self.vg["invalid_read_count"] > 0:
+                    description.update({"valgrind_read": "valgrind_read"})
+
+                if self.vg["invalid_write_count"] > 0:
+                    description.update({"valgrind_write": "valgrind_write"})
+                if self.vg["leak_summary"]["definitely lost"] != (0, 0):
+                    description.update({"valgrind_leak": "valgrind_leak"})
+                elif self.vg["leak_summary"]['possibly lost'] != (0, 0):
+                    description.update({"valgrind_leak": "valgrind_leak"})
+                elif self.vg["leak_summary"]['indirectly lost'] != (0, 0):
+                    description.update({"valgrind_leak": "valgrind_leak"})
+                elif self.vg["leak_summary"]['still reachable'] != (0, 0):
+                    description.update({"valgrind_leak": "valgrind_leak"})
+
+        if self.type == "BAD":
+            if self.error_msg_quality < 1:
+                description.update({"error_massage": "error_massage"})
+        else:
+            if not self.output_correct:
+                description.update({"output": "output"})
+
+        return description
+
     def __str__(self):
         """
         Returns a pretty printed string representation

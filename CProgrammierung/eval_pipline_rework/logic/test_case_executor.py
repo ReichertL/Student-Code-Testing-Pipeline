@@ -330,7 +330,7 @@ class TestCaseExecutor:
         test_case_result.output_correct = True
         parser = ResultParser()
         parser.parse_error_file(test_case_result)
-        if test_case_result.return_code > 0 and test_case_result.error_msg_quality > -1:
+        if test_case_result.return_code > 0 and test_case_result.error_msg_quality > 0:
             test_case_result.output_correct = True
         else:
             test_case_result.output_correct = False
@@ -395,20 +395,22 @@ class TestCaseExecutor:
             if p.returncode in (-9, -15, None):
                 result.timeout = False
                 result.return_code = p.returncode
-                if result.returncode is None:
+                if result.return_code is None:
                     result.return_code = -15
                 duration = -1
             else:
                 with open(self.configuration["TIME_OUT_PATH"]) as file:
                     parser.parse_time_file(test_case_result=result, file=file)
+            if self.args.verbose and not result.timeout:
+                print('-> TIMEOUT')
             result.tictoc = duration
             fin.close()
 
             if self.args.verbose:
-                print(f'--- executing ./loesung < {test_case.short_id} ---')
+                print(f'--- finished ./loesung < {test_case.short_id} ---')
 
+        result.vg['ok'] = None
         if test_case.valgrind_needed and result.timeout and result.segfault:
-            result.vg['ok'] = False
             if self.args.verbose:
                 print(f'--- executing valgrind ./loesung < {test_case.short_id} ---')
             with NamedPipeOpen(input_path) as fin:
@@ -424,18 +426,15 @@ class TestCaseExecutor:
                     p.wait(300)
                 except subprocess.TimeoutExpired:
                     sudokill(p)
-            if p.returncode in (-9, -15, None):
-                result.vg['ok'] = None
-            else:
+            if p.returncode not in (-9, -15, None):
                 try:
                     with open(self.configuration["VALGRIND_OUT_PATH"], 'br') as f:
                         result.vg = parser.parse_valgrind_file(f)
                 except FileNotFoundError:
-                    result.vg['ok'] = None
+                    pass
             if self.args.verbose:
                 print(f'--- finished valgrind ./loesung < {test_case.short_id} ---')
             unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)
-
         return result
 
     def set_limits_time(self):

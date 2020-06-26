@@ -202,6 +202,10 @@ class TestCaseExecutor:
                     topdown=False):
                 for name in files:
 
+                    if not name.endswith('.stdin'):
+                        continue
+                    # FIXME: The above two lines already avoid duplicates
+                    # TODO: throw away alreadyIn logic and clean up
                     path = os.path.join(root, name). \
                         replace(".stdin", ""). \
                         replace(".stdout", "")

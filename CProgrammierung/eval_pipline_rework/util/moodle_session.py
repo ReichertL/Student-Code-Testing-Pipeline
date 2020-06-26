@@ -116,7 +116,8 @@ class MoodleSession:
         """
         login_url = 'https://' + self.domain + '/login/index.php'
         d = {'username': self.username,
-             'password': getpass.getpass()}
+             'password': getpass.getpass(
+                 f'[loggin in as {self.username}] Password: ')}
         # import ipdb; ipdb.set_trace()
         self._last_request = self.session.post(login_url, data=d)
         self.session_state['cookie'] = self.session.cookies['MoodleSession']

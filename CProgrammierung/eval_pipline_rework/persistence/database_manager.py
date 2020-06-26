@@ -25,7 +25,7 @@ class SQLiteDatabaseManager:
     def __init__(self):
         super().__init__()
 
-        p = resolve_absolute_path("/resources.template/config_database_manager.config")
+        p = resolve_absolute_path("/resources/config_database_manager.config")
         configuration = ConfigReader().read_file(str(p))
         self.database = sqlite3.connect(configuration["DATABASE_PATH"])
 

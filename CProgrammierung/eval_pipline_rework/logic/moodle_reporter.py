@@ -11,7 +11,7 @@ class MoodleReporter:
 
     def __init__(self, args):
         self.args = args
-        config_path = resolve_absolute_path("/resources.template/config_submission_fetcher.config")
+        config_path = resolve_absolute_path("/resources/config_submission_fetcher.config")
         configuration = ConfigReader().read_file(config_path)
         self.configuration = configuration
         self.moodle_session = None

@@ -85,7 +85,7 @@ class TestCaseExecutor:
 
     def __init__(self, args):
 
-        config_path = resolve_absolute_path("/resources.template/config_test_case_executor.config")
+        config_path = resolve_absolute_path("/resources/config_test_case_executor.config")
 
         configuration = ConfigReader().read_file(os.path.abspath(config_path))
         self.configuration = configuration

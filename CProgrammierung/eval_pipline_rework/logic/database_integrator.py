@@ -9,7 +9,7 @@ class DatabaseIntegrator:
     configuration: str
 
     def __init__(self):
-        config_path = resolve_absolute_path("/resources.template/config_database_integrator.config")
+        config_path = resolve_absolute_path("/resources/config_database_integrator.config")
         configuration = ConfigReader().read_file(config_path)
         self.configuration = configuration
 

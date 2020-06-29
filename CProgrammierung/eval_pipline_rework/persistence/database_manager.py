@@ -81,7 +81,7 @@ class SQLiteDatabaseManager:
 
     def insert_valgrind_result(self, student_key, submission_key, test_case_result):
         vg = test_case_result.vg
-        ok = 1 if vg["ok"] else 0
+        ok = {False: 0, True: 1, None: 2}[vg["ok"]]
         invalid_read_count = vg["invalid_read_count"] if "invalid_read_count" in vg.keys() else 0
         invalid_write_count = vg["invalid_write_count"] if "invalid_write_count" in vg.keys() else 0
         in_use_at_exit = vg["in_use_at_exit"] if "in_use_at_exit" in vg.keys() else (0, 0)
@@ -110,7 +110,7 @@ class SQLiteDatabaseManager:
                                student_key,
                                submission_key,
                                test_id,
-                               1 if ok else 0,
+                               ok,
                                invalid_read_count,
                                invalid_write_count,
                                in_use_at_exit[0],
@@ -161,7 +161,7 @@ class SQLiteDatabaseManager:
             WHERE student_key=? AND submission_key=? AND test_id=?
             """, [
 
-                1 if ok else 0,
+                ok,
                 invalid_read_count,
                 invalid_write_count,
                 in_use_at_exit[0],
@@ -199,7 +199,7 @@ class SQLiteDatabaseManager:
             raw_result = result[0]
         else:
             return None
-        ok = vg.update({"ok": raw_result[3] == 1})
+        ok = vg.update({"ok": (False, True, None)[raw_result[3]]})
         vg.update({"invalid_read_count": raw_result[4]})
         vg.update({"invalid_write_count": raw_result[5]})
         vg.update({"in_use_at_exit": (raw_result[6], raw_result[7])})

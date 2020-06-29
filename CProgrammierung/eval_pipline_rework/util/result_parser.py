@@ -92,6 +92,7 @@ class ResultParser:
 
     @staticmethod
     def parse_error_file(test_case_result):
+        test_case_result.error_msg_quality = 0
         for discriptor, file_path in [('stderr', 'test.stderr'), ('stdout', 'test.stdout')]:
             with open(file_path, 'br') as file:
                 for line in file:

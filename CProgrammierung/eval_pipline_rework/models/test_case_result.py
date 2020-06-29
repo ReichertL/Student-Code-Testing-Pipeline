@@ -99,6 +99,8 @@ class TestCaseResult:
 
     @property
     def valgrind_ok(self):
+        if self.vg['ok'] is None:
+            return True
         return ((self.vg['ok'] is not False) and
                 (self.vg['invalid_read_count'] == 0 and
                  self.vg['invalid_write_count'] == 0))

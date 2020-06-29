@@ -73,7 +73,7 @@ class MoodleReporter:
 
                         failed_snippet += '</ul>\n'
                     failed_snippet += '</p>\n'
-                mail += failed_snippet
+                    mail += failed_snippet
             else:
                 if submission.compilation is not None:
                     mail += mail_templates["not_compiled"] \

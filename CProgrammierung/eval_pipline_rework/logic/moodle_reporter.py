@@ -1,4 +1,6 @@
 import os
+import subprocess
+import sys
 from datetime import datetime
 
 from logic.moodle_submission_fetcher import MoodleSubmissionFetcher
@@ -53,7 +55,7 @@ class MoodleReporter:
                 good_failed_snippet = mail_templates["good_test_failed_intro"]
                 if bad_failed:
                     mail += mail_templates["bad_test_failed_intro"]
-                    good_failed_snippet=good_failed_snippet.replace("$also_token$", "Auch wenn")
+                    good_failed_snippet = good_failed_snippet.replace("$also_token$", "Auch wenn")
 
                 if good_failed:
                     mail += good_failed_snippet.replace("$also_token$", "Wenn")
@@ -94,13 +96,50 @@ class MoodleReporter:
 
         if not self.args.final:
             mail += mail_templates["automatically_generated"]
-        print()
-        print(mail)
-        print()
+        mail += "\n"
         return mail
 
-    def send_mail(self, student, text):
-        pass
+    def send_mail(self, student, submission, text):
+        success = False
+        stats_path = 'stats'
+        text_path = "text"
+        with open(stats_path, 'w') as f:
+            submission.print_stats(f)
+        with open(text_path, 'w') as f:
+            f.write(text)
+        while True:
+            subprocess.call('/bin/cat "{}" "{}" | less -R'.format(text_path, stats_path), shell=True)
+            print(
+                'send this mail? (y/n/e/v/o/q) '
+                'y=send; '
+                'n=do not send; '
+                'e=edit mail; '
+                'v=view source code; '
+                'o = open conversation in browser; '
+                'q = quit ',
+                end='', flush=True)
+
+            answer = sys.stdin.readline()[0]
+            if answer == 'e':
+                subprocess.call([self.configuration["EDITOR_PATH"], text_path])
+            elif answer == 'v':
+                subprocess.call([self.configuration["EDITOR_PATH"], submission.path])
+            elif answer == 'o':
+                self.moodle_session.open_conversation_in_ff(student.moodle_id)
+            elif answer == 'q':
+                os.unlink(text_path)
+                os.unlink(stats_path)
+                sys.exit(0)
+            else:
+                break
+        if answer == 'y':
+            with open(text_path) as f:
+                msg = f.read()
+            success = self.moodle_session.send_instant_message(student.moodle_id, msg)
+
+        os.unlink(text_path)
+        os.unlink(stats_path)
+        return success
 
     def run(self, database_manager, force=False):
         username, session_state = MoodleSubmissionFetcher(self.args).get_login_data()
@@ -114,13 +153,18 @@ class MoodleReporter:
         if len(self.args.mailto) > 0:
             for student_name in self.args.mailto:
                 to_mail.append(database_manager.get_student_by_name(student_name))
+
+        if self.args.debug:
+            to_mail = []
+            to_mail.append(database_manager.get_student_by_name("C Programmierprojekt Team"))
+
         for student in to_mail:
-            submission = database_manager.get_submissions_for_student(student)
-            if len(submission) > 0:
-                submission = sorted(
-                    submission, key=lambda x: x.timestamp
+            submissions = database_manager.get_submissions_for_student(student)
+            if len(submissions) > 0:
+                submissions = sorted(
+                    submissions, key=lambda x: x.timestamp
                 )
-                mail_information = database_manager.get_mail_information(student, submission[-1])
+                mail_information = database_manager.get_mail_information(student, submissions[-1])
                 already_mailed = False
 
                 if mail_information is not None:
@@ -128,10 +172,17 @@ class MoodleReporter:
                         print(f"Already send a mail to {student.name} at {mail_information.time_stamp}")
                         already_mailed = True
 
+                        if self.args.rerun or self.args.force:
+                            print('Send anyway? (y/n) ', end='', flush=True)
+                            if sys.stdin.readline()[:1] == 'y':
+                                already_mailed = False
+
                 if not already_mailed or force:
                     if self.args.verbose:
                         print(f"Sending mail to {student.name}, mailed at {datetime.now()}")
-                    text = self.generate_mail_content(student, submission[-1])
-                    success = self.send_mail(student, text)
+                    submission = submissions[-1]
+                    text = self.generate_mail_content(student, submission)
+
+                    success = self.send_mail(student, submission, text)
                     if success:
                         database_manager.insert_mail_information(student, submission, text)

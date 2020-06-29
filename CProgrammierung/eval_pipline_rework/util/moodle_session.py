@@ -1,6 +1,8 @@
 import getpass
 import json
+import os
 import re
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -10,6 +12,14 @@ from bs4 import BeautifulSoup
 
 from models.student import Student
 from util.absolute_path_resolver import resolve_absolute_path
+
+AJAX_HEADERS = {
+    'X-Requested-With': 'XMLHttpRequest',
+    'Pragma': 'no-cache',
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Cache-Control': 'no-cache',
+    'Accept': 'application/json, text/javascript, */*; q=0.01',
+}
 
 DEFAULT_SESSION_HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;'
@@ -21,6 +31,10 @@ DEFAULT_SESSION_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:74.0) '
                   'Gecko/20100101 Firefox/74.0',
 }
+
+
+class MoodleAjaxError(Exception):
+    """Unknown json reply from the moodle AJAX API."""
 
 
 class MoodleScrapeError(Exception):
@@ -203,3 +217,69 @@ class MoodleSession:
                     f.write(x)
             return dest
         return None
+
+    def open_conversation_in_ff(self, touserid):
+        """Open the instant messages moodle view in browser."""
+        cmd_line = [self.configuration["FIREFOX_PATH"], self.get_conversation_url(touserid)]
+        if os.path.exists(self.configuration["FIREFOX_PATH"]):
+            subprocess.call(cmd_line)
+        else:
+            print("firefox '{}'".format(cmd_line[1]))
+
+    def get_conversation_url(self, touserid):
+        """Return the url of the instant message conversation view regarding
+        a specific user."""
+        moodle_base_url = 'https://' + self.domain
+        return '{}/message/index.php?user={}&id={}'.format(
+            moodle_base_url, self.userid, touserid)
+
+    def send_instant_message(self, touserid, text):
+        """Send an instant message `text` to the user `touserid`.
+
+        Note that text is interpreted as HTML, so literal `<>&`s will need
+        to be escaped.
+
+        Returns the text actually sent. In case of failure, returns False.
+        """
+        try:
+            data = self._ajax_call(
+                'core_message_send_instant_messages',
+                {"messages": [{"touserid": int(touserid), "text": text}]})[0]
+        except (MoodleAjaxError, IndexError):
+            return False
+        if data.get('msgid', -1) > -1:
+            return data.get('text', False)
+        return False
+
+    def _ajax_call(self, methodname: str, args):
+        """Make AJAX call through sevice.php."""
+
+        AJAX_HEADERS.update({'Referer': 'https://' + self.domain + '/message/index.php'})
+        data = [{"index": 0,
+                 "methodname": methodname,
+                 "args": args}]
+        r = self.session.post(
+            self.configuration["AJAX_URL"],
+            params={'sesskey': self.session_state['sesskey'],
+                    'info': methodname},
+            data=json.dumps(data),
+            headers={**AJAX_HEADERS,
+                     'Referrer': self.configuration["AJAX_URL"]})
+        self._last_request = r
+        try:
+            d = json.loads(r.text)[0]
+            if d['error']:
+                if d['exception']['errorcode'] == 'servicerequireslogin':
+                    self.handle_logout()
+                raise MoodleAjaxError()
+        except (KeyError, IndexError):
+            raise MoodleAjaxError()
+        return d['data']
+
+    def handle_logout(self):
+        """Clear the session variable cache because we are not logged in.
+        """
+        self.session_state['logged_in'] = False
+        self.session_state['cookie'] = ''
+        self.session_state['sesskey'] = ''
+        self.dump_state()

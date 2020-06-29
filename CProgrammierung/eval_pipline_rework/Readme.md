@@ -36,9 +36,14 @@ sudo ln -s /path/to/eval_pipeline/__main__.py /usr/bin/check
 Commandline arguments currently implemented:
 ---
     -a testing all submissions
-    -r rerun tested submissions
-    -f fetches students and submissions from a given base dir
+    -r rerun tested submissions, also requests resending of emails
+    -f fetches students and submissions from moodle and saves them local
+       and generates a respective database entry
     -v prints extended information
+    
+    --force resends emails after confirmation 
+    --debug sends email only to "C Programmierprojekt Team" 
+   
 
 Implemented features:
 ---
@@ -46,10 +51,12 @@ Implemented features:
   - Running given test cases for all submissions in the database
   - Evaluate the results
   - marking students and submissions as passed (current bug, valgrind not taken into account)
+  - integrated submission fetching from moodle course
+  - integrated automatic feedback 
 
 Roadmap
 ---
   - evaluating memory footprint for passing
-  - automate moodle submission fetching
   - evaluate runtime statistics
-  - automate feedback sending
+
+

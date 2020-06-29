@@ -152,6 +152,17 @@ class ArgumentExtractor:
                           help='if used together with '
                                '--details, set exit status'
                                ' to 0 iff displayed abgabe passes')
+        self \
+            .parser \
+            .add_argument('--debug',
+                          action='store_true',
+                          help='enables sending mail only to '
+                               '"C Programmierprojekt Team" moodle account')
+        self \
+            .parser \
+            .add_argument('--force',
+                          action='store_true',
+                          help='forces actions like resending emails')
 
     def get_arguments(self):
         """

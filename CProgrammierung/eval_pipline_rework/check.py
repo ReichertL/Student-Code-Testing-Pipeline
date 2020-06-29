@@ -7,6 +7,7 @@ submissionsParameter: none, reads commandline arguments to determine behavior
 """
 
 from logic.database_integrator import DatabaseIntegrator
+from logic.moodle_reporter import MoodleReporter
 from logic.moodle_submission_fetcher import MoodleSubmissionFetcher
 from logic.test_case_executor import TestCaseExecutor
 
@@ -44,7 +45,9 @@ def run():
         executor.run(database_manager=persistence_manager, verbosity=verbosity)
 
     # Send Moodle feedback to students if needed determined by args
-    # reporter = MoodleReporter(args)
+    if args.mail_to_all or len(args.mailto) > 0 or args.debug:
+        reporter = MoodleReporter(args)
+        reporter.run(database_manager=persistence_manager)
 
     if args.playground:
         playground = Playground()

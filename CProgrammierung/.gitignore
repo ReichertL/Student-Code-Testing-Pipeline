@@ -25,6 +25,7 @@ pytest.xml
 
 /musterloesung/tests/auswertung
 /musterloesung/Testcase_Generatror/*
+/*.db
 
 /auswertung/teilnehmer.json
 

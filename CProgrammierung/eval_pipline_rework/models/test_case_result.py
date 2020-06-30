@@ -28,7 +28,8 @@ class TestCaseResult:
     tictoc: float = None
     mrss: int = -1
     short_id = ""
-
+    description = ""
+    hint = ""
     vg = {}
     ignore: list = []
 
@@ -36,37 +37,49 @@ class TestCaseResult:
         self.path = test_case_identifier
         self.short_id = test_case_identifier.split(os.path.sep)[-1]
 
+    def append_self(self,description,key):
+        update_list = []
+        if key in description:
+            update_list = description[key]
+        if len(self.hint) > 0:
+            update_list.append(self.hint)
+        else:
+            update_list.append(f"bei {self.short_id}")
+        description.update({key: update_list})
+
     def get_failed_description(self, description=None):
+
         if description is None:
             description = {}
         if not self.timeout:
-            description.update({"timeout": "timeout"})
+            self.append_self(description, "timeout")
 
         if self.timeout and not self.segfault:
-            description.update({"segfault": "segfault"})
+            self.append_self(description, "segfault")
 
         if self.vg is not None and len(self.vg.keys()) > 0:
             if not self.vg["ok"]:
                 if self.vg["invalid_read_count"] > 0:
-                    description.update({"valgrind_read": "valgrind_read"})
+                    self.append_self(description,"valgrind_read")
 
                 if self.vg["invalid_write_count"] > 0:
-                    description.update({"valgrind_write": "valgrind_write"})
+                    self.append_self(description,"valgrind_write")
+
                 if self.vg["leak_summary"]["definitely lost"] != (0, 0):
-                    description.update({"valgrind_leak": "valgrind_leak"})
+                    self.append_self(description, "valgrind_leak")
                 elif self.vg["leak_summary"]['possibly lost'] != (0, 0):
-                    description.update({"valgrind_leak": "valgrind_leak"})
+                    self.append_self(description, "valgrind_leak")
                 elif self.vg["leak_summary"]['indirectly lost'] != (0, 0):
-                    description.update({"valgrind_leak": "valgrind_leak"})
+                    self.append_self(description, "valgrind_leak")
                 elif self.vg["leak_summary"]['still reachable'] != (0, 0):
-                    description.update({"valgrind_leak": "valgrind_leak"})
+                    self.append_self(description, "valgrind_leak")
 
         if self.type == "BAD":
             if self.error_msg_quality < 1:
-                description.update({"error_massage": "error_massage"})
+                self.append_self(description,"error_massage")
         else:
             if not self.output_correct:
-                description.update({"output": "output"})
+                self.append_self(description, "output")
 
         return description
 
@@ -131,7 +144,7 @@ class TestCaseResult:
             'err_msg': '---' if 'error_msg' in self.ignore else errok(self.error_msg_quality),
             'error_line': self.error_line[:25].strip(),
             'passed_indicator': ind[bool(self)],
-            # 'desc': test_cases['all'][self.id_]['short_desc'],
+            'description': self.description,
             'output': rc[self.output_correct],
         }
 

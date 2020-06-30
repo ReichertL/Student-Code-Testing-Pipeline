@@ -24,7 +24,7 @@ class Submission:
     mtime: int = -1
     timing: dict
     compilation: Compilation = None
-    passed = False
+    # passed = False
     is_performant = True
     tests_bad_input = []
     tests_good_input = []
@@ -60,8 +60,21 @@ class Submission:
                f"\n\t\tCompilation({self.compilation})" \
                f"\n)"
 
+    @property
+    def passed(self):
+        passed = True
+        if self.compilation is None:
+            return False
+        passed = passed and self.compilation.return_code == 0
+        for bad_test in self.tests_bad_input:
+            passed = passed and bad_test.passed()
+        for good_test in self.tests_good_input:
+            passed = passed and good_test.passed()
+
+        return passed
+
     def __bool__(self):
-        return self.passed
+        return True if self.passed else False
 
     def is_performant(self):
         return self.is_performant
@@ -93,15 +106,15 @@ class Submission:
                   , file=f)
             print(file=f)
             print(table_format(
-                '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {err_msg}',
+                '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {err_msg} | {description}',
                 [x.statistics_dict for x in self.tests_bad_input],
                 titles='auto'), file=f)
             print(file=f)
 
         passed_good = True
         for good_test in self.tests_good_input:
-            passed_bad = passed_bad and good_test.passed()
-        if passed_bad:
+            passed_good = passed_good and good_test.passed()
+        if passed_good:
             print(green('All tests concerning good input passed.'), file=f)
         else:
             failed = len(self.tests_good_input) - sum(map(map_to_int, self.tests_good_input))
@@ -110,7 +123,7 @@ class Submission:
                   , file=f)
             print(file=f)
             print(table_format(
-                '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {output}',
+                '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {output} | {description}',
                 [x.statistics_dict for x in self.tests_good_input],
                 titles='auto'), file=f)
             print(file=f)

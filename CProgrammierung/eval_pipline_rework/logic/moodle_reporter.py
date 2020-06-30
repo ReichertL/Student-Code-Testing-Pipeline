@@ -18,6 +18,28 @@ class MoodleReporter:
         self.configuration = configuration
         self.moodle_session = None
 
+    @staticmethod
+    def get_fail_information_snippet(failed_description, mail_templates):
+        failed_snippet = "test"
+        if len(failed_description) > 0:
+            failed_snippet = '<p>\n'
+            for error_type in failed_description:
+                failed_snippet += f"{mail_templates[error_type]} "
+                failed_cases = failed_description[error_type]
+                if len(failed_cases) == 1:
+                    failed_snippet += f"{failed_cases[0]}\n"
+                else:
+                    failed_snippet += "\n"
+                    failed_snippet += '<ul>\n'
+
+                    for hint in failed_cases:
+                        failed_snippet += f'<li>{hint}</li>\n'
+
+                    failed_snippet += '</ul>\n'
+            failed_snippet += '</p>\n'
+
+        return failed_snippet
+
     def generate_mail_content(self, student, submission):
         mail_templates = {}
         for root, _, files in os.walk(
@@ -40,40 +62,25 @@ class MoodleReporter:
                 mail += mail_templates["successful"]
         else:
             if submission.compilation is not None and submission.compilation:
-                bad_failed = False
-                good_failed = False
-                failed_description = {}
+                bad_failed_description = {}
+                good_failed_description = {}
                 for i in submission.tests_bad_input:
                     if not i.passed():
-                        bad_failed = True
-                        failed_description = i.get_failed_description(failed_description)
+                        bad_failed_description = i.get_failed_description(bad_failed_description)
                 for i in submission.tests_good_input:
                     if not i.passed():
-                        good_failed = True
-                        failed_description = i.get_failed_description(failed_description)
+                        good_failed_description = i.get_failed_description(good_failed_description)
 
                 good_failed_snippet = mail_templates["good_test_failed_intro"]
-                if bad_failed:
+                if len(bad_failed_description) > 0:
                     mail += mail_templates["bad_test_failed_intro"]
                     good_failed_snippet = good_failed_snippet.replace("$also_token$", "Auch wenn")
+                    mail += self.get_fail_information_snippet(bad_failed_description, mail_templates)
 
-                if good_failed:
+                if len(good_failed_description) > 0:
                     mail += good_failed_snippet.replace("$also_token$", "Wenn")
+                    mail += self.get_fail_information_snippet(good_failed_description, mail_templates)
 
-                if len(failed_description.keys()) > 0:
-                    failed_snippet = '<p>\n'
-                    if len(failed_description) == 1:
-                        for key in failed_description:
-                            failed_snippet += f"{mail_templates[failed_description[key]]}\n"
-
-                    else:
-                        failed_snippet += '<ul>\n'
-                        for i in failed_description:
-                            failed_snippet += f'<li>{mail_templates[failed_description[i]]}</li>\n'
-
-                        failed_snippet += '</ul>\n'
-                    failed_snippet += '</p>\n'
-                mail += failed_snippet
             else:
                 if submission.compilation is not None:
                     mail += mail_templates["not_compiled"] \

@@ -27,13 +27,14 @@ class MoodleReporter:
                 failed_snippet += f"{mail_templates[error_type]} "
                 failed_cases = failed_description[error_type]
                 if len(failed_cases) == 1:
-                    failed_snippet += f"{failed_cases[0]}\n"
+                    failed_snippet += f"{failed_cases[0]}.\n"
                 else:
                     failed_snippet += "\n"
                     failed_snippet += '<ul>\n'
 
-                    for hint in failed_cases:
-                        failed_snippet += f'<li>{hint}</li>\n'
+                    for hint, dot in zip(failed_cases,
+                                         (len(failed_cases)-1)*('',)+('.',)):
+                        failed_snippet += f'<li>{hint}{dot}</li>\n'
 
                     failed_snippet += '</ul>\n'
             failed_snippet += '</p>\n'
@@ -98,8 +99,10 @@ class MoodleReporter:
                     mail += mail_templates["extra_passed_final"]
                 else:
                     mail += mail_templates["not_passed_final"]
-
-        mail += mail_templates["ending"].replace("$submission_timestamp$", str(submission.timestamp))
+        mail += mail_templates["ending"]\
+            .replace("$submission_timestamp$",
+                     datetime.fromtimestamp(submission.mtime)
+                     .strftime('%d.%m.%Y, %T Uhr'))
 
         if not self.args.final:
             mail += mail_templates["automatically_generated"]

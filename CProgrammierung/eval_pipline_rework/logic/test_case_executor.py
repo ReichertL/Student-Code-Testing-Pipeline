@@ -2,6 +2,7 @@
 This module manages all test case execution and evaluation
 """
 import datetime
+import json
 import os
 import resource
 import subprocess
@@ -89,7 +90,7 @@ class TestCaseExecutor:
 
         configuration = ConfigReader().read_file(os.path.abspath(config_path))
         self.configuration = configuration
-        self.test_cases = self.load_tests()
+        # self.test_cases = self.load_tests()
         self.args = args
         self.sudo_path = configuration["SUDO_PATH"]
         self.sudo_user = configuration["SUDO_USER"]
@@ -102,7 +103,8 @@ class TestCaseExecutor:
         """
             runs specified test cases
         """
-        self.load_tests()
+        self.test_cases = self.load_tests(database_manager)
+
         pending_submissions = self.retrieve_pending_submissions(
             database_manager)
 
@@ -180,7 +182,7 @@ class TestCaseExecutor:
                            commandline=' '.join(all_args),
                            output=cp.stderr)
 
-    def load_tests(self):
+    def load_tests(self, database_manager):
         """
         Loads the in the config file specified testcases for good bad and extra
         :return: dictionary of list test_case
@@ -191,6 +193,8 @@ class TestCaseExecutor:
                       "GOOD": self.configuration["TESTS_GOOD_EXTENSION"],
                       "EXTRA": self.configuration["TESTS_EXTRA_EXTENSION"]}
         id = 0
+        json_descriptions = {}
+
         for key in extensions:
 
             test_case_input = []
@@ -202,43 +206,54 @@ class TestCaseExecutor:
                     topdown=False):
                 for name in files:
 
+                    if name.endswith(".json"):
+                        with open(os.path.join(root, name)) as description_file:
+                            short_id = name.replace(".json", "")
+                            description = json.load(description_file)
+                            json_descriptions.update({short_id: description})
+
                     if not name.endswith('.stdin'):
                         continue
-                    # FIXME: The above two lines already avoid duplicates
-                    # TODO: throw away alreadyIn logic and clean up
+
                     path = os.path.join(root, name). \
                         replace(".stdin", ""). \
                         replace(".stdout", "")
 
-                    alreadyIn = False
-                    for i in test_case_input:
-                        if i.path == path:
-                            alreadyIn = True
+                    test_output = ""
+                    with open(f"{path}.stdin") as input_file:
+                        test_input = input_file.read()
+                    if key != "BAD":
+                        with open(f"{path}.stdout") as output_file:
+                            test_output = output_file.read()
 
-                    if not alreadyIn:
-                        test_output = ""
-                        with open(f"{path}.stdin") as input_file:
-                            test_input = input_file.read()
-                        if key != "BAD":
-                            with open(f"{path}.stdout") as output_file:
-                                test_output = output_file.read()
-
-                        test_case = TestCase(path, test_input, test_output, error_expected=(key == "BAD"))
-                        test_case_input.append(test_case)
+                    test_case = TestCase(path, test_input, test_output, error_expected=(key == "BAD"))
+                    test_case.type = key
+                    test_case_input.append(test_case)
 
             path_mapping = [(key, test_case_input)]
             test_cases.update(path_mapping)
         all_test_cases = []
+
         for key in test_cases:
             for test_case in test_cases[key]:
                 test_case.valgrind_needed = False if key == "EXTRA" else True
                 test_case.type_good_input = False if key == "BAD" else True
                 test_case.id = id
+                try:
+                    test_case.description = json_descriptions[test_case.short_id]["short_desc"]
+                except KeyError:
+                    test_case.description = test_case.short_id
+                try:
+                    test_case.hint = json_descriptions[test_case.short_id]["hint"]
+                except KeyError:
+                    test_case.hint = f"bei {test_case.short_id}"
+
                 id = id + 1
+                database_manager.insert_test_case_information(test_case)
                 all_test_cases.append(test_case)
 
         test_cases.update([("ALL", all_test_cases)])
-        self.test_cases = test_cases
+
         return test_cases
 
     def check(self, student,
@@ -291,7 +306,6 @@ class TestCaseExecutor:
         for i in all_results:
             passed = passed and i.passed()
 
-        submission.passed = passed
         submission.is_checked = True
         submission.timestamp = datetime.datetime.now()
         student.passed = student.passed or passed
@@ -318,7 +332,6 @@ class TestCaseExecutor:
             Failed()
             if self.args.verbose:
                 submission.print_stats()
-                pass
         return all_results
 
     def check_for_error(self, submission, test):
@@ -438,6 +451,8 @@ class TestCaseExecutor:
                     pass
             if self.args.verbose:
                 print(f'--- finished valgrind ./loesung < {test_case.short_id} ---')
+            result.description = test_case.description
+            result.hint = test_case.hint
             unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)
         return result
 

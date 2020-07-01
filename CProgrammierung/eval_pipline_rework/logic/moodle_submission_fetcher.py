@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn
@@ -67,11 +68,20 @@ class MoodleSubmissionFetcher:
         new_submissions_dir = self.configuration["SUBMISSION_NEW_DIR"]
         new_submissions_zip = self.configuration["SUBMISSION_NEW_ZIP"]
         all_submissions_dir = resolve_absolute_path(self.configuration["SUBMISSION_BASE_DIR"])
+        use_local_zip = False
+        if os.path.exists(new_submissions_zip):
+            print(f'target zip path "{new_submissions_zip}" exists.\n'
+                  'use local file instead of fetching? (y/n)',
+                  end='', flush=True)
+            answer = sys.stdin.readline()[:1]
+            if answer.lower() == 'y':
+                use_local_zip = True
         if not dryrun:
-            ms = self.moodle_session
-            if not ms.logged_in:
-                return None
-            ms.download_all_submissions(self.configuration["MOODLE_IDS"]["MOODLE_SUBMISSION_ID"])
+            if not use_local_zip:
+                ms = self.moodle_session
+                if not ms.logged_in:
+                    return None
+                ms.download_all_submissions(self.configuration["MOODLE_IDS"]["MOODLE_SUBMISSION_ID"])
             if os.path.isdir(new_submissions_dir):
                 shutil.rmtree(new_submissions_dir)
             os.mkdir(new_submissions_dir)

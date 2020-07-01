@@ -10,6 +10,7 @@ from models.compilation import Compilation
 from models.mail_information import MailInformation
 from models.student import Student
 from models.submission import Submission
+from models.test_case import TestCase
 from models.test_case_result import TestCaseResult
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
@@ -34,6 +35,48 @@ class SQLiteDatabaseManager:
         cursor.execute("""SELECT * FROM students""")
         results = cursor.fetchone()
         return results is None or len(results) <= 0
+
+    def insert_test_case_information(self, test_case):
+        cursor = self.database.cursor()
+
+        cursor.execute("""SELECT * FROM test_cases WHERE test_case_id=?""",
+                       [test_case.id])
+        result = cursor.fetchall()
+        if result is None or len(result) == 0:
+            cursor.execute("""INSERT INTO test_cases VALUES (?,?,?,?,?,?,?,?,?,?)
+             """, [test_case.id,
+                   test_case.path,
+                   test_case.test_input,
+                   test_case.test_output,
+                   1 if test_case.error_expected else 0,
+                   1 if test_case.valgrind_needed else 0,
+                   test_case.short_id,
+                   test_case.description,
+                   test_case.hint,
+                   test_case.type,
+                   ])
+
+        else:
+            pass
+
+        self.database.commit()
+
+    def get_test_case_by_id(self, id):
+        cursor = self.database.cursor()
+
+        cursor.execute("""SELECT * FROM test_cases WHERE test_case_id=?""",
+                       [id])
+        raw_result = cursor.fetchall()
+        raw_result = raw_result[0]
+        test_case = TestCase(raw_result[1], raw_result[2], raw_result[3], raw_result[4] == 1)
+        test_case.id = id
+        test_case.valgrind_needed = raw_result[5] == 1
+        test_case.short_id = raw_result[6]
+        test_case.description = raw_result[7]
+        test_case.hint = raw_result[8]
+        test_case.type = raw_result[9]
+
+        return test_case
 
     def insert_mail_information(self, student, submission, text):
         cursor = self.database.cursor()
@@ -254,6 +297,9 @@ class SQLiteDatabaseManager:
             test_case_result.tictoc = result[15]
             test_case_result.mrss = result[16]
             test_case_result.vg = self.get_valgrind_result(student_key, submission_key, test_case_result.id)
+            test_case = self.get_test_case_by_id(test_case_result.id)
+            test_case_result.hint = test_case.hint
+            test_case_result.description = test_case.description if len(test_case.description) >0 else test_case.short_id
             results.append(test_case_result)
         return results
 
@@ -718,10 +764,11 @@ class SQLiteDatabaseManager:
         cursor = self.database.cursor()
         self.create_student_table(cursor)
         self.create_submission_table(cursor)
-        self.create_test_case_table(cursor)
+        self.create_test_case_results_table(cursor)
         self.create_compilation_table(cursor)
         self.create_valgrind_table(cursor)
         self.create_mail_log(cursor)
+        self.create_test_case_table(cursor)
         self.database.commit()
 
     def close(self):
@@ -765,7 +812,7 @@ class SQLiteDatabaseManager:
                     )''')
 
     @staticmethod
-    def create_test_case_table(cursor):
+    def create_test_case_results_table(cursor):
         """
         creats the new test_case_result table if it doesn't exist
         :param cursor: pointer to the database
@@ -850,4 +897,19 @@ class SQLiteDatabaseManager:
                            submission_key INTEGER,
                            last_mailed TIMESTAMP,
                            massage TEXT NOT NULL                                            
+                           )''')
+
+    @staticmethod
+    def create_test_case_table(cursor):
+        cursor.execute('''CREATE TABLE IF NOT EXISTS test_cases
+                           (test_case_id INTEGER,
+                           path TEXT NOT NULL ,
+                           input TEXT NOT NULL ,
+                           output TEXT NOT NULL, 
+                           error_expected INTEGER ,
+                           valgrind_needed INTEGER ,
+                           short_id TEXT NOT NULL,                                            
+                           description TEXT NOT NULL,                                            
+                           hint TEXT NOT NULL ,                                           
+                           type TEXT NOT NULL                                            
                            )''')

@@ -11,6 +11,10 @@ class TestCase:
     valgrind_needed = False
     id = -1
     short_id = ""
+    description = ""
+    hint = ""
+    type = ""
+    rlimit = 0
 
     def __init__(self, path, test_input, test_output, error_expected):
         """
@@ -30,12 +34,15 @@ class TestCase:
         """
         Returns a string representation of the testcase
         :return: String representation of the testcase
+
+               #f"Input:\n{self.test_input}\n" \
+               f"Output:\n{self.test_output}\n" \
         """
         return f"Path: {self.path}\n" \
-               f"Input:\n{self.test_input}\n" \
-               f"Output:\n{self.test_output}\n" \
                f"Error expected: {self.error_expected}\n" \
-               f"id: {self.id}\n"
+               f"id: {self.id}\n" \
+               f"hint: {self.hint}\n" \
+               f"description: {self.description}\n"
 
     def __eq__(self, other):
         """

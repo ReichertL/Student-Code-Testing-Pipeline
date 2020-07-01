@@ -131,12 +131,21 @@ class MoodleSession:
         """
         login_url = 'https://' + self.domain + '/login/index.php'
         d = {'username': self.username,
-             'password': getpass.getpass(
-                 f'[loggin in as {self.username}] Password: ')}
+             'password': self.configuration
+             .get("MOODLE_PASSWORDS", {})
+             .get(self.username)}
+        if d['password'] is None:
+            d['password'] = getpass.getpass(
+                 f'[loggin in as {self.username}] Password: ')
+        print(f'INFO: logging in as {self.username} ... ', end='', flush=True)
         # import ipdb; ipdb.set_trace()
+
         self._last_request = self.session.post(login_url, data=d)
         self.session_state['cookie'] = self.session.cookies['MoodleSession']
-        self.query_logged_in()
+        if self.query_logged_in():
+            print(f'OK, your full name is "{self.full_name:s}"')
+        else:
+            print('FAILED')
 
     @staticmethod
     def dump_dashboard(r):

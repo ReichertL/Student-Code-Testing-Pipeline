@@ -1,4 +1,5 @@
 import getpass
+import itertools
 import json
 import os
 import re
@@ -137,6 +138,19 @@ class MoodleSession:
         self.session_state['cookie'] = self.session.cookies['MoodleSession']
         self.query_logged_in()
 
+    @staticmethod
+    def dump_dashboard(r):
+        """Dump r.text to /tmp/dashboard%03d.html
+
+        For debugging only."""
+        for i in itertools.count():
+            html_dump_path = f'/tmp/dashboard{i:03d}.html'
+            if not os.path.exists(html_dump_path):
+                break
+        print(f'MoodleSession.scrape_dashboard() -> {html_dump_path}')
+        with open(html_dump_path, 'w') as f:
+            f.write(r.text)
+
     def scrape_dashboard(self, r):
         """Scrape the moodle dashboard to retrieve full name, user id and
         session key."""
@@ -153,28 +167,35 @@ class MoodleSession:
             # <div class='logininfo' .../> contains all data we need
             div = d.find_all('div', attrs={'class': 'logininfo'})
             if len(div) != 1:
-                raise MoodleScrapeError()
+                raise MoodleScrapeError(
+                    'cannot find <div class=\'logininfo\' .../>')
             # extract the full name
             self.full_name = div[0].find_all('a')[0].text
             # extract the moodle user id
             url = div[0].find_all('a')[0]['href']
             if (mo := re.match(r'(.*?=)(\d+)', url)) is not None:
                 if mo.group(1) != moodle_base_url + '/user/profile.php?id=':
-                    raise MoodleScrapeError()
+                    raise MoodleScrapeError(
+                        'cannot find link .../user/profile.php?id=...')
                 self.userid = mo.group(2)
             else:
-                raise MoodleScrapeError()
+                raise MoodleScrapeError(
+                    'cannot find link .../user/profile.php?id=...')
             # extract the sesskey
             url = div[0].find_all('a')[1]['href']
             if (mo := re.match(r'(.*?=)(\w+)', url)) is not None:
                 if mo.group(1) != moodle_base_url \
                         + '/login/logout.php?sesskey=':
-                    raise MoodleScrapeError()
+                    raise MoodleScrapeError(
+                        'cannot find link .../login/logout.php?sesskey=...')
                 self.session_state['sesskey'] = mo.group(2)
             else:
-                raise MoodleScrapeError()
-        except (IndexError, MoodleScrapeError):
+                raise MoodleScrapeError(
+                    'cannot find link .../login/logout.php?sesskey=...')
+        except (IndexError, MoodleScrapeError) as e:
             sys.stderr.write('ERROR: unexpected error in dashboard parsing')
+            std.esterr.write(f'-> {e:s}')
+            self.dump_dashboard(r)
             self.session_state['logged_in'] = False
         self.dump_state()
 

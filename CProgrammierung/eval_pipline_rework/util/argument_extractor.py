@@ -41,9 +41,11 @@ class ArgumentExtractor:
             .parser \
             .add_argument('-c', '--check',
                           dest='check',
-                          action='store_true',
-                          help='run tests for each submission that '
-                               'has not been tested so far')
+                          type=str,
+                          default=[],
+                          action="append",
+                          help='run tests for the submissions'
+                               ' of the given student')
         self \
             .parser \
             .add_argument('-a', '--all',
@@ -163,10 +165,17 @@ class ArgumentExtractor:
             .add_argument('--force',
                           action='store_true',
                           help='forces actions like resending emails')
+        self \
+            .parser \
+            .add_argument('-l', '--local',
+                          dest="local",
+                          action='store_true',
+                          help='fetches mails only local from submission dir')
 
     def get_arguments(self):
         """
         getter for the parsed arguments as a dictionary
         :return: parsed args
         """
+        print(self.parser.parse_args())
         return self.parser.parse_args()

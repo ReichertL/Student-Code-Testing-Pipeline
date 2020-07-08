@@ -33,7 +33,7 @@ class MoodleReporter:
                     failed_snippet += '<ul>\n'
 
                     for hint, dot in zip(failed_cases,
-                                         (len(failed_cases)-1)*('',)+('.',)):
+                                         (len(failed_cases) - 1) * ('',) + ('.',)):
                         failed_snippet += f'<li>{hint}{dot}</li>\n'
 
                     failed_snippet += '</ul>\n'
@@ -99,7 +99,7 @@ class MoodleReporter:
                     mail += mail_templates["extra_passed_final"]
                 else:
                     mail += mail_templates["not_passed_final"]
-        mail += mail_templates["ending"]\
+        mail += mail_templates["ending"] \
             .replace("$submission_timestamp$",
                      datetime.fromtimestamp(submission.mtime)
                      .strftime('%d.%m.%Y, %T Uhr'))
@@ -120,9 +120,10 @@ class MoodleReporter:
         while True:
             subprocess.call('/bin/cat "{}" "{}" | less -R'.format(text_path, stats_path), shell=True)
             print(
-                'send this mail? (y/n/e/v/o/q) '
+                'send this mail? (y/n/m/e/v/o/q) '
                 'y=send; '
                 'n=do not send; '
+                'm=mark as mailed anyways'
                 'e=edit mail; '
                 'v=view source code; '
                 'o = open conversation in browser; '
@@ -136,6 +137,9 @@ class MoodleReporter:
                 subprocess.call([self.configuration["EDITOR_PATH"], submission.path])
             elif answer == 'o':
                 self.moodle_session.open_conversation_in_ff(student.moodle_id)
+            elif answer == 'm':
+                success = True
+                break
             elif answer == 'q':
                 os.unlink(text_path)
                 os.unlink(stats_path)
@@ -174,6 +178,7 @@ class MoodleReporter:
                 submissions = sorted(
                     submissions, key=lambda x: x.timestamp
                 )
+
                 mail_information = database_manager.get_mail_information(student, submissions[-1])
                 already_mailed = False
 

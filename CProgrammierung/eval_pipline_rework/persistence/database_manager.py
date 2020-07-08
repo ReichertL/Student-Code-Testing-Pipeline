@@ -299,7 +299,8 @@ class SQLiteDatabaseManager:
             test_case_result.vg = self.get_valgrind_result(student_key, submission_key, test_case_result.id)
             test_case = self.get_test_case_by_id(test_case_result.id)
             test_case_result.hint = test_case.hint
-            test_case_result.description = test_case.description if len(test_case.description) >0 else test_case.short_id
+            test_case_result.description = test_case.description if len(
+                test_case.description) > 0 else test_case.short_id
             results.append(test_case_result)
         return results
 
@@ -503,7 +504,7 @@ class SQLiteDatabaseManager:
         cursor.execute("""INSERT INTO submissions VALUES (?,?,?,?,?,?,?,?)""",
                        [submission.student_key,
                         submission.submission_key,
-                        submission.timestamp,
+                        datetime.utcfromtimestamp(int(submission.mtime)).strftime("%Y-%m-%d %H:%M:%S"),
                         submission.path,
                         (1 if submission.is_checked else 0),
                         (1 if submission.fast else 0),
@@ -557,7 +558,7 @@ class SQLiteDatabaseManager:
             submission = Submission()
             submission.student_key = result[0]
             submission.submission_key = result[1]
-            submission.timestamp = datetime.fromisoformat(result[2])
+            submission.timestamp = datetime.utcfromtimestamp(int(result[6])).strftime("%Y-%m-%d %H:%M:%S")
             submission.path = result[3]
             submission.is_checked = False if result[4] == 0 else True
             submission.fast = False if result[5] == 0 else True
@@ -651,7 +652,9 @@ class SQLiteDatabaseManager:
             , [str(name)]
         )
         students = cursor.fetchall()
-        if len(students) != 1:
+        if len(students) < 1:
+            print(f"----found no with name: {name}----\n{students}")
+        if len(students) > 1:
             print(f"----found more than one student with name: {name}----\n{students}")
 
         retrieved_students = Student(

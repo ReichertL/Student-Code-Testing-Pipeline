@@ -1,4 +1,7 @@
+import datetime
 import os
+import re
+import shutil
 
 from models.submission import Submission
 from util.absolute_path_resolver import resolve_absolute_path
@@ -26,6 +29,17 @@ class DatabaseIntegrator:
             if len(student_name) > 0 and len(student_moodle_id) > 0:
                 new_student = database_manager.get_student_by_name(student_name)
             for file in files:
+                filename = file
+                if not file.startswith("loesung_202"):
+                    timestamp_extension = datetime.datetime.fromtimestamp(
+                        int(os.path.getmtime(root + os.path.sep + file))).__str__()
+                    regex_timestamp = re.sub("-|:|\s", "_", timestamp_extension)
+                    filename = f"loesung_{regex_timestamp}.c"
+                    new_file = os.path.join(root, filename)
+                    old_file = os.path.join(root, file)
+                    shutil.move(old_file, new_file)
+
                 new_submission = Submission()
-                new_submission.path = root + os.path.sep + file
+                new_submission.path = root + os.path.sep + filename
+                new_submission.mtime = int(os.path.getmtime(new_submission.path))
                 database_manager.insert_submission(new_student, new_submission)

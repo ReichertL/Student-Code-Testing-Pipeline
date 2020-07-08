@@ -2,8 +2,12 @@
 """
 main module of the reworked evaluation script
 """
+import os
 
 import check
 
 if __name__ == "__main__":
-    check.run()
+    try:
+        check.run()
+    finally:
+        os.unlink("check.lock")

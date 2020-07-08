@@ -1,6 +1,7 @@
 """
 Data abstraction for a submission by a specific student
 """
+import os
 import sys
 from datetime import datetime
 
@@ -25,7 +26,7 @@ class Submission:
     timing: dict
     compilation: Compilation = None
     # passed = False
-    is_performant = True
+    performant = True
     tests_bad_input = []
     tests_good_input = []
     tests_extra_input = []
@@ -77,7 +78,33 @@ class Submission:
         return True if self.passed else False
 
     def is_performant(self):
-        return self.is_performant
+        return self.performant
+
+    def print_small_stats(self, f=sys.stdout):
+        map_to_int = lambda test_case_result: 1 if test_case_result.passed() else 0
+        output = f'{self.path.split(os.path.sep)[-1]}: '
+        if not self.compilation:
+            output = output + (red('Compilation failed. '))
+            print(output)
+            return
+
+        output = output + (green('Compilation successful. '))
+
+        failed = len(self.tests_bad_input) - sum(map(map_to_int, self.tests_bad_input))
+        all = len(self.tests_bad_input)
+        if failed > 0:
+            output = output + (red(f'{failed} / {all} bad tests failed. '))
+        else:
+            output = output + (green(f'{failed} / {all} bad tests failed. '))
+
+        failed = len(self.tests_good_input) - sum(map(map_to_int, self.tests_good_input))
+        all = len(self.tests_good_input)
+        if failed > 0:
+            output = output + (red(f'{failed} / {all} good tests failed. '))
+        else:
+            output = output + (green(f'{failed} / {all} good tests failed. '))
+
+        print(output, file=f)
 
     def print_stats(self, f=sys.stdout):
         map_to_int = lambda test_case_result: 1 if test_case_result.passed() else 0

@@ -26,6 +26,8 @@ class PerformanceEvaluator:
     @staticmethod
     def average_euclidean_cpu_time_competition(submission):
         extra_test_cases = submission.tests_extra_input
+        if len(extra_test_cases) == 0:
+            return float('nan')
         dist = 0.0
         for i in extra_test_cases:
             dist = dist + i.cpu_time

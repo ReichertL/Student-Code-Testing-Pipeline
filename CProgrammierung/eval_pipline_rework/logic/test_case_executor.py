@@ -290,6 +290,11 @@ class TestCaseExecutor:
         bad_input_results = []
         good_input_results = []
         extra_input_results = []
+
+        submission.tests_good_input = good_input_results
+        submission.tests_bad_input = bad_input_results
+        submission.tests_extra_input = extra_input_results
+
         if submission.compilation.return_code == 0:
             for test in self.test_cases["BAD"]:
                 result = self.check_for_error(submission, test)
@@ -328,10 +333,6 @@ class TestCaseExecutor:
 
         for i in extra_input_results:
             all_results.append(i)
-
-        submission.tests_good_input = good_input_results
-        submission.tests_bad_input = bad_input_results
-        submission.tests_extra_input = extra_input_results
 
         if submission.passed and submission.is_performant():
             performance_evaluator.average_euclidean_cpu_time_competition(submission)

@@ -16,6 +16,7 @@ from models.test_case import TestCase
 from models.test_case_result import TestCaseResult
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn, Passed, Failed
+from util.gcc import native_gcc, docker_gcc
 from util.config_reader import ConfigReader
 from util.named_pipe_open import NamedPipeOpen
 from util.result_parser import ResultParser
@@ -168,23 +169,27 @@ class TestCaseExecutor:
                 (gcc_return_code, commandline call , gcc_stderr)
         """
 
-        gcc_args = [self.configuration["GCC_PATH"], '-o', 'loesung'] + \
+        gcc_args = [self.configuration["GCC_PATH"]] + \
                    self.configuration["CFLAGS"]
         if not strict:
             gcc_args.remove('-Werror')
-
-        all_args = gcc_args + \
-                   self.configuration["CFLAGS_LOCAL"] + \
-                   [os.path.abspath(path)]
-        cp = subprocess.run(all_args,
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.PIPE,
-                            universal_newlines=True,
-                            errors='ignore',
-                            cwd='/tmp', check=False)
-        return Compilation(return_code=cp.returncode,
-                           commandline=' '.join(all_args),
-                           output=cp.stderr)
+        submission_executable_path = '/tmp/loesung'
+        # # uncomment the following to enable compilation using the host's
+        # # native gcc:
+        # commandline, return_code, gcc_stderr = native_gcc(
+        #     gcc_args + self.configuration.get('CFLAGS_LOCAL', []),
+        #     path,
+        #     submission_executable_path)
+        commandline, return_code, gcc_stderr = docker_gcc(
+            gcc_args,
+            path,
+            submission_executable_path,
+            self.configuration['DOCKER_IMAGE_GCC'],
+            self.configuration['DOCKER_CONTAINER_GCC'],
+            self.configuration['DOCKER_SHARED_DIRECTORY'])
+        return Compilation(return_code=return_code,
+                           commandline=commandline,
+                           output=gcc_stderr)
 
     def load_tests(self, database_manager):
         """

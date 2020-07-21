@@ -174,19 +174,19 @@ class TestCaseExecutor:
         if not strict:
             gcc_args.remove('-Werror')
         submission_executable_path = '/tmp/loesung'
-        # # uncomment the following to enable compilation using the host's
-        # # native gcc:
-        # commandline, return_code, gcc_stderr = native_gcc(
-        #     gcc_args + self.configuration.get('CFLAGS_LOCAL', []),
-        #     path,
-        #     submission_executable_path)
-        commandline, return_code, gcc_stderr = docker_gcc(
+        # uncomment the following to enable compilation using the host's
+         # native gcc:
+        commandline, return_code, gcc_stderr = native_gcc(
+             gcc_args + self.configuration.get('CFLAGS_LOCAL', []),
+             path,
+             submission_executable_path)
+        """commandline, return_code, gcc_stderr = docker_gcc(
             gcc_args,
             path,
             submission_executable_path,
             self.configuration['DOCKER_IMAGE_GCC'],
             self.configuration['DOCKER_CONTAINER_GCC'],
-            self.configuration['DOCKER_SHARED_DIRECTORY'])
+            self.configuration['DOCKER_SHARED_DIRECTORY'])"""
         return Compilation(return_code=return_code,
                            commandline=commandline,
                            output=gcc_stderr)

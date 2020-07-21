@@ -57,6 +57,9 @@ class TestCaseResult:
         if self.timeout and not self.segfault:
             self.append_self(description, "segfault")
 
+        if not self.returncode_correct():
+            self.append_self(description, "return_code")
+
         if self.vg is not None and len(self.vg.keys()) > 0:
             if not self.vg["ok"]:
                 if self.vg["invalid_read_count"] > 0:

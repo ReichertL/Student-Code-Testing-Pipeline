@@ -154,3 +154,4 @@ class Submission:
                 [x.statistics_dict for x in self.tests_good_input],
                 titles='auto'), file=f)
             print(file=f)
+

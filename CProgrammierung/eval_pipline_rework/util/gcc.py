@@ -4,16 +4,18 @@ This module provides functions to compile a single c file using gcc.
 The host's native gcc can be used as less as a gcc inside a docker container.
 """
 import os
-from pwd import getpwnam
 import shutil
+from pwd import getpwnam
 from subprocess import run, DEVNULL, PIPE
 
 OWN_PW = getpwnam(os.environ['USER'])
 OWN_UID_GID = f'{OWN_PW.pw_uid:d}.{OWN_PW.pw_gid:d}'
 SUDO_DOCKER = ['sudo', 'docker']
 
+
 class DockerError(RuntimeError):
     pass
+
 
 def native_gcc(gcc_args, src, dest):
     """Call gcc to compile C file `src` procuding executable `dest`
@@ -49,6 +51,7 @@ def native_gcc(gcc_args, src, dest):
              cwd=directory, check=False)
     os.unlink(tmp_c_path)
     return ' '.join(all_args), cp.returncode, cp.stderr
+
 
 def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     """Call gcc to compile C file `src` procuding executable `dest`

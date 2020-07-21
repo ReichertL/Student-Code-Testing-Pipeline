@@ -65,10 +65,23 @@ def run():
         reporter.run(database_manager=database_manager)
 
     result_generator = ResultGenerator()
-    result_generator.generate_csv_dump(database_manager)
+    if len(args.abtestat) > 0:
+        students = [database_manager.get_student_by_name(student_name) for student_name in args.abtestat]
+        for student in students:
+            database_manager.mark_as_done(student)
+    if len(args.revert) > 0:
+        students = [database_manager.get_student_by_name(student_name) for student_name in args.revert]
+        for student in students:
+            database_manager.revert_abtestat(student)
+
+    if args.generate:
+        result_generator.generate_csv_dump(database_manager)
 
     if args.stats:
         result_generator.print_short_stats(database_manager)
+
+    if len(args.details) > 0:
+        result_generator.print_details(database_manager, args.details)
 
     if args.playground:
         playground = Playground()

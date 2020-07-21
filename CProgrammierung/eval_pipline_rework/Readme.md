@@ -40,6 +40,18 @@ Commandline arguments currently implemented:
     -f fetches students and submissions from moodle and saves them local
        and generates a respective database entry
     -v prints extended information
+    -g generating full .csv grading files for uploading at moodle 
+    -s prints short statistics for all submissions and all students
+    -d prints full information for a/some student/s submission given
+       if more than one submission is found the user is asked 
+    
+    -A marks a student or a list of students as "abtestat done" if the student hasn't passed 
+       all test the user will be asked
+    -R reverts marking a student or a list of students as "abtestat done" 
+       the user will also be ask whether to unset passed test cases
+    
+    
+    
     
     --force resends emails after confirmation 
     --debug sends email only to "C Programmierprojekt Team" 

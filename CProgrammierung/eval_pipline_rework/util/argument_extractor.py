@@ -167,15 +167,37 @@ class ArgumentExtractor:
                           help='forces actions like resending emails')
         self \
             .parser \
-            .add_argument('-l', '--local',
-                          dest="local",
+            .add_argument('-g', '--generate',
+                          dest="generate",
                           action='store_true',
-                          help='fetches mails only local from submission dir')
+                          help='generates a full .csv file with grading for moodle'
+                               'and a separate .csv file for students '
+                               'which passed the abtestat')
+
+        self \
+            .parser \
+            .add_argument('-A', '--Abtestat',
+                          dest="abtestat",
+                          nargs='*',
+                          type=str,
+                          default=[],
+                          help='generates a full .csv file with grading for moodle'
+                               'and a separate .csv file for students '
+                               'which passed the abtestat')
+
+        self \
+            .parser \
+            .add_argument('-R', '--Revert',
+                          dest="revert",
+                          nargs='*',
+                          type=str,
+                          default=[],
+                          help='reverts abtestat state for the students given')
+
 
     def get_arguments(self):
         """
         getter for the parsed arguments as a dictionary
         :return: parsed args
         """
-        print(self.parser.parse_args())
         return self.parser.parse_args()

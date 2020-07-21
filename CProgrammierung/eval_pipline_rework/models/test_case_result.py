@@ -37,7 +37,7 @@ class TestCaseResult:
         self.path = test_case_identifier
         self.short_id = test_case_identifier.split(os.path.sep)[-1]
 
-    def append_self(self,description,key):
+    def append_self(self, description, key):
         update_list = []
         if key in description:
             update_list = description[key]
@@ -57,13 +57,16 @@ class TestCaseResult:
         if self.timeout and not self.segfault:
             self.append_self(description, "segfault")
 
+        if not self.returncode_correct():
+            self.append_self(description, "return_code")
+
         if self.vg is not None and len(self.vg.keys()) > 0:
             if not self.vg["ok"]:
                 if self.vg["invalid_read_count"] > 0:
-                    self.append_self(description,"valgrind_read")
+                    self.append_self(description, "valgrind_read")
 
                 if self.vg["invalid_write_count"] > 0:
-                    self.append_self(description,"valgrind_write")
+                    self.append_self(description, "valgrind_write")
 
                 if self.vg["leak_summary"]["definitely lost"] != (0, 0):
                     self.append_self(description, "valgrind_leak")
@@ -76,7 +79,7 @@ class TestCaseResult:
 
         if self.type == "BAD":
             if self.error_msg_quality < 1:
-                self.append_self(description,"error_massage")
+                self.append_self(description, "error_massage")
         else:
             if not self.output_correct:
                 self.append_self(description, "output")
@@ -144,7 +147,7 @@ class TestCaseResult:
             'err_msg': '---' if 'error_msg' in self.ignore else errok(self.error_msg_quality),
             'error_line': self.error_line[:25].strip(),
             'passed_indicator': ind[bool(self)],
-            'description': self.description,
+            'description': self.description if len(self.description) else self.short_id,
             'output': rc[self.output_correct],
         }
 

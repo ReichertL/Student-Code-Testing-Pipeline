@@ -3,6 +3,7 @@
     in this case, SQLite database
 """
 import sqlite3
+import sys
 from datetime import datetime
 from os.path import getmtime
 
@@ -125,6 +126,7 @@ class SQLiteDatabaseManager:
     def insert_valgrind_result(self, student_key, submission_key, test_case_result):
         vg = test_case_result.vg
         ok = 1 if vg["ok"] else 0
+        ok = 2 if vg["ok"] is None else ok
         invalid_read_count = vg["invalid_read_count"] if "invalid_read_count" in vg.keys() else 0
         invalid_write_count = vg["invalid_write_count"] if "invalid_write_count" in vg.keys() else 0
         in_use_at_exit = vg["in_use_at_exit"] if "in_use_at_exit" in vg.keys() else (0, 0)
@@ -204,7 +206,7 @@ class SQLiteDatabaseManager:
             WHERE student_key=? AND submission_key=? AND test_id=?
             """, [
 
-                1 if ok else 0,
+                ok,
                 invalid_read_count,
                 invalid_write_count,
                 in_use_at_exit[0],
@@ -299,7 +301,8 @@ class SQLiteDatabaseManager:
             test_case_result.vg = self.get_valgrind_result(student_key, submission_key, test_case_result.id)
             test_case = self.get_test_case_by_id(test_case_result.id)
             test_case_result.hint = test_case.hint
-            test_case_result.description = test_case.description if len(test_case.description) >0 else test_case.short_id
+            test_case_result.description = test_case.description if len(
+                test_case.description) > 0 else test_case.short_id
             results.append(test_case_result)
         return results
 
@@ -503,7 +506,7 @@ class SQLiteDatabaseManager:
         cursor.execute("""INSERT INTO submissions VALUES (?,?,?,?,?,?,?,?)""",
                        [submission.student_key,
                         submission.submission_key,
-                        submission.timestamp,
+                        datetime.utcfromtimestamp(int(submission.mtime)).strftime("%Y-%m-%d %H:%M:%S"),
                         submission.path,
                         (1 if submission.is_checked else 0),
                         (1 if submission.fast else 0),
@@ -557,7 +560,7 @@ class SQLiteDatabaseManager:
             submission = Submission()
             submission.student_key = result[0]
             submission.submission_key = result[1]
-            submission.timestamp = datetime.fromisoformat(result[2])
+            submission.timestamp = datetime.utcfromtimestamp(int(result[6])).strftime("%Y-%m-%d %H:%M:%S")
             submission.path = result[3]
             submission.is_checked = False if result[4] == 0 else True
             submission.fast = False if result[5] == 0 else True
@@ -651,7 +654,10 @@ class SQLiteDatabaseManager:
             , [str(name)]
         )
         students = cursor.fetchall()
-        if len(students) != 1:
+        if len(students) < 1:
+            print(f"----found no student with name: {name}----")
+            return
+        if len(students) > 1:
             print(f"----found more than one student with name: {name}----\n{students}")
 
         retrieved_students = Student(
@@ -769,6 +775,7 @@ class SQLiteDatabaseManager:
         self.create_valgrind_table(cursor)
         self.create_mail_log(cursor)
         self.create_test_case_table(cursor)
+        self.create_abtestat_table(cursor)
         self.database.commit()
 
     def close(self):
@@ -913,3 +920,71 @@ class SQLiteDatabaseManager:
                            hint TEXT NOT NULL ,                                           
                            type TEXT NOT NULL                                            
                            )''')
+
+    def is_student_done(self, student):
+        student_key = self.get_student_key(student)
+        cursor = self.database.cursor()
+        cursor.execute(
+            """SELECT * FROM abtestat_done
+                WHERE student_key=?"""
+            , [student_key]
+        )
+        raw_result = cursor.fetchall()
+
+        return len(raw_result) > 0
+
+    def get_testat_information(self):
+        cursor = self.database.cursor()
+        cursor.execute(
+            """SELECT * FROM abtestat_done"""
+        )
+        return cursor.fetchall()
+
+    def revert_abtestat(self, student):
+        student_key = self.get_student_key(student)
+
+        print(f"Should {student.name} also marked as not passed the test cases?")
+        if 'y' == sys.stdin.readline()[:1]:
+            student.passed = False
+            self.set_student_passed(student)
+
+        cursor = self.database.cursor()
+        cursor.execute(
+            """SELECT * FROM abtestat_done
+                WHERE student_key=?"""
+            , [student_key]
+        )
+        raw_result = cursor.fetchall()
+        if len(raw_result) > 0:
+            cursor.execute(""" DELETE FROM abtestat_done WHERE student_key=?""", [student_key])
+        self.database.commit()
+
+    def mark_as_done(self, student):
+        student_key = self.get_student_key(student)
+        if not student.passed:
+            print(f"{student.name} has not passed so far, mark abtestat as done anyways?")
+            if 'y' != sys.stdin.readline()[:1]:
+                return
+            else:
+                student.passed = True
+                self.set_student_passed(student)
+        cursor = self.database.cursor()
+        cursor.execute(
+            """SELECT * FROM abtestat_done
+                WHERE student_key=?"""
+            , [student_key]
+        )
+        raw_result = cursor.fetchall()
+        if len(raw_result) == 0:
+            cursor.execute(""" INSERT INTO abtestat_done VALUES (?,?,?,?)""",
+                           [student_key, student.moodle_id, datetime.now(), 1])
+        self.database.commit()
+
+    @staticmethod
+    def create_abtestat_table(cursor):
+        cursor.execute('''CREATE TABLE IF NOT EXISTS abtestat_done
+                               (student_key INTEGER,
+                               moodle_id INTEGER ,
+                               time_stamp TIMESTAMP,
+                               done INTEGER                                        
+                               )''')

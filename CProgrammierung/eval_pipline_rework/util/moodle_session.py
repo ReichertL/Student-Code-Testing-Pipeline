@@ -132,11 +132,11 @@ class MoodleSession:
         login_url = 'https://' + self.domain + '/login/index.php'
         d = {'username': self.username,
              'password': self.configuration
-             .get("MOODLE_PASSWORDS", {})
-             .get(self.username)}
+                 .get("MOODLE_PASSWORDS", {})
+                 .get(self.username)}
         if d['password'] is None:
             d['password'] = getpass.getpass(
-                 f'[loggin in as {self.username}] Password: ')
+                f'[loggin in as {self.username}] Password: ')
         print(f'INFO: logging in as {self.username} ... ', end='', flush=True)
         # import ipdb; ipdb.set_trace()
 
@@ -203,7 +203,8 @@ class MoodleSession:
                     'cannot find link .../login/logout.php?sesskey=...')
         except (IndexError, MoodleScrapeError) as e:
             sys.stderr.write('ERROR: unexpected error in dashboard parsing')
-            std.esterr.write(f'-> {e:s}')
+            # FixMe where does this come from?
+            # std.esterr.write(f'-> {e:s}')
             self.dump_dashboard(r)
             self.session_state['logged_in'] = False
         self.dump_state()

@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import re
@@ -102,21 +103,13 @@ class MoodleSubmissionFetcher:
                     student_name, student_id))
                 continue
             dest_dir = os.path.join(all_submissions_dir, d)
-            dest = os.path.join(dest_dir, 'loesung.c')
-            if os.path.isdir(dest_dir):
-                assert os.path.exists(dest)
-                if os.path.getmtime(src) == os.path.getmtime(dest):
-                    continue
-                for i in range(1, 100):
-                    bak = dest[:-2] + '-{:02d}.c'.format(i)
-                    if not os.path.exists(bak):
-                        break
-                assert not os.path.exists(bak)
-                os.rename(dest, bak)
-                print(dest)
-                print(bak)
-            else:
+            timestamp_extension = datetime.datetime.fromtimestamp(os.path.getmtime(src)).__str__()
+            regex_timestamp = re.sub("-|:|\s", "_", timestamp_extension)
+
+            dest = os.path.join(dest_dir, f'loesung_{regex_timestamp}.c')
+            if not os.path.isdir(dest_dir):
                 os.mkdir(dest_dir)
+
             shutil.move(src, dest)
             new.append((student_id, student_name))
         # if not dryrun:

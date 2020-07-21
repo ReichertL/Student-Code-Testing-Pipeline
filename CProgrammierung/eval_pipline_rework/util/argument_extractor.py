@@ -41,9 +41,11 @@ class ArgumentExtractor:
             .parser \
             .add_argument('-c', '--check',
                           dest='check',
-                          action='store_true',
-                          help='run tests for each submission that '
-                               'has not been tested so far')
+                          type=str,
+                          default=[],
+                          action="append",
+                          help='run tests for the submissions'
+                               ' of the given student')
         self \
             .parser \
             .add_argument('-a', '--all',
@@ -163,6 +165,35 @@ class ArgumentExtractor:
             .add_argument('--force',
                           action='store_true',
                           help='forces actions like resending emails')
+        self \
+            .parser \
+            .add_argument('-g', '--generate',
+                          dest="generate",
+                          action='store_true',
+                          help='generates a full .csv file with grading for moodle'
+                               'and a separate .csv file for students '
+                               'which passed the abtestat')
+
+        self \
+            .parser \
+            .add_argument('-A', '--Abtestat',
+                          dest="abtestat",
+                          nargs='*',
+                          type=str,
+                          default=[],
+                          help='generates a full .csv file with grading for moodle'
+                               'and a separate .csv file for students '
+                               'which passed the abtestat')
+
+        self \
+            .parser \
+            .add_argument('-R', '--Revert',
+                          dest="revert",
+                          nargs='*',
+                          type=str,
+                          default=[],
+                          help='reverts abtestat state for the students given')
+
 
     def get_arguments(self):
         """

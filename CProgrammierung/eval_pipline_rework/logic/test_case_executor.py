@@ -10,11 +10,13 @@ import sys
 import tempfile
 import time
 
+from logic.performance_evaluator import PerformanceEvaluator
 from models.compilation import Compilation
 from models.test_case import TestCase
 from models.test_case_result import TestCaseResult
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn, Passed, Failed
+from util.gcc import native_gcc, docker_gcc
 from util.config_reader import ConfigReader
 from util.named_pipe_open import NamedPipeOpen
 from util.result_parser import ResultParser
@@ -136,21 +138,24 @@ class TestCaseExecutor:
         """
 
         submissions = {}
+        students = []
         if self.args.check:
-            pass
+            for i in self.args.check:
+                students.append(database_manager.get_student_by_name(i))
+
         if self.args.all:
             students = database_manager.get_all_students()
 
-            for student in students:
-                student.get_all_submissions(database_manager)
-                unchecked_submissions = []
-                if student.submissions is not None:
-                    if not self.args.rerun:
-                        unchecked_submissions = student.get_unchecked_submissions()
-                    else:
-                        unchecked_submissions = student.submissions
-                if len(unchecked_submissions) > 0:
-                    submissions.update({student.data_base_key: unchecked_submissions})
+        for student in students:
+            student.get_all_submissions(database_manager)
+            unchecked_submissions = []
+            if student.submissions is not None:
+                if not self.args.rerun:
+                    unchecked_submissions = student.get_unchecked_submissions()
+                else:
+                    unchecked_submissions = student.submissions
+            if len(unchecked_submissions) > 0:
+                submissions.update({student.data_base_key: unchecked_submissions})
 
         return submissions
 
@@ -164,23 +169,27 @@ class TestCaseExecutor:
                 (gcc_return_code, commandline call , gcc_stderr)
         """
 
-        gcc_args = [self.configuration["GCC_PATH"], '-o', 'loesung'] + \
+        gcc_args = [self.configuration["GCC_PATH"]] + \
                    self.configuration["CFLAGS"]
         if not strict:
             gcc_args.remove('-Werror')
-
-        all_args = gcc_args + \
-                   self.configuration["CFLAGS_LOCAL"] + \
-                   [os.path.abspath(path)]
-        cp = subprocess.run(all_args,
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.PIPE,
-                            universal_newlines=True,
-                            errors='ignore',
-                            cwd='/tmp', check=False)
-        return Compilation(return_code=cp.returncode,
-                           commandline=' '.join(all_args),
-                           output=cp.stderr)
+        submission_executable_path = '/tmp/loesung'
+        # uncomment the following to enable compilation using the host's
+         # native gcc:
+        commandline, return_code, gcc_stderr = native_gcc(
+             gcc_args + self.configuration.get('CFLAGS_LOCAL', []),
+             path,
+             submission_executable_path)
+        """commandline, return_code, gcc_stderr = docker_gcc(
+            gcc_args,
+            path,
+            submission_executable_path,
+            self.configuration['DOCKER_IMAGE_GCC'],
+            self.configuration['DOCKER_CONTAINER_GCC'],
+            self.configuration['DOCKER_SHARED_DIRECTORY'])"""
+        return Compilation(return_code=return_code,
+                           commandline=commandline,
+                           output=gcc_stderr)
 
     def load_tests(self, database_manager):
         """
@@ -273,11 +282,12 @@ class TestCaseExecutor:
         if submission.is_checked:
             if self.args.rerun:
                 Warn(f'You forced to re-run tests on submission by '
-                     f'{student.name}, submitted on {submission.timestamp}.\n'
-                     f'This is his {submission.submission_key + 1}. submission, saved as {submission.path}')
+                     f'{student.name} submitted at {submission.timestamp}.\n'
+
+                     f'This is the {submission.submission_key + 1}. submission, saved as {submission.path}')
             else:
                 return False
-        print(f'running tests for {student.name} ', end='')
+        print(f'running tests for {student.name} submitted at {submission.timestamp}')
         sys.stdout.flush()
         submission.compilation = self.compile_single_submission(source)
         all_results = []
@@ -285,6 +295,11 @@ class TestCaseExecutor:
         bad_input_results = []
         good_input_results = []
         extra_input_results = []
+
+        submission.tests_good_input = good_input_results
+        submission.tests_bad_input = bad_input_results
+        submission.tests_extra_input = extra_input_results
+
         if submission.compilation.return_code == 0:
             for test in self.test_cases["BAD"]:
                 result = self.check_for_error(submission, test)
@@ -309,6 +324,9 @@ class TestCaseExecutor:
         submission.is_checked = True
         submission.timestamp = datetime.datetime.now()
         student.passed = student.passed or passed
+        if submission.passed:
+            performance_evaluator = PerformanceEvaluator()
+            performance_evaluator.evaluate_performance(submission)
         if submission and (submission.is_performant()
                            or force_performance):
             print('fast submission; running performance tests')
@@ -321,11 +339,8 @@ class TestCaseExecutor:
         for i in extra_input_results:
             all_results.append(i)
 
-        submission.tests_good_input = good_input_results
-        submission.tests_bad_input = bad_input_results
-        submission.tests_extra_input = extra_input_results
-
-        if submission.passed:
+        if submission.passed and submission.is_performant():
+            performance_evaluator.average_euclidean_cpu_time_competition(submission)
             Passed()
 
         else:
@@ -342,7 +357,7 @@ class TestCaseExecutor:
         :param verbose: enables verbose output
         :return: returns the result of the testcase
         """
-        test_case_result = self.execute_test_case(test)
+        test_case_result = self.execute_test_case(test, submission)
         test_case_result.error_line = ''
         test_case_result.output_correct = True
         parser = ResultParser()
@@ -366,7 +381,7 @@ class TestCaseExecutor:
         :param comparator: compares to results
         :return: a TestCaseResult object encapsulating the results
         """
-        test_case_result = self.execute_test_case(test)
+        test_case_result = self.execute_test_case(test, submission)
         test_case_result.output_correct = comparator('test.stdout',
                                                      os.path.join(test.path + '.stdout'))
         unlink_safe("test.stderr")
@@ -376,7 +391,7 @@ class TestCaseExecutor:
 
         return test_case_result
 
-    def execute_test_case(self, test_case):
+    def execute_test_case(self, test_case, submission):
         """
         tests a submission with a testcase
         :param submission: the submission to test
@@ -389,13 +404,13 @@ class TestCaseExecutor:
         tic = time.time()
         parser = ResultParser()
         if self.args.verbose:
-            print(f'--- executing ./loesung < {test_case.short_id} ---')
+            print(f'--- executing {"".join(submission.path.split("/")[-2:])} < {test_case.short_id} ---')
         with NamedPipeOpen(input_path) as fin, \
                 open('test.stdout', 'bw') as fout, \
                 open('test.stderr', 'bw') as ferr:
             args = ['./loesung']
             p = subprocess.Popen(
-                self.sudo + self.unshare + [self.configuration["TIME_PATH"], '-f', '%S %U %M %x %e', '-o',
+                self.sudo + self.unshare + [self.configuration["TIME_PATH"], "-f", '%S %U %M %x %e', '-o',
                                             self.configuration["TIME_OUT_PATH"]] + args,
                 stdin=fin,
                 stdout=fout,
@@ -424,12 +439,12 @@ class TestCaseExecutor:
             fin.close()
 
             if self.args.verbose:
-                print(f'--- finished ./loesung < {test_case.short_id} ---')
+                print(f'--- finished {"".join(submission.path.split("/")[-2:])} < {test_case.short_id} ---')
 
         result.vg['ok'] = None
         if test_case.valgrind_needed and result.timeout and result.segfault:
             if self.args.verbose:
-                print(f'--- executing valgrind ./loesung < {test_case.short_id} ---')
+                print(f'--- executing valgrind {"".join(submission.path.split("/")[-2:])} < {test_case.short_id} ---')
             with NamedPipeOpen(input_path) as fin:
                 p = subprocess.Popen(self.sudo + self.unshare + [self.configuration["VALGRIND_PATH"],
                                                                  '--log-file=' + self.configuration[
@@ -450,7 +465,7 @@ class TestCaseExecutor:
                 except FileNotFoundError:
                     pass
             if self.args.verbose:
-                print(f'--- finished valgrind ./loesung < {test_case.short_id} ---')
+                print(f'--- finished valgrind {"".join(submission.path.split("/")[-2:])} < {test_case.short_id} ---')
             result.description = test_case.description
             result.hint = test_case.hint
             unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)

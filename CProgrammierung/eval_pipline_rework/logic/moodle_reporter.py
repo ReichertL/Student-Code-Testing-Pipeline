@@ -213,15 +213,16 @@ class MoodleReporter:
                 os.unlink(text_path)
                 os.unlink(stats_path)
                 sys.exit(0)
+            elif answer == 'y':
+                with open(text_path) as f:
+                    msg = f.read()
+                success = self.moodle_session. \
+                    send_instant_message(student.moodle_id, msg)
+                break
             elif answer == 'n':
                 break
             else:
                 continue
-        if answer == 'y':
-            with open(text_path) as f:
-                msg = f.read()
-            success = self.moodle_session. \
-                send_instant_message(student.moodle_id, msg)
 
         os.unlink(text_path)
         os.unlink(stats_path)

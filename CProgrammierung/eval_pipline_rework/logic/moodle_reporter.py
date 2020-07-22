@@ -228,7 +228,7 @@ class MoodleReporter:
         os.unlink(stats_path)
         return success
 
-    def run(self, database_manager, force=False):
+    def run(self, database_manager):
         """
         Iteration over all students
         which haven't received an e-mail yet
@@ -286,7 +286,7 @@ class MoodleReporter:
                             if sys.stdin.readline()[:1] == 'y':
                                 already_mailed = False
 
-                if (not already_mailed) or self.args.force:
+                if (not already_mailed) or self.args.rerun:
                     if self.args.verbose:
                         print(f"Sending mail to {student.name}, "
                               f"mailed at {datetime.now()}")

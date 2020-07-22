@@ -44,9 +44,8 @@ def run():
     database_manager.create()
     if args.fetch or args.fetch_only:
         # Execute Submission Fetching if needed determined by the provided args
-        if not args.local:
-            fetcher = MoodleSubmissionFetcher(args)
-            fetcher.run(database_manager)
+        fetcher = MoodleSubmissionFetcher(args)
+        fetcher.run(database_manager)
         database_integrator = DatabaseIntegrator()
         database_integrator.integrate_submission_dir(database_manager)
 

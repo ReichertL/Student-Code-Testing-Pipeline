@@ -32,7 +32,7 @@ class ResultGenerator:
 
             abtestat_done = database_manager.get_testat_information()
             if len(abtestat_done) > 0:
-                header = ["ID", "Name", "Zeitstempel"]
+                header = ["Name","Matrikelnr.",  "Zeitstempel"]
                 result_writer.writerow(header)
                 for i in abtestat_done:
                     row = [database_manager

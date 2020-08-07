@@ -234,8 +234,7 @@ class MoodleReporter:
         which haven't received an e-mail yet
         :param database_manager: database manager
         to retrieve necessary information
-        regarding unmailed students and their submission
-        :param force: boolean enforces remailing
+        regarding students that have not received a mail yet and their submission
         :return: nothing
         """
         username, session_state = MoodleSubmissionFetcher(self.args). \

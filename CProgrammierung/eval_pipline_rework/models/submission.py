@@ -132,6 +132,7 @@ class Submission:
             print(red(f'{failed} / {all} tests concerning malicious input failed.')
                   , file=f)
             print(file=f)
+            self.tests_bad_input.sort(key=lambda x: x.short_id)
             print(table_format(
                 '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {err_msg} | {description}',
                 [x.statistics_dict for x in self.tests_bad_input],
@@ -149,9 +150,9 @@ class Submission:
             print(red(f'{failed} / {all} tests concerning good input failed.')
                   , file=f)
             print(file=f)
+            self.tests_good_input.sort(key=lambda x: x.short_id)
             print(table_format(
                 '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {output} | {description}',
                 [x.statistics_dict for x in self.tests_good_input],
                 titles='auto'), file=f)
             print(file=f)
-

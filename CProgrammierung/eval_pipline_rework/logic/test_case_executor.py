@@ -92,7 +92,6 @@ class TestCaseExecutor:
 
         configuration = ConfigReader().read_file(os.path.abspath(config_path))
         self.configuration = configuration
-        # self.test_cases = self.load_tests()
         self.args = args
         self.sudo_path = configuration["SUDO_PATH"]
         self.sudo_user = configuration["SUDO_USER"]
@@ -101,7 +100,7 @@ class TestCaseExecutor:
         self.unshare_path = configuration["UNSHARE_PATH"]
         self.unshare = [self.unshare_path, '-r', '-n']
 
-    def run(self, database_manager, verbosity):
+    def run(self, database_manager):
         """
             runs specified test cases
         """
@@ -176,17 +175,17 @@ class TestCaseExecutor:
         submission_executable_path = '/tmp/loesung'
         # uncomment the following to enable compilation using the host's
          # native gcc:
-        #commandline, return_code, gcc_stderr = native_gcc(
-        #     gcc_args + self.configuration.get('CFLAGS_LOCAL', []),
-        #     path,
-        #     submission_executable_path)
-        commandline, return_code, gcc_stderr = docker_gcc(
+        commandline, return_code, gcc_stderr = native_gcc(
+             gcc_args + self.configuration.get('CFLAGS_LOCAL', []),
+             path,
+            submission_executable_path)
+        """commandline, return_code, gcc_stderr = docker_gcc(
             gcc_args,
             path,
             submission_executable_path,
             self.configuration['DOCKER_IMAGE_GCC'],
             self.configuration['DOCKER_CONTAINER_GCC'],
-            self.configuration['DOCKER_SHARED_DIRECTORY'])
+            self.configuration['DOCKER_SHARED_DIRECTORY'])"""
         return Compilation(return_code=return_code,
                            commandline=commandline,
                            output=gcc_stderr)

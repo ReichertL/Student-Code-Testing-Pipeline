@@ -29,7 +29,7 @@ class TestCaseResult:
     mrss: int = -1
     short_id = ""
     description = ""
-    hint = ""
+    hint: str = ""
     vg = {}
     ignore: list = []
 
@@ -61,27 +61,29 @@ class TestCaseResult:
             self.append_self(description, "return_code")
 
         if self.vg is not None and len(self.vg.keys()) > 0:
-            if not self.vg["ok"]:
+
+            if not self.valgrind_ok:
                 if self.vg["invalid_read_count"] > 0:
-                    self.append_self(description, "valgrind_read")
+
+                        self.append_self(description, "valgrind_read")
 
                 if self.vg["invalid_write_count"] > 0:
-                    self.append_self(description, "valgrind_write")
+                        self.append_self(description, "valgrind_write")
 
                 if self.vg["leak_summary"]["definitely lost"] != (0, 0):
-                    self.append_self(description, "valgrind_leak")
+                        self.append_self(description, "valgrind_leak")
                 elif self.vg["leak_summary"]['possibly lost'] != (0, 0):
-                    self.append_self(description, "valgrind_leak")
+                        self.append_self(description, "valgrind_leak")
                 elif self.vg["leak_summary"]['indirectly lost'] != (0, 0):
-                    self.append_self(description, "valgrind_leak")
+                        self.append_self(description, "valgrind_leak")
                 elif self.vg["leak_summary"]['still reachable'] != (0, 0):
-                    self.append_self(description, "valgrind_leak")
+                        self.append_self(description, "valgrind_leak")
 
         if self.type == "BAD":
             if self.error_msg_quality < 1:
                 self.append_self(description, "error_massage")
         else:
-            if not self.output_correct:
+            if not self.output_correct and self.timeout:
                 self.append_self(description, "output")
 
         return description
@@ -138,7 +140,8 @@ class TestCaseResult:
     def statistics_dict(self):
         return {
             'id': self.short_id,
-            'valgrind': rc[self.vg['ok']],
+            'valgrind': rc[None if self.vg['ok'] is None
+            else self.valgrind_ok],
             'valgrind_rw': rc[None if self.vg['ok'] is None
             else self.vg['invalid_read_count'] == self.vg['invalid_write_count'] == 0],
             'segfault': rc[self.segfault],

@@ -104,14 +104,6 @@ class ArgumentExtractor:
                                       'who has not received a report'
                                       ' for the current version yet')
         self \
-            .parser \
-            .add_argument('-b', '--bestanden',
-                          dest='bestanden',
-                          type=str,
-                          default='',
-                          help='mark student as bestanden')
-
-        self \
             .parser. \
             add_argument('-B', '--best',
                          action='store_true',
@@ -181,9 +173,7 @@ class ArgumentExtractor:
                           nargs='*',
                           type=str,
                           default=[],
-                          help='generates a full .csv file with grading for moodle'
-                               'and a separate .csv file for students '
-                               'which passed the abtestat')
+                          help='sets a list of students as abtestat done')
 
         self \
             .parser \

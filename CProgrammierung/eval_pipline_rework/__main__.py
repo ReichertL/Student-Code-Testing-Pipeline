@@ -9,5 +9,6 @@ import check
 if __name__ == "__main__":
     try:
         check.run()
+
     finally:
-        os.unlink("check.lock")
+        pass

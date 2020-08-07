@@ -213,28 +213,28 @@ class MoodleReporter:
                 os.unlink(text_path)
                 os.unlink(stats_path)
                 sys.exit(0)
+            elif answer == 'y':
+                with open(text_path) as f:
+                    msg = f.read()
+                success = self.moodle_session. \
+                    send_instant_message(student.moodle_id, msg)
+                break
             elif answer == 'n':
                 break
             else:
                 continue
-        if answer == 'y':
-            with open(text_path) as f:
-                msg = f.read()
-            success = self.moodle_session. \
-                send_instant_message(student.moodle_id, msg)
 
         os.unlink(text_path)
         os.unlink(stats_path)
         return success
 
-    def run(self, database_manager, force=False):
+    def run(self, database_manager):
         """
         Iteration over all students
         which haven't received an e-mail yet
         :param database_manager: database manager
         to retrieve necessary information
-        regarding unmailed students and their submission
-        :param force: boolean enforces remailing
+        regarding students that have not received a mail yet and their submission
         :return: nothing
         """
         username, session_state = MoodleSubmissionFetcher(self.args). \
@@ -285,7 +285,7 @@ class MoodleReporter:
                             if sys.stdin.readline()[:1] == 'y':
                                 already_mailed = False
 
-                if (not already_mailed) or self.args.force:
+                if (not already_mailed) or self.args.rerun:
                     if self.args.verbose:
                         print(f"Sending mail to {student.name}, "
                               f"mailed at {datetime.now()}")

@@ -975,9 +975,20 @@ class SQLiteDatabaseManager:
             , [student_key]
         )
         raw_result = cursor.fetchall()
+        print(f"Please insert Mat.-Nr.!")
+        answer_accepted = False
+        mat_nr = 0
+        while not answer_accepted:
+            mat_nr = sys.stdin.readline()[0]
+            try:
+                mat_nr = int(mat_nr)
+                answer_accepted = True
+            except ValueError:
+                print(f"{mat_nr} is not a number, please select again!")
+
         if len(raw_result) == 0:
             cursor.execute(""" INSERT INTO abtestat_done VALUES (?,?,?,?)""",
-                           [student_key, student.moodle_id, datetime.now(), 1])
+                           [student_key, mat_nr, datetime.now(), 1])
         self.database.commit()
 
     @staticmethod

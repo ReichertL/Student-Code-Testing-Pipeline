@@ -17,6 +17,8 @@ from persistence.database_manager import SQLiteDatabaseManager
 from util.argument_extractor import ArgumentExtractor
 from util.playground import Playground
 
+other_process = False
+
 
 def cleanup():
     os.unlink("check.lock")
@@ -35,62 +37,67 @@ def run():
         open("check.lock", "x")
     except:
         print("There is already a process which acquired check.lock")
-        exit(1)
+        exit(0)
 
-    argument_extractor = ArgumentExtractor()
-    args = argument_extractor.get_arguments()
-    verbosity = args.verbose
-    database_manager = SQLiteDatabaseManager()
-    database_manager.create()
-    if args.fetch or args.fetch_only:
-        # Execute Submission Fetching if needed determined by the provided args
-        if not args.local:
+    try:
+        argument_extractor = ArgumentExtractor()
+        args = argument_extractor.get_arguments()
+        database_manager = SQLiteDatabaseManager()
+        database_manager.create()
+        if args.fetch or args.fetch_only:
+            # Execute Submission Fetching if needed determined by the provided args
             fetcher = MoodleSubmissionFetcher(args)
             fetcher.run(database_manager)
-        database_integrator = DatabaseIntegrator()
-        database_integrator.integrate_submission_dir(database_manager)
+            database_integrator = DatabaseIntegrator()
+            database_integrator.integrate_submission_dir(database_manager)
 
-    studentlog = database_manager.get_all_students()
-    for student in studentlog:
-        student.get_all_submissions(database_manager)
+        studentlog = database_manager.get_all_students()
+        for student in studentlog:
+            student.get_all_submissions(database_manager)
 
-    if not args.fetch_only:
-        # Execute test cases if needed determined by the provided args
-        executor = TestCaseExecutor(args)
-        executor.run(database_manager=database_manager, verbosity=verbosity)
+        if not args.fetch_only:
+            # Execute test cases if needed determined by the provided args
+            executor = TestCaseExecutor(args)
+            executor.run(database_manager=database_manager)
 
-    # Send Moodle feedback to students if needed determined by args
-    if args.mail_to_all or len(args.mailto) > 0 or args.debug:
-        reporter = MoodleReporter(args)
-        reporter.run(database_manager=database_manager)
+        # Send Moodle feedback to students if needed determined by args
+        if args.mail_to_all or len(args.mailto) > 0 or args.debug:
+            reporter = MoodleReporter(args)
+            reporter.run(database_manager=database_manager)
 
-    result_generator = ResultGenerator()
-    if len(args.abtestat) > 0:
-        students = [database_manager.get_student_by_name(student_name) for student_name in args.abtestat]
-        for student in students:
-            database_manager.mark_as_done(student)
-    if len(args.revert) > 0:
-        students = [database_manager.get_student_by_name(student_name) for student_name in args.revert]
-        for student in students:
-            database_manager.revert_abtestat(student)
+        result_generator = ResultGenerator()
+        if len(args.abtestat) > 0:
+            students = [database_manager.get_student_by_name(student_name) for student_name in args.abtestat]
+            for student in students:
+                database_manager.mark_as_done(student)
+        if len(args.revert) > 0:
+            students = [database_manager.get_student_by_name(student_name) for student_name in args.revert]
+            for student in students:
+                database_manager.revert_abtestat(student)
 
-    if args.generate:
-        result_generator.generate_csv_dump(database_manager)
+        if args.generate:
+            result_generator.generate_csv_dump(database_manager)
 
-    if args.stats:
-        result_generator.print_short_stats(database_manager)
+        if args.stats:
+            result_generator.print_short_stats(database_manager)
 
-    if len(args.details) > 0:
-        result_generator.print_details(database_manager, args.details)
+        if len(args.details) > 0:
+            result_generator.print_details(database_manager, args.details)
 
-    if args.playground:
-        playground = Playground()
-        playground.run()
-    database_manager.close()
+        if args.playground:
+            playground = Playground()
+            playground.run()
+        database_manager.close()
+    except:
+        cleanup()
+        try:
+            database_manager.close()
+        except:
+            pass
 
 
 if __name__ == "__main__":
     try:
         run()
     finally:
-        os.unlink("check.lock")
+        pass

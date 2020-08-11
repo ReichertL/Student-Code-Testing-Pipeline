@@ -10,6 +10,7 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+import urllib.parse
 
 from models.student import Student
 from util.absolute_path_resolver import resolve_absolute_path
@@ -66,11 +67,17 @@ class MoodleSession:
         if interactive:
             if not session_state or not self.session_state['logged_in']:
                 self.login()
+        self._grader_contextid = None
+        self._grader_assignmentid = None
 
     def read_users_cached(self, database_manager):
         """Read in the users list found in a cache file 'teilnehmer.json' in
         the current working directory."""
         self.teilnehmer = database_manager.get_all_students()
+
+    @property
+    def moodle_base_url(self):
+        return 'https://' + self.domain
 
     def update_teilnehmer(self, database_manager):
         """Fetch moodle course user index and save names and user ids as json.
@@ -78,14 +85,13 @@ class MoodleSession:
         course_id defaults to constants.MOODLE_COURSE_ID
 
         """
-        moodle_base_url = 'https://' + self.domain
         course_id = self.configuration["MOODLE_IDS"]["MOODLE_COURSE_ID"]
         re_teilnehmer = re.compile(
             r'<a href="{}/user/view.php\?id=(\d+)&amp;course=(\d+)">'
             r'<img src="[^"]*"\s+class="[^"]*"[^>]*>([^<]+)</a>'.format(
-                re.escape(moodle_base_url)))
+                re.escape(self.moodle_base_url)))
         res = {}
-        url = moodle_base_url + '/user/index.php'
+        url = self.moodle_base_url + '/user/index.php'
         r = self.session.get(url, params={'id': course_id, 'perpage': '5000'})
         self._last_request = r
         for line in r.text.splitlines():
@@ -115,11 +121,10 @@ class MoodleSession:
     def query_logged_in(self):
         """Try to fetch and scrape dashboard. We use this to find out,
         whether we are currently logged in."""
-        moodle_base_url = 'https://' + self.domain
-        r = self.session.get(moodle_base_url + '/my/')
+        r = self.session.get(self.moodle_base_url + '/my/')
         self.scrape_dashboard(r)
         self._last_request = r
-        return self.logged_in
+        return self.logged_in()
 
     def login(self):
         """Login into moodle. This queries the password but does not store it.
@@ -163,8 +168,6 @@ class MoodleSession:
     def scrape_dashboard(self, r):
         """Scrape the moodle dashboard to retrieve full name, user id and
         session key."""
-        moodle_base_url = 'https://' + self.domain
-
         d = BeautifulSoup(r.text, 'html.parser')
         try:
             # dashboard is only loaded if we are logged in
@@ -183,7 +186,7 @@ class MoodleSession:
             # extract the moodle user id
             url = div[0].find_all('a')[0]['href']
             if (mo := re.match(r'(.*?=)(\d+)', url)) is not None:
-                if mo.group(1) != moodle_base_url + '/user/profile.php?id=':
+                if mo.group(1) != self.moodle_base_url + '/user/profile.php?id=':
                     raise MoodleScrapeError(
                         'cannot find link .../user/profile.php?id=...')
                 self.userid = mo.group(2)
@@ -193,7 +196,7 @@ class MoodleSession:
             # extract the sesskey
             url = div[0].find_all('a')[1]['href']
             if (mo := re.match(r'(.*?=)(\w+)', url)) is not None:
-                if mo.group(1) != moodle_base_url \
+                if mo.group(1) != self.moodle_base_url \
                         + '/login/logout.php?sesskey=':
                     raise MoodleScrapeError(
                         'cannot find link .../login/logout.php?sesskey=...')
@@ -208,6 +211,30 @@ class MoodleSession:
             self.dump_dashboard(r)
             self.session_state['logged_in'] = False
         self.dump_state()
+
+    def fetch_grader_contextid_assignmentid(self):
+        r = self.session.get(
+            self.moodle_base_url + '/mod/assign/view.php',
+            params={'id': self.configuration['MOODLE_IDS']['MOODLE_SUBMISSION_ID'],
+                    'action': 'grader'})
+        d = BeautifulSoup(r.text, 'html.parser')
+        divs = d.find_all('div', attrs={'data-region': 'grade'})
+        if len(divs):
+            div = divs[0]
+            self._grader_contextid = div.attrs['data-contextid']
+            self._grader_assignmentid = div.attrs['data-assignmentid']
+
+    @property
+    def grader_contextid(self):
+        if self._grader_contextid is None:
+            self.fetch_grader_contextid_assignmentid()
+        return self._grader_contextid
+
+    @property
+    def grader_assignmentid(self):
+        if self._grader_assignmentid is None:
+            self.fetch_grader_contextid_assignmentid()
+        return self._grader_assignmentid
 
     def dump_state(self):
         """Dump the current session's cookie and key to disk."""
@@ -233,11 +260,10 @@ class MoodleSession:
 
         Returns: Local path of the downloaded file or None, if download failed.
             """
-        moodle_base_url = 'https://' + self.domain
         if id_ is None:
             id_ = self.configuration["MOODLE_IDS"]["MOODLE_SUBMISSION_ID"]
         dest = self.configuration["SUBMISSION_NEW_ZIP"]
-        r = self.session.get(moodle_base_url + '/mod/assign/view.php',
+        r = self.session.get(self.moodle_base_url + '/mod/assign/view.php',
                              params={'id': id_, 'action': 'downloadall'},
                              stream=True)
         self._last_request = r
@@ -251,7 +277,8 @@ class MoodleSession:
 
     def open_conversation_in_ff(self, touserid):
         """Open the instant messages moodle view in browser."""
-        cmd_line = [self.configuration["FIREFOX_PATH"], self.get_conversation_url(touserid)]
+        cmd_line = [self.configuration["FIREFOX_PATH"],
+                    self.get_conversation_url(touserid)]
         if os.path.exists(self.configuration["FIREFOX_PATH"]):
             subprocess.call(cmd_line)
         else:
@@ -260,9 +287,8 @@ class MoodleSession:
     def get_conversation_url(self, touserid):
         """Return the url of the instant message conversation view regarding
         a specific user."""
-        moodle_base_url = 'https://' + self.domain
         return '{}/message/index.php?user={}&id={}'.format(
-            moodle_base_url, self.userid, touserid)
+            self.moodle_base_url, self.userid, touserid)
 
     def send_instant_message(self, touserid, text):
         """Send an instant message `text` to the user `touserid`.
@@ -275,17 +301,80 @@ class MoodleSession:
         try:
             data = self._ajax_call(
                 'core_message_send_instant_messages',
-                {"messages": [{"touserid": int(touserid), "text": text}]})[0]
+                {"messages": [{"touserid": int(touserid), "text": text}]},
+                referer='/message/index.php')[0]
         except (MoodleAjaxError, IndexError):
             return False
         if data.get('msgid', -1) > -1:
             return data.get('text', False)
         return False
 
-    def _ajax_call(self, methodname: str, args):
-        """Make AJAX call through sevice.php."""
+    def get_current_grading(self, userid, return_editor_itemid=False):
+        rsp = self._ajax_call(
+            'core_get_fragment',
+            {'component': 'mod_assign',
+             'callback': 'gradingpanel',
+             'contextid': self.grader_contextid,
+             'args': [{'name': 'userid', 'value': int(userid)},
+                      {'name': 'attemptnumber', 'value': -1},
+                      {'name': 'jsonformdata', 'value': '""'}]})
+        self.debugdata = rsp
+        d = BeautifulSoup(rsp['html'], 'html.parser')
+        grade_str = d.find_all('span', attrs={'class': 'currentgrade'})[0].\
+            find('a').text.replace(',', '.')
+        try:
+            grade = float(grade_str)
+        except ValueError:
+            grade = None
+        itemid = None
+        if not return_editor_itemid:
+            return grade
+        elements = d.find_all(
+            'input',
+            attrs={'type': 'hidden',
+                   'name': 'assignfeedbackcomments_editor[itemid]'})
+        if len(elements) > 0:
+            itemid = elements[0].attrs['value']
+        return grade, itemid
 
-        AJAX_HEADERS.update({'Referer': 'https://' + self.domain + '/message/index.php'})
+
+    def update_grading(self, userid, grade, text='', sendstudentnotifications=False):
+        old_grade, editor_itemid = self.get_current_grading(userid, True)
+        if old_grade == grade:
+            return False
+        if text != '' and not text.startswith('<'):
+            text = '<p>{}<br></p>'.format(text)
+        self._ajax_call(
+            'mod_assign_submit_grading_form',
+            {'assignmentid': self.grader_assignmentid,
+             'userid': int(userid),
+             'jsonformdata': json.dumps(
+                 '&'.join([
+                     'id={}'.format(self.configuration['MOODLE_IDS']['MOODLE_SUBMISSION_ID']),
+                     'rownum=0',
+                     'useridlistid=',
+                     'attemptnumber=-1',
+                     'ajax=0',
+                     'userid=0',
+                     'sendstudentnotifications={}'.format(json.dumps(bool(sendstudentnotifications))),
+                     'action=submitgrade',
+                     'sesskey={}'.format(self.session_state['sesskey']),
+                     '_qf__mod_assign_grade_form_{}=1'.format(userid),
+                     'grade={}'.format(str(grade).replace('.', ',')),
+                     'assignfeedbackcomments_editor%5Btext%5D={}'.format(urllib.parse.quote(text)),
+                     'assignfeedbackcomments_editor%5Bformat%5D=1',
+                     'assignfeedbackcomments_editor%5Bitemid%5D={}'.format(editor_itemid)
+                 ])
+             )
+            }
+        )
+        return True
+
+    def _ajax_call(self, methodname: str, args, referer=None):
+        """Make AJAX call through sevice.php."""
+        headers = dict(AJAX_HEADERS)
+        if referer:
+            referer.update({'Referer': 'https://' + self.domain + referer})
         data = [{"index": 0,
                  "methodname": methodname,
                  "args": args}]
@@ -294,8 +383,7 @@ class MoodleSession:
             params={'sesskey': self.session_state['sesskey'],
                     'info': methodname},
             data=json.dumps(data),
-            headers={**AJAX_HEADERS,
-                     'Referrer': self.configuration["AJAX_URL"]})
+            headers=headers)
         self._last_request = r
         try:
             d = json.loads(r.text)[0]

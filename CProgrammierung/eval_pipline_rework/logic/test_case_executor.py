@@ -16,7 +16,7 @@ from models.test_case import TestCase
 from models.test_case_result import TestCaseResult
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn, Passed, Failed
-from util.gcc import native_gcc, docker_gcc
+from util.gcc import native_gcc, docker_gcc, hybrid_gcc
 from util.config_reader import ConfigReader
 from util.named_pipe_open import NamedPipeOpen
 from util.result_parser import ResultParser
@@ -149,10 +149,16 @@ class TestCaseExecutor:
             student.get_all_submissions(database_manager)
             unchecked_submissions = []
             if student.submissions is not None:
-                if not self.args.rerun:
-                    unchecked_submissions = student.get_unchecked_submissions()
+                if self.args.rerun:
+                    try:
+                        unchecked_submissions = [max(student.submissions,
+                                                    key = lambda s: s.mtime)]
+                    except ValueError:
+                        print('INFO: Cannot rerun, student "{}" has no submissions yet'
+                              .format(student.name))
+                        unchecked_submissions = []
                 else:
-                    unchecked_submissions = student.submissions
+                    unchecked_submissions = student.get_unchecked_submissions()
             if len(unchecked_submissions) > 0:
                 submissions.update({student.data_base_key: unchecked_submissions})
 
@@ -175,17 +181,17 @@ class TestCaseExecutor:
         submission_executable_path = '/tmp/loesung'
         # uncomment the following to enable compilation using the host's
          # native gcc:
-        commandline, return_code, gcc_stderr = native_gcc(
-             gcc_args + self.configuration.get('CFLAGS_LOCAL', []),
-             path,
-            submission_executable_path)
-        """commandline, return_code, gcc_stderr = docker_gcc(
+        """commandline, return_code, gcc_stderr = native_gcc(
+            gcc_args + self.configuration.get('CFLAGS_LOCAL', []),
+            path,
+            submission_executable_path)"""
+        commandline, return_code, gcc_stderr = hybrid_gcc(
             gcc_args,
             path,
             submission_executable_path,
             self.configuration['DOCKER_IMAGE_GCC'],
             self.configuration['DOCKER_CONTAINER_GCC'],
-            self.configuration['DOCKER_SHARED_DIRECTORY'])"""
+            self.configuration['DOCKER_SHARED_DIRECTORY'])
         return Compilation(return_code=return_code,
                            commandline=commandline,
                            output=gcc_stderr)

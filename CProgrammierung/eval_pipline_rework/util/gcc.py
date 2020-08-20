@@ -50,6 +50,7 @@ def native_gcc(gcc_args, src, dest):
              errors='ignore',
              cwd=directory, check=False)
     os.unlink(tmp_c_path)
+    print('native_gcc "{}" -> {}'.format(src, cp.returncode))
     return ' '.join(all_args), cp.returncode, cp.stderr
 
 
@@ -137,4 +138,14 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     # clean up copy of c file
     os.unlink(tmp_c_path)
     # directory should now be back in its original state, most likely empty
+    print('docker_gcc "{}" -> {}'.format(src, gcc_returncode))
+    return commandline, gcc_returncode, gcc_stderr
+
+def hybrid_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
+    commandline, gcc_returncode, gcc_stderr = docker_gcc(
+        gcc_args, src, dest, docker_image, docker_container, directory)
+    if gcc_returncode == 0:
+        native_args = gcc_args.copy()
+        native_args.remove('-Werror')
+        native_gcc(native_args, src, dest)
     return commandline, gcc_returncode, gcc_stderr

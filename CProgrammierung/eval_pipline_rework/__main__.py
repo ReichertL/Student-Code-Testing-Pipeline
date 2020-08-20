@@ -7,8 +7,5 @@ import os
 import check
 
 if __name__ == "__main__":
-    try:
+    with check.LockFile(check.LOCK_FILE_PATH):
         check.run()
-
-    finally:
-        pass

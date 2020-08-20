@@ -15,14 +15,10 @@ from logic.result_generator import ResultGenerator
 from logic.test_case_executor import TestCaseExecutor
 from persistence.database_manager import SQLiteDatabaseManager
 from util.argument_extractor import ArgumentExtractor
+from util.lockfile import LockFile
 from util.playground import Playground
 
-other_process = False
-
-
-def cleanup():
-    os.unlink("check.lock")
-
+LOCK_FILE_PATH = '/run/lock/check.lock'
 
 def run():
     """
@@ -30,15 +26,6 @@ def run():
     due to readability extracted to separate module and invokes
     in args specified functionality
     """
-
-    for sig in (SIGABRT, SIGILL, SIGSEGV, SIGTERM, SIGINT):
-        signal(sig, cleanup)
-    try:
-        open("check.lock", "x")
-    except:
-        print("There is already a process which acquired check.lock")
-        exit(0)
-
     try:
         argument_extractor = ArgumentExtractor()
         args = argument_extractor.get_arguments()
@@ -87,9 +74,7 @@ def run():
         if args.playground:
             playground = Playground()
             playground.run()
-        database_manager.close()
-    except:
-        cleanup()
+    finally:
         try:
             database_manager.close()
         except:
@@ -97,7 +82,5 @@ def run():
 
 
 if __name__ == "__main__":
-    try:
+    with LockFile(LOCK_FILE_PATH):
         run()
-    finally:
-        pass

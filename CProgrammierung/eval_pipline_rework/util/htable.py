@@ -308,7 +308,7 @@ class HtmlTable:
 
     def shipout(self):
         """Return the whole table as `str`."""
-        return ''.join(self.parts + ['</table\n'])
+        return ''.join(self.parts + ['</table>\n'])
 
 
 def html_table_demo():

@@ -60,7 +60,10 @@ class DatabaseIntegrator:
                 new_student = database_manager \
                     .get_student_by_name(student_name)
             for file in files:
+                if file.__str__().find(".swp") > 0:
+                    continue
                 filename = file
+
                 if not file.startswith("loesung_202"):
                     timestamp_extension = datetime.datetime.fromtimestamp(
                         int(os

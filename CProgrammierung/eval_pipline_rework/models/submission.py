@@ -57,7 +57,7 @@ class Submission:
                f" is_checked={self.is_checked}" \
                f" fast={self.fast}" \
                f" mtime={self.mtime} " \
-               f" passed={self.passed} " \
+               f" passed={True if self.passed else False} " \
                f"\n\t\tCompilation({self.compilation})" \
                f"\n)"
 
@@ -76,6 +76,16 @@ class Submission:
 
     def __bool__(self):
         return True if self.passed else False
+
+    def set_submission_passed(self):
+        self.compilation.return_code=0
+        for bad_test in self.tests_bad_input:
+            bad_test.set_passed()
+        for good_test in self.tests_good_input:
+            good_test.set_passed()
+
+
+
 
     def is_performant(self):
         return self.performant

@@ -776,6 +776,7 @@ class SQLiteDatabaseManager:
         self.create_mail_log(cursor)
         self.create_test_case_table(cursor)
         self.create_abtestat_table(cursor)
+        self.create_performance_table(cursor)
         self.database.commit()
 
     def close(self):
@@ -959,6 +960,51 @@ class SQLiteDatabaseManager:
             cursor.execute(""" DELETE FROM abtestat_done WHERE student_key=?""", [student_key])
         self.database.commit()
 
+    def mark_submission_passed(self, student):
+        if student is None:
+            return
+
+        student.passed = False
+        print(student)
+        student_key = self.get_student_key(student)
+        if not student.passed:
+            submissions = self.get_submissions_for_student(student)
+            passing_submission = None
+            if len(submissions) <= 0:
+                print(f"No submissions for {student.name} found")
+                return
+            if len(submissions) > 1:
+                print(f"More than one submission found. Please select!")
+                for index, submission in zip(range(0, len(submissions)), submissions):
+                    print(f"[{index + 1}]: {submission.timestamp}")
+
+                answer_accepted = False
+                answer = 0
+                while not answer_accepted:
+                    answer = sys.stdin.readline()[0]
+                    try:
+                        answer = int(answer) - 1
+                        if len(submissions) > answer >= 0:
+                            answer_accepted = True
+                        else:
+                            print(f"{answer + 1} is not in range of [{1},{len(submissions)}], please select again!")
+                    except ValueError:
+                        print(f"{answer} is not a number, please select again!")
+                passing_submission = submissions[answer]
+
+            else:
+                passing_submission = submissions[0]
+
+            passing_submission.set_submission_passed()
+
+            cursor = self.database.cursor()
+            cursor.execute(
+                """DELETE FROM submissions WHERE submission_key = ?""",
+                [passing_submission.submission_key])
+            self.database.commit()
+
+            self.insert_submission(student,passing_submission)
+
     def mark_as_done(self, student):
         student_key = self.get_student_key(student)
         if not student.passed:
@@ -998,4 +1044,98 @@ class SQLiteDatabaseManager:
                                moodle_id INTEGER ,
                                time_stamp TIMESTAMP,
                                done INTEGER                                        
+                               )''')
+
+    def insert_performance(self, student, results):
+        student_key = self.get_student_key(student)
+        cursor = self.database.cursor()
+        cursor.execute(
+            """SELECT * FROM performance_results
+                WHERE student_key =?"""
+            , [student_key]
+        )
+        is_already_in = cursor.fetchone()
+
+        if is_already_in is not None and len(is_already_in) > 0:
+            cursor.execute("""UPDATE performance_results SET example10=?,
+             example11=?,
+             example12=?,
+             example2001=?,
+             example2002=?,
+             example2003=?,
+             example2004=?,
+             example2005=?,
+             mrss=?
+             WHERE student_key=?
+                                """,
+                           [
+                               self.resultOrZero(results, "example10"),
+                               self.resultOrZero(results, "example11"),
+                               self.resultOrZero(results, "example12"),
+                               self.resultOrZero(results, "example2001"),
+                               self.resultOrZero(results, "example2002"),
+                               self.resultOrZero(results, "example2003"),
+                               self.resultOrZero(results, "example2004"),
+                               self.resultOrZero(results, "example2005"),
+                               self.resultOrZero(results, "mrss"),
+
+                               student_key
+
+                           ])
+        else:
+            cursor.execute(""" INSERT INTO performance_results VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                           [student_key,
+                            self.resultOrZero(results, "example10"),
+                            self.resultOrZero(results, "example11"),
+                            self.resultOrZero(results, "example12"),
+                            self.resultOrZero(results, "example2001"),
+                            self.resultOrZero(results, "example2002"),
+                            self.resultOrZero(results, "example2003"),
+                            self.resultOrZero(results, "example2004"),
+                            self.resultOrZero(results, "example2005"),
+                            self.resultOrZero(results, "mrss")
+                            ])
+        self.database.commit()
+
+    def get_performance(self, student):
+        student_key = self.get_student_key(student)
+        cursor = self.database.cursor()
+        cursor.execute(
+            """SELECT * FROM performance_results
+                WHERE student_key =?"""
+            , [student_key]
+        )
+        raw_result = cursor.fetchone()
+        if len(raw_result) > 0 and raw_result is not None:
+            return {
+                "name": self.get_student_by_key(raw_result[0]).name,
+                "example10": str(raw_result[1]),
+                "example11": str(raw_result[2]),
+                "example12": str(raw_result[3]),
+                "example2001": str(raw_result[4]),
+                "example2002": str(raw_result[5]),
+                "example2003": str(raw_result[6]),
+                "example2004": str(raw_result[7]),
+                "example2005": str(raw_result[8]),
+                "mrss": str(raw_result[9])
+
+            }
+
+    @staticmethod
+    def resultOrZero(results, key):
+        return results[key] if key in results else 0.0
+
+    @staticmethod
+    def create_performance_table(cursor):
+        cursor.execute('''CREATE TABLE IF NOT EXISTS performance_results
+                               (student_key INTEGER,
+                               example10 REAL ,
+                               example11 REAL,
+                               example12 REAL,                                     
+                               example2001 REAL,                                     
+                               example2002 REAL,                                     
+                               example2003 REAL,                                     
+                               example2004 REAL,                                     
+                               example2005 REAL,                                     
+                               mrss REAL                                     
                                )''')

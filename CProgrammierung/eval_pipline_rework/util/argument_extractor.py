@@ -115,6 +115,7 @@ class ArgumentExtractor:
             .add_argument('-p', '--performance',
                           dest='show_performance',
                           action='store_true')
+
         self \
             .parser \
             .add_argument('-H', '--html',
@@ -184,6 +185,15 @@ class ArgumentExtractor:
                           default=[],
                           help='reverts abtestat state for the students given')
 
+        self \
+            .parser \
+            .add_argument('-D', '--mark-manual',
+                          dest="mark_manual",
+                          nargs='*',
+                          type=str,
+                          default=[],
+                          help='marks a students submission manually as passed '
+                               'if corrected manually')
 
     def get_arguments(self):
         """

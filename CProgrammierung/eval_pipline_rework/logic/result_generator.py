@@ -2,6 +2,8 @@ import csv
 import datetime
 import sys
 
+from logic.performance_evaluator import PerformanceEvaluator
+
 
 class ResultGenerator:
     to_dump_list = []
@@ -66,6 +68,7 @@ class ResultGenerator:
                     result_writer.writerow(i)
 
     def print_details(self, database_manager, details):
+        perf=PerformanceEvaluator()
         for raw_student in details:
             student = database_manager.get_student_by_name(raw_student)
             if student is None:
@@ -92,6 +95,7 @@ class ResultGenerator:
                         print(f"{answer} is not a number, please select again!")
 
                 submissions[answer].print_stats()
+
 
             elif len(submissions) == 1:
                 submissions[0].print_stats()

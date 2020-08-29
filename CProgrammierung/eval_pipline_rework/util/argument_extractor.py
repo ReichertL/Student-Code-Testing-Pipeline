@@ -195,6 +195,14 @@ class ArgumentExtractor:
                           help='marks a students submission manually as passed '
                                'if corrected manually')
 
+        self \
+            .parser \
+            .add_argument('-u', '--unpassed-students',
+                          dest="unpassed",
+                          action='store_true',
+                          help='checks all unpassed students')
+
+
     def get_arguments(self):
         """
         getter for the parsed arguments as a dictionary

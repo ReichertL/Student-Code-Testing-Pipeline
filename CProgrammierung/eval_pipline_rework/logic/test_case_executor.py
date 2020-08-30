@@ -145,6 +145,9 @@ class TestCaseExecutor:
         if self.args.all:
             students = database_manager.get_all_students()
 
+        if self.args.unpassed:
+            students = self.get_unpassed_students(database_manager)
+
         for student in students:
             student.get_all_submissions(database_manager)
             unchecked_submissions = []
@@ -164,6 +167,15 @@ class TestCaseExecutor:
 
         return submissions
 
+
+    def get_unpassed_students(self, database_manager):
+        students = database_manager.get_all_students()
+        for student in students:
+            student.get_all_submissions(database_manager)
+        unpassed_students = [i for i in students if (not i.passed and i.submissions is not None
+                                                     and len(i.submissions) > 0)]
+        return unpassed_students
+
     def compile_single_submission(self, path: str, strict=True):
         """Tries to compile a c file at configuration
         @:param configuration string describing the configuration of the configuration c file
@@ -176,6 +188,11 @@ class TestCaseExecutor:
 
         gcc_args = [self.configuration["GCC_PATH"]] + \
                    self.configuration["CFLAGS"]
+
+        if self.args.final:
+            gcc_args = [self.configuration["GCC_PATH"]] + \
+                       self.configuration["CFLAGS_CARELESS"]
+
         if not strict:
             gcc_args.remove('-Werror')
         submission_executable_path = '/tmp/loesung'
@@ -477,11 +494,21 @@ class TestCaseExecutor:
         return result
 
     def set_limits_time(self):
-        resource.setrlimit(resource.RLIMIT_DATA, 2 * (self.configuration["RLIMIT_DATA"],))
-        resource.setrlimit(resource.RLIMIT_STACK, 2 * (self.configuration["RLIMIT_STACK"],))
-        resource.setrlimit(resource.RLIMIT_CPU, 2 * (self.configuration["RLIMIT_CPU"],))
+        if not self.args.final:
+            resource.setrlimit(resource.RLIMIT_DATA, 2 * (self.configuration["RLIMIT_DATA"],))
+            resource.setrlimit(resource.RLIMIT_STACK, 2 * (self.configuration["RLIMIT_STACK"],))
+            resource.setrlimit(resource.RLIMIT_CPU, 2 * (self.configuration["RLIMIT_CPU"],))
+        else:
+            resource.setrlimit(resource.RLIMIT_DATA, 2 * (self.configuration["RLIMIT_DATA_CARELESS"],))
+            resource.setrlimit(resource.RLIMIT_STACK, 2 * (self.configuration["RLIMIT_STACK_CARELESS"],))
+            resource.setrlimit(resource.RLIMIT_CPU, 2 * (self.configuration["RLIMIT_CPU_CARELESS"],))
 
     def set_limits_valgrind(self):
-        resource.setrlimit(resource.RLIMIT_DATA, 2 * (self.configuration["VALGRIND_DATA"],))
-        resource.setrlimit(resource.RLIMIT_STACK, 2 * (self.configuration["VALGRIND_STACK"],))
-        resource.setrlimit(resource.RLIMIT_CPU, 2 * (self.configuration["VALGRIND_CPU"],))
+        if not self.args.final:
+            resource.setrlimit(resource.RLIMIT_DATA, 2 * (self.configuration["VALGRIND_DATA"],))
+            resource.setrlimit(resource.RLIMIT_STACK, 2 * (self.configuration["VALGRIND_STACK"],))
+            resource.setrlimit(resource.RLIMIT_CPU, 2 * (self.configuration["VALGRIND_CPU"],))
+        else:
+            resource.setrlimit(resource.RLIMIT_DATA, 2 * (self.configuration["RLIMIT_DATA_CARELESS"],))
+            resource.setrlimit(resource.RLIMIT_STACK, 2 * (self.configuration["RLIMIT_STACK_CARELESS"],))
+            resource.setrlimit(resource.RLIMIT_CPU, 2 * (self.configuration["RLIMIT_CPU_CARELESS"],))

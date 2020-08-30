@@ -146,6 +146,9 @@ def hybrid_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         gcc_args, src, dest, docker_image, docker_container, directory)
     if gcc_returncode == 0:
         native_args = gcc_args.copy()
-        native_args.remove('-Werror')
+        try:
+            native_args.remove('-Werror')
+        except ValueError:
+            pass
         native_gcc(native_args, src, dest)
     return commandline, gcc_returncode, gcc_stderr

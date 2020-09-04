@@ -151,7 +151,7 @@ class MoodleReporter:
         mail += "\n"
         return mail
 
-    def send_mail(self, student, submission, text):
+    def send_mail(self, student, submission, text, grade=None):
         """
         Interaction for sending a mail with regards to
         corrector interaction
@@ -218,6 +218,15 @@ class MoodleReporter:
                     msg = f.read()
                 success = self.moodle_session. \
                     send_instant_message(student.moodle_id, msg)
+                if success:
+                    if grade is None:
+                        gr = input('set grade in moodle? (0/1/2) ')
+                        if gr in ('0', '1', '2'):
+                            grade = int(gr)
+                    if grade is not None:
+                        self.moodle_session.update_grading(student.moodle_id, grade)
+                        print('INFO: updated moodle grade to {}'.format(grade))
+
                 break
             elif answer == 'n':
                 break

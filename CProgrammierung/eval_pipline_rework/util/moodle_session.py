@@ -374,7 +374,7 @@ class MoodleSession:
         """Make AJAX call through sevice.php."""
         headers = dict(AJAX_HEADERS)
         if referer:
-            referer.update({'Referer': 'https://' + self.domain + referer})
+            headers.update({'Referer': 'https://' + self.domain + referer})
         data = [{"index": 0,
                  "methodname": methodname,
                  "args": args}]

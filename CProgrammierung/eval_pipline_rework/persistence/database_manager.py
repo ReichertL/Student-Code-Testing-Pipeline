@@ -1003,7 +1003,7 @@ class SQLiteDatabaseManager:
                 [passing_submission.submission_key])
             self.database.commit()
 
-            self.insert_submission(student,passing_submission)
+            self.insert_submission(student, passing_submission)
 
     def mark_as_done(self, student):
         student_key = self.get_student_key(student)
@@ -1025,7 +1025,7 @@ class SQLiteDatabaseManager:
         answer_accepted = False
         mat_nr = 0
         while not answer_accepted:
-            mat_nr = sys.stdin.readline()[0]
+            mat_nr = sys.stdin.readline()
             try:
                 mat_nr = int(mat_nr)
                 answer_accepted = True
@@ -1035,6 +1035,16 @@ class SQLiteDatabaseManager:
         if len(raw_result) == 0:
             cursor.execute(""" INSERT INTO abtestat_done VALUES (?,?,?,?)""",
                            [student_key, mat_nr, datetime.now(), 1])
+        else:
+            cursor.execute("""UPDATE abtestat_done 
+            SET moodle_id=? , time_stamp=?
+            WHERE student_key=? 
+            """,
+                           [
+                               mat_nr,
+                               datetime.now(),
+                               student_key
+                           ])
         self.database.commit()
 
     @staticmethod

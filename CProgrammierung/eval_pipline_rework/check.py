@@ -40,10 +40,6 @@ def run():
             database_integrator = DatabaseIntegrator()
             database_integrator.integrate_submission_dir(database_manager)
 
-        studentlog = database_manager.get_all_students()
-        for student in studentlog:
-            student.get_all_submissions(database_manager)
-
         if not args.fetch_only:
             # Execute test cases if needed determined by the provided args
             executor = TestCaseExecutor(args)
@@ -83,6 +79,9 @@ def run():
 
         # evaluates and shows performance statistics for all students which have passed
         if args.show_performance:
+            studentlog = database_manager.get_all_students()
+            for student in studentlog:
+                student.get_all_submissions(database_manager)
             performance_evaluator = PerformanceEvaluator()
             performance_evaluator.evaluate(studentlog, database_manager)
 

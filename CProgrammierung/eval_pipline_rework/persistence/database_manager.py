@@ -31,6 +31,9 @@ class SQLiteDatabaseManager:
         configuration = ConfigReader().read_file(str(p))
         self.database = sqlite3.connect(configuration["DATABASE_PATH"])
 
+        p = resolve_absolute_path("/resources/config_performance_evaluator.config")
+        self.performance_configuration = ConfigReader().read_file(str(p))
+
     def is_empty(self):
         cursor = self.database.cursor()
         cursor.execute("""SELECT * FROM students""")
@@ -776,7 +779,7 @@ class SQLiteDatabaseManager:
         self.create_mail_log(cursor)
         self.create_test_case_table(cursor)
         self.create_abtestat_table(cursor)
-        self.create_performance_table(cursor)
+        self.create_performance_table(cursor, self.performance_configuration)
         self.database.commit()
 
     def close(self):
@@ -1067,44 +1070,41 @@ class SQLiteDatabaseManager:
         is_already_in = cursor.fetchone()
 
         if is_already_in is not None and len(is_already_in) > 0:
-            cursor.execute("""UPDATE performance_results SET example10=?,
-             example11=?,
-             example12=?,
-             example2001=?,
-             example2002=?,
-             example2003=?,
-             example2004=?,
-             example2005=?,
-             mrss=?
-             WHERE student_key=?
-                                """,
-                           [
-                               self.resultOrZero(results, "example10"),
-                               self.resultOrZero(results, "example11"),
-                               self.resultOrZero(results, "example12"),
-                               self.resultOrZero(results, "example2001"),
-                               self.resultOrZero(results, "example2002"),
-                               self.resultOrZero(results, "example2003"),
-                               self.resultOrZero(results, "example2004"),
-                               self.resultOrZero(results, "example2005"),
-                               self.resultOrZero(results, "mrss"),
+            cursor.execute("UPDATE performance_results SET " +
+                           ", ".join(tc+"=?" for tc in self.performance_configuration["PERFORMANCE_TEST_CASES_TIME"]) +
+                           ", mrss=? WHERE student_key=?",
+                           [self.resultOrZero(results, tc) for tc in (list(self.performance_configuration["PERFORMANCE_TEST_CASES_TIME"]) + ["mrss"])]
+                           + [student_key])
 
-                               student_key
-
-                           ])
+            # cursor.execute("""UPDATE performance_results SET example10=?,
+            #  example11=?,
+            #  example12=?,
+            #  example2001=?,
+            #  example2002=?,
+            #  example2003=?,
+            #  example2004=?,
+            #  example2005=?,
+            #  mrss=?
+            #  WHERE student_key=?
+            #                     """,
+            #                [
+            #                    self.resultOrZero(results, "example10"),
+            #                    self.resultOrZero(results, "example11"),
+            #                    self.resultOrZero(results, "example12"),
+            #                    self.resultOrZero(results, "example2001"),
+            #                    self.resultOrZero(results, "example2002"),
+            #                    self.resultOrZero(results, "example2003"),
+            #                    self.resultOrZero(results, "example2004"),
+            #                    self.resultOrZero(results, "example2005"),
+            #                    self.resultOrZero(results, "mrss"),
+# 
+#                                student_key
+# 
+#                            ])
         else:
-            cursor.execute(""" INSERT INTO performance_results VALUES (?,?,?,?,?,?,?,?,?,?)""",
-                           [student_key,
-                            self.resultOrZero(results, "example10"),
-                            self.resultOrZero(results, "example11"),
-                            self.resultOrZero(results, "example12"),
-                            self.resultOrZero(results, "example2001"),
-                            self.resultOrZero(results, "example2002"),
-                            self.resultOrZero(results, "example2003"),
-                            self.resultOrZero(results, "example2004"),
-                            self.resultOrZero(results, "example2005"),
-                            self.resultOrZero(results, "mrss")
-                            ])
+            cursor.execute(" INSERT INTO performance_results VALUES (?" + len(self.performance_configuration["PERFORMANCE_TEST_CASES_TIME"])*",?" + ",?)",
+                           [student_key] +
+                           [self.resultOrZero(results, tc) for tc in (list(self.performance_configuration["PERFORMANCE_TEST_CASES_TIME"]) + ["mrss"])])
         self.database.commit()
 
     def get_performance(self, student):
@@ -1116,36 +1116,36 @@ class SQLiteDatabaseManager:
             , [student_key]
         )
         raw_result = cursor.fetchone()
-        if len(raw_result) > 0 and raw_result is not None:
-            return {
-                "name": self.get_student_by_key(raw_result[0]).name,
-                "example10": str(raw_result[1]),
-                "example11": str(raw_result[2]),
-                "example12": str(raw_result[3]),
-                "example2001": str(raw_result[4]),
-                "example2002": str(raw_result[5]),
-                "example2003": str(raw_result[6]),
-                "example2004": str(raw_result[7]),
-                "example2005": str(raw_result[8]),
-                "mrss": str(raw_result[9])
-
-            }
+        if raw_result is not None and len(raw_result) > 0:
+            result = {"name": self.get_student_by_key(raw_result[0]).name}
+            for i, tc in enumerate(list(self.performance_configuration["PERFORMANCE_TEST_CASES_TIME"]) + ["mrss"], start=1):
+                result[tc] = float(raw_result[i])
+            return result
+            # return {
+            #     "name": self.get_student_by_key(raw_result[0]).name,
+            #     "example10": str(raw_result[1]),
+            #     "example11": str(raw_result[2]),
+            #     "example12": str(raw_result[3]),
+            #     "example2001": str(raw_result[4]),
+            #     "example2002": str(raw_result[5]),
+            #     "example2003": str(raw_result[6]),
+            #     "example2004": str(raw_result[7]),
+            #     "example2005": str(raw_result[8]),
+            #     "mrss": str(raw_result[9])
+            # }
 
     @staticmethod
     def resultOrZero(results, key):
         return results[key] if key in results else 0.0
 
     @staticmethod
-    def create_performance_table(cursor):
+    def create_performance_table(cursor, performance_configuration):
+        try:
+            cursor.execute("DROP TABLE performance_results")
+        except sqlite3.OperationalError:
+            pass
         cursor.execute('''CREATE TABLE IF NOT EXISTS performance_results
-                               (student_key INTEGER,
-                               example10 REAL ,
-                               example11 REAL,
-                               example12 REAL,                                     
-                               example2001 REAL,                                     
-                               example2002 REAL,                                     
-                               example2003 REAL,                                     
-                               example2004 REAL,                                     
-                               example2005 REAL,                                     
-                               mrss REAL                                     
-                               )''')
+                               (student_key INTEGER, ''' +
+                       ', '.join(tc + " REAL" for tc in list(performance_configuration["PERFORMANCE_TEST_CASES_TIME"]) + ["mrss"]) +
+                       ')')
+                       

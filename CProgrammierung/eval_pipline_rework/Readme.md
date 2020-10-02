@@ -43,7 +43,7 @@ which can be replaced during runtime. These tokens should be follow the format `
 ## Current state of the rework
 
 
-###Commandline arguments currently implemented:
+### Commandline arguments currently implemented:
 
     -a testing all submissions
     -r rerun tested submissions, also requests resending of emails
@@ -61,7 +61,7 @@ which can be replaced during runtime. These tokens should be follow the format `
        the user will also be ask whether to unset passed test cases
 
 
-###Implemented features:
+### Implemented features:
 
   - Integrating an existing submission dir into a sql-lite database
   - Running given test cases for all submissions in the database
@@ -70,7 +70,7 @@ which can be replaced during runtime. These tokens should be follow the format `
   - integrated submission fetching from moodle course
   - integrated automatic feedback 
 
-##Future Development
+## Future Development
 
   - evaluating memory footprint for passing
   - evaluate runtime statistics

@@ -105,8 +105,10 @@ the [current features](#implemented-features).
                     Marks a submission and a student as passed if corrected manually.
 
 ### Implemented Structure:
+The image below represents the currently implemented structure of the evaluation pipeline. 
+![current stucture](current-structure.jpg)
 
-
+Further down below you can find a [target structure](#planned-structure)
 
 ### Implemented Features:  
   - Fetching submissions from moodle or a local dir 
@@ -126,7 +128,7 @@ In this section we'll describe planned future reworks and structural improvement
 ### Planned Structure
 The planned structure is shown below in the diagram:
 
-![stucture](future-structure.jpg)
+![future stucture](future-structure.jpg)
 
 We advice to combine the adaptation of the presented structure while also integrating a 3rd party orm like SqlAlchemy 
 

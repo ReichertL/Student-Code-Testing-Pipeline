@@ -142,8 +142,8 @@ We advice to combine the adaptation of the presented structure while also integr
 ### Planned Integration 
 
 - integrate 3rd party orm like SqlAlchemy
-- integrate the [planned structure](#planned-stucture) 
+- integrate the [planned structure](#planned-structure) 
 - pair-wise similarity analysis with j-plag
-  
+- test coverage for eval pipeline
 
 

@@ -183,7 +183,7 @@ class TestCaseExecutor:
                     unchecked_submissions = student.get_unchecked_submissions()
             if len(unchecked_submissions) > 0:
                 submissions.update({student
-                                    .data_base_key: unchecked_submissions})
+                                   .data_base_key: unchecked_submissions})
 
         return submissions
 
@@ -459,7 +459,7 @@ class TestCaseExecutor:
 
     def execute_test_case(self, test_case, submission):
         """
-        tests a submission with a testcase
+        tests a submission with a testcaseabtestat
         :param submission: the submission to test
         :param test_case: the test_case object encapsulating
         paths and expected results
@@ -525,7 +525,7 @@ class TestCaseExecutor:
                                      + [self.configuration["VALGRIND_PATH"],
                                         '--log-file='
                                         + self
-                                        .configuration["VALGRIND_OUT_PATH"]]
+                                     .configuration["VALGRIND_OUT_PATH"]]
                                      + args,
                                      stdin=fin,
                                      stdout=subprocess.DEVNULL,
@@ -539,7 +539,7 @@ class TestCaseExecutor:
             if p.returncode not in (-9, -15, None):
                 try:
                     with open(self
-                              .configuration["VALGRIND_OUT_PATH"], 'br') as f:
+                                      .configuration["VALGRIND_OUT_PATH"], 'br') as f:
                         result.vg = parser.parse_valgrind_file(f)
                 except FileNotFoundError:
                     pass

@@ -69,7 +69,8 @@ the [current features](#implemented-features).
                     No test are executed afterwards. 
     
     -c/--check ["name1", "name2",...]:     
-                    Runs evaluation for all students given in the list of strings. 
+                    Runs evaluation for all students given in the list of strings.
+                    Usage e.g. check -rc "Vorname Nachname". Can be used in combination with -r, -d
     
     -a/--all:       Runs evaluation for all students. By default only if not already run.
     
@@ -84,7 +85,8 @@ the [current features](#implemented-features).
     
     -d/--details ["name1","name2",...]:
                     Prints detailed information for submissions for the specified students.
-                    If more than one submission is found the user is asked.      
+                    If more than one submission is found the user is asked.
+                    To only get a single student: use incombination with -c
     
     -s/--stats:     Prints stats for all students.
     
@@ -103,6 +105,8 @@ the [current features](#implemented-features).
 
     -D/--mark_manual ["name1",...]:
                     Marks a submission and a student as passed if corrected manually.
+                    
+    --force         Resends emails after confirmation (does the same -r)
 
 ### Implemented Structure:
 

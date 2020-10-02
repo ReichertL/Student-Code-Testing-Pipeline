@@ -1,11 +1,19 @@
+"""
+    Module to implement needed functionality to generate all
+    statistics and summaries.
+"""
 import csv
 import datetime
 import sys
 
-from logic.performance_evaluator import PerformanceEvaluator
-
 
 class ResultGenerator:
+    """
+    Class to implement needed functionality to generate all
+    statistics and summaries.
+    Might be extendet.
+    """
+
     to_dump_list = []
 
     def __init__(self):
@@ -15,6 +23,13 @@ class ResultGenerator:
         self.to_dump_list.append(["ID", "Name", "Punkte"])
 
     def generate_csv_dump(self, database_manager):
+        """
+        Generates all necessary csv-files
+        :param database_manager: the database manager
+        which provides student information
+        :return:nothing
+        """
+
         students = database_manager.get_all_students()
         passed_students = [i for i in students if i.passed]
         with open(self.csv_path, "w") as result_file:
@@ -34,19 +49,27 @@ class ResultGenerator:
 
             abtestat_done = database_manager.get_testat_information()
             if len(abtestat_done) > 0:
-                header = ["Name","Matrikelnr.",  "Zeitstempel"]
+                header = ["Name", "Matrikelnr.", "Zeitstempel"]
                 result_writer.writerow(header)
                 for i in abtestat_done:
                     row = [database_manager
-                               .get_student_by_key(i[0]).name,
+                           .get_student_by_key(i[0]).name,
                            i[1],
                            datetime
-                               .datetime
-                               .fromisoformat(i[2])
-                               .strftime("%H:%M:%S %d-%m-%Y")]
+                           .datetime
+                           .fromisoformat(i[2])
+                           .strftime("%H:%M:%S %d-%m-%Y")]
                     result_writer.writerow(row)
 
-    def print_short_stats(self, database_manager):
+    @staticmethod
+    def print_short_stats(database_manager):
+        """
+        prints summarized stats for all stundents that have at least
+        one submission which is checked
+        :param database_manager: the database manager
+        that provides student information
+        :return: nothing
+        """
         student_log = database_manager.get_all_students()
         for student in student_log:
             submissions = student.get_all_submissions(database_manager)
@@ -57,18 +80,35 @@ class ResultGenerator:
                     submission.print_small_stats()
 
     def add_line(self, student, points):
+        """
+        adds a line to the list of students
+        that should be contained in the csv result dump
+        :param student: the student entity
+        :param points: the points he/she received
+        :return: nothing
+        """
         row = [student.moodle_id, student.name, points]
         self.to_dump_list.append(row)
 
     def dump_list(self):
+        """
+        dumps a csv list for all students who have received a mail
+        :return: nothing
+        """
         if len(self.to_dump_list) > 1:
             with open(self.csv_mailed_path, "w") as result_file:
                 result_writer = csv.writer(result_file, delimiter=",")
                 for i in self.to_dump_list:
                     result_writer.writerow(i)
 
-    def print_details(self, database_manager, details):
-        perf=PerformanceEvaluator()
+    @staticmethod
+    def print_details(database_manager, details):
+        """
+        prints detailed information for all student names in details
+        :param database_manager: database manager to retrieve the students list
+        :param details: a list of raw student names
+        :return:
+        """
         for raw_student in details:
             student = database_manager.get_student_by_name(raw_student)
             if student is None:
@@ -77,8 +117,10 @@ class ResultGenerator:
             print(f"Printing details for {raw_student}:")
             submissions = database_manager.get_submissions_for_student(student)
             if len(submissions) > 1:
-                print(f"More than one submission found. Please select!")
-                for index, submission in zip(range(0, len(submissions)), submissions):
+                print("More than one submission found. Please select!")
+                for index, submission in zip(range(0,
+                                                   len(submissions)),
+                                             submissions):
                     print(f"[{index + 1}]: {submission.timestamp}")
 
                 answer_accepted = False
@@ -90,9 +132,12 @@ class ResultGenerator:
                         if len(submissions) > answer >= 0:
                             answer_accepted = True
                         else:
-                            print(f"{answer + 1} is not in range of [{1},{len(submissions)}], please select again!")
+                            print(f"{answer + 1} is not in range of"
+                                  f"[{1},{len(submissions)}],"
+                                  f"please select again!")
                     except ValueError:
-                        print(f"{answer} is not a number, please select again!")
+                        print(f"{answer} is not a number,"
+                              f"please select again!")
 
                 submissions[answer].print_stats()
 

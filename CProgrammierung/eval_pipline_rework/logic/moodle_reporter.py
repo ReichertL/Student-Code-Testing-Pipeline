@@ -155,6 +155,7 @@ class MoodleReporter:
         """
         Interaction for sending a mail with regards to
         corrector interaction
+        :param grade: optional grade for the specific student
         :param student: the respective student
         :param submission: the respective submission
         :param text: the HTML String
@@ -224,7 +225,8 @@ class MoodleReporter:
                         if gr in ('0', '1', '2'):
                             grade = int(gr)
                     if grade is not None:
-                        self.moodle_session.update_grading(student.moodle_id, grade)
+                        self.moodle_session \
+                            .update_grading(student.moodle_id, grade)
                         print('INFO: updated moodle grade to {}'.format(grade))
 
                 break
@@ -243,7 +245,8 @@ class MoodleReporter:
         which haven't received an e-mail yet
         :param database_manager: database manager
         to retrieve necessary information
-        regarding students that have not received a mail yet and their submission
+        regarding students that
+        have not received a mail yet and their submission
         :return: nothing
         """
         username, session_state = MoodleSubmissionFetcher(self.args). \
@@ -263,11 +266,6 @@ class MoodleReporter:
             for student_name in self.args.mailto:
                 to_mail.append(database_manager.
                                get_student_by_name(student_name))
-
-        if self.args.debug:
-            to_mail = []
-            to_mail.append(database_manager.
-                           get_student_by_name("C Programmierprojekt Team"))
 
         for student in to_mail:
             submissions = database_manager.get_submissions_for_student(student)

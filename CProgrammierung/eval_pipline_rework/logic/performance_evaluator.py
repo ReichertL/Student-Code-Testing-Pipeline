@@ -173,9 +173,13 @@ class PerformanceEvaluator:
             os.unlink("performances.txt")
         except FileNotFoundError:
             pass
-        # import pdb; pdb.set_trace()
+
         row_format = ' | '.join(['{name}'] + ['{{{}:.2f}}'.format(col)
-                                for col in self.configuration["PERFORMANCE_TEST_CASES_TIME"]] + ['{mrss:.0f}'])
+                                              for col in
+                                              self.configuration[
+                                                  "PERFORMANCE_TEST_CASES_TIME"
+                                              ]]
+                                + ['{mrss:.0f}'])
         for i in range(1, len(key_list)):
             print(f"\nSorted by {key_list[i]}:\n")
             print(table_format(
@@ -189,9 +193,10 @@ class PerformanceEvaluator:
             with open("performances.html", "a+") as file:
                 print(f"\nSorted by {key_list[i]}:\n", file=file)
                 print(table_format(
-                    # '{name} | {example10} | {example11} |'
-                    # ' {example12} | {example2001} | {example2002} |'
-                    # ' {example2003} | {example2004} | {example2005} | {mrss}',
                     row_format,
-                    sorted(performances, key=lambda k: float(k[key_list[i]])),
-                    titles='auto',html=True,highlight=key_list[i]), file=file)
+                    sorted(performances,
+                           key=lambda k: float(k[key_list[i]])),
+                    titles='auto',
+                    html=True,
+                    highlight=key_list[i]),
+                      file=file)

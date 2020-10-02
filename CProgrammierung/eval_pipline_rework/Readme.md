@@ -1,5 +1,5 @@
-Reworked python eval pipeline for evaluating c-programming project submissions.
-===
+# Reworked python eval pipeline for evaluating c-programming project submissions. #
+
 
 Thanks to `__init__.py` and `__main__.py`
 it can be called by executing
@@ -14,8 +14,8 @@ or
 /path/to/eval_pipeline/__main__.py
 ```
 
-Installation and Setup
----
+## Installation and Setup
+
 
 There needs to be a resource directory inside the `eval_pipline directory`
 which contains:
@@ -24,17 +24,27 @@ which contains:
   - `config_database_manager.config`
   - `config_submission_fetcher.config`
   - `config_test_case_executor.config`
+  - `config_performance_evaluator.config`
 
 These files are used to set relevant constants.
 There are example `.config` files included in the `resource.templates` directory that need to be adjusted appropriately.
 
-For convenience, put a symblink in `/usr/bin`:
+For convenience, put a symbolic link in `/usr/bin`:
 ```
 sudo ln -s /path/to/eval_pipeline/__main__.py /usr/bin/check
 ```
 
-Commandline arguments currently implemented:
----
+If you want to use the automatic email functionality you might want to define a `mail_templates` directory,
+where you define all relevant error messages that can be part of an email to a student.
+It's worth to note, that these template massages can contain placeholder tokens,
+which can be replaced during runtime. These tokens should be follow the format `$placeholder_token$`.  
+ 
+
+## Current state of the rework
+
+
+###Commandline arguments currently implemented:
+
     -a testing all submissions
     -r rerun tested submissions, also requests resending of emails
     -f fetches students and submissions from moodle and saves them local
@@ -49,16 +59,10 @@ Commandline arguments currently implemented:
        all test the user will be asked
     -R reverts marking a student or a list of students as "abtestat done" 
        the user will also be ask whether to unset passed test cases
-    
-    
-    
-    
-    --force resends emails after confirmation 
-    --debug sends email only to "C Programmierprojekt Team" 
-   
 
-Implemented features:
----
+
+###Implemented features:
+
   - Integrating an existing submission dir into a sql-lite database
   - Running given test cases for all submissions in the database
   - Evaluate the results
@@ -66,8 +70,8 @@ Implemented features:
   - integrated submission fetching from moodle course
   - integrated automatic feedback 
 
-Roadmap
----
+##Future Development
+
   - evaluating memory footprint for passing
   - evaluate runtime statistics
   - integrate 3rd party orm like SqlAlchemy (in progress)

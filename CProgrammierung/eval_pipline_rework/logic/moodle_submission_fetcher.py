@@ -1,3 +1,8 @@
+"""
+Module which implements needed functionality to
+fetch submissions from local or moodle submissions
+"""
+
 import datetime
 import json
 import os
@@ -13,6 +18,12 @@ from util.moodle_session import MoodleSession
 
 
 def mkdir(path):
+    """
+    wrapper for creating a dir
+    by just ignoring FileExistsError if thrown
+    :param path: the path where the directory should be created
+    :return: nothing
+    """
     try:
         os.mkdir(path)
     except FileExistsError:
@@ -20,17 +31,36 @@ def mkdir(path):
 
 
 class MoodleSubmissionFetcher:
+    """
+    Implements needed functionality to
+    fetch submissions from local or moodle submissions
+    """
+
     def __init__(self, args):
-        config_path = resolve_absolute_path("/resources/config_submission_fetcher.config")
+        relative_config_path = "/resources/config_submission_fetcher.config"
+        config_path = \
+            resolve_absolute_path(relative_config_path)
         configuration = ConfigReader().read_file(config_path)
         self.configuration = configuration
         self.args = args
-        self.submission_base_dir = resolve_absolute_path(self.configuration["SUBMISSION_BASE_DIR"])
+        relative_submission_path = self.configuration["SUBMISSION_BASE_DIR"]
+        self.submission_base_dir = \
+            resolve_absolute_path(relative_submission_path)
         self.moodle_session = None
 
     def run(self, database_manager):
+        """
+        runs fetching functionality
+        :param database_manager:
+        the database manager into which new submissions should be integrated
+        :return: nothing
+        """
         username, session_state = self.get_login_data()
-        self.moodle_session = MoodleSession(username, session_state, self.configuration, database_manager)
+        self.moodle_session = \
+            MoodleSession(username,
+                          session_state,
+                          self.configuration,
+                          database_manager)
         self.moodle_session.update_teilnehmer(database_manager)
         mkdir(self.submission_base_dir)
         self.fetch_abgaben(database_manager)
@@ -41,7 +71,8 @@ class MoodleSubmissionFetcher:
         Otherwise the user is asked.
         """
         try:
-            with open(resolve_absolute_path(self.configuration["SESSION_DATA_PATH"])) as f:
+            session_data_path = self.configuration["SESSION_DATA_PATH"]
+            with open(resolve_absolute_path(session_data_path)) as f:
                 d = json.load(f)
         except OSError:
             d = {}
@@ -65,10 +96,20 @@ class MoodleSubmissionFetcher:
         return username, d.get(username, {})
 
     def fetch_abgaben(self, database_manager, dryrun=False, noimport=False):
+        """
+        collects all submissions from a
+        specified source (moodle or local directory)
+        :param database_manager:
+        :param dryrun: optional no fetch from external source
+        :param noimport: flag for not returning new submissions
+        :return: list of new submission
+        """
+
         new = []
         new_submissions_dir = self.configuration["SUBMISSION_NEW_DIR"]
         new_submissions_zip = self.configuration["SUBMISSION_NEW_ZIP"]
-        all_submissions_dir = resolve_absolute_path(self.configuration["SUBMISSION_BASE_DIR"])
+        submission_base_dir = self.configuration["SUBMISSION_BASE_DIR"]
+        all_submissions_dir = resolve_absolute_path(submission_base_dir)
         use_local_zip = False
         if os.path.exists(new_submissions_zip):
             print(f'target zip path "{new_submissions_zip}" exists.\n'
@@ -82,7 +123,11 @@ class MoodleSubmissionFetcher:
                 ms = self.moodle_session
                 if not ms.logged_in:
                     return None
-                ms.download_all_submissions(self.configuration["MOODLE_IDS"]["MOODLE_SUBMISSION_ID"])
+                with_submission_id = \
+                    self.configuration["MOODLE_IDS"]["MOODLE_SUBMISSION_ID"]
+
+                ms. \
+                    download_all_submissions(with_submission_id)
             if os.path.isdir(new_submissions_dir):
                 shutil.rmtree(new_submissions_dir)
             os.mkdir(new_submissions_dir)
@@ -94,7 +139,8 @@ class MoodleSubmissionFetcher:
             return new
         dir_listing = os.listdir(new_submissions_dir)
         for d in dir_listing:
-            student_id, student_name, submission_id = self.dirname_to_student(d, database_manager)
+            student_id, student_name, _ = self. \
+                dirname_to_student(d, database_manager)
             src_dir = os.path.join(new_submissions_dir, d)
             src = os.path.join(src_dir, 'loesung.c')
 
@@ -103,7 +149,10 @@ class MoodleSubmissionFetcher:
                     student_name, student_id))
                 continue
             dest_dir = os.path.join(all_submissions_dir, d)
-            timestamp_extension = datetime.datetime.fromtimestamp(os.path.getmtime(src)).__str__()
+            timestamp_extension = datetime \
+                .datetime \
+                .fromtimestamp(os.path.getmtime(src)) \
+                .__str__()
             regex_timestamp = re.sub("-|:|\s", "_", timestamp_extension)
 
             dest = os.path.join(dest_dir, f'loesung_{regex_timestamp}.c')
@@ -112,12 +161,19 @@ class MoodleSubmissionFetcher:
 
             shutil.move(src, dest)
             new.append((student_id, student_name))
-        # if not dryrun:
-        #     shutil.rmtree(new_submissions_dir)
         return new
 
     @staticmethod
     def dirname_to_student(d, database_manager):
+        """
+        Extracts the student name and
+        the submission id from a directory name
+        :param d: directory name
+        :param database_manager:
+        the database manager from which a student is retrieved
+        :return: Triple(student id, student name, submission id)
+        """
+
         re_submission_dir = re.compile(r'(.+)_(\d+)_assignsubmission_file_')
         mo = re_submission_dir.match(d)
         student_name = mo.group(1)

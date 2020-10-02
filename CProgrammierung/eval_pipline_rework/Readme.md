@@ -124,7 +124,7 @@ In this section we'll describe planned future reworks and structural improvement
 ### Planned Structure
 The planned structure is shown below in the diagram:
 
-![stucture](#future-structure.jpg)
+![stucture](future-structure.jpg)
 
 ### Planned Features
 - automated grading on moodle when ever a mail is send

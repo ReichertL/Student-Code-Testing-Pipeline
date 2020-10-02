@@ -13,7 +13,7 @@ it can be called by executing:
 or
 `/path/to/eval_pipeline/__main__.py`
 
-Relevant switches and flags are listed in Section [Commandline arguments](#Stable-Commandline-arguments)
+Relevant switches and flags are listed in Section [Commandline arguments](#stable-commandline-arguments)
 
 ### Installation and Setup
 

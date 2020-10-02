@@ -126,9 +126,13 @@ The planned structure is shown below in the diagram:
 
 ![stucture](future-structure.jpg)
 
+We advice to combine the adaptation of the presented structure while also integrating a 3rd party orm like SqlAlchemy 
+
 ### Planned Features
 - automated grading on moodle when ever a mail is send
-
+- allow optional correct output when executing malicious test cases, that aren't formally wrong  
+- execute single testcases for submissions 
+- separate operations with flags all, few, one for student and/or submissions
 
 ### Planned Integration 
 

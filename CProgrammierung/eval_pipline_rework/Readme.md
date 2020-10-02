@@ -106,6 +106,8 @@ the [current features](#implemented-features).
 
 ### Implemented Structure:
 
+
+
 ### Implemented Features:  
   - Fetching submissions from moodle or a local dir 
   - Persist student data and submission information in a sqlite database 
@@ -132,12 +134,14 @@ We advice to combine the adaptation of the presented structure while also integr
 - automated grading on moodle when ever a mail is send
 - allow optional correct output when executing malicious test cases, that aren't formally wrong  
 - execute single testcases for submissions 
-- separate operations with flags all, few, one for student and/or submissions
+- separate operations with flag for students single, list, all and for submissions not_passed, latest, all 
+- rework format of -s/--stats 
 
 ### Planned Integration 
 
 - integrate 3rd party orm like SqlAlchemy
 - integrate the [planned structure](#planned-stucture) 
+- pair-wise similarity analysis with j-plag
   
 
 

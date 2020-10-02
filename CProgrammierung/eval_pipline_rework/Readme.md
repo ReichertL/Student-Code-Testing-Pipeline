@@ -1,6 +1,11 @@
-# Reworked python eval pipeline for evaluating c-programming project submissions. #
+# Reworked python eval pipeline for evaluating c-programming project submissions
 
+This python script is intended to automatically fetch submissions from a moodle page, compile these submissions for each
+student and evaluate the correctness along with the performance. 
+Further it is able to persist relevant information, send feedback e-mails and generate relevant grading for moodle via 
+csv and also via the moodle grading api.   
 
+### Usage
 Thanks to `__init__.py` and `__main__.py`
 it can be called by executing
 
@@ -14,7 +19,7 @@ or
 /path/to/eval_pipeline/__main__.py
 ```
 
-## Installation and Setup
+### Installation and Setup
 
 
 There needs to be a resource directory inside the `eval_pipline directory`

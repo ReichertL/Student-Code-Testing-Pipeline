@@ -7,17 +7,13 @@ csv and also via the moodle grading api.
 
 ### Usage
 Thanks to `__init__.py` and `__main__.py`
-it can be called by executing
+it can be called by executing:
 
-```
-python3 /path/to/eval_pipeline/
-```
-
+`python3 /path/to/eval_pipeline/`
 or
+`/path/to/eval_pipeline/__main__.py`
 
-```
-/path/to/eval_pipeline/__main__.py
-```
+Relevant switches and flags are listed in Section [Commandline arguments](#Stable-Commandline-arguments)
 
 ### Installation and Setup
 
@@ -48,7 +44,7 @@ which can be replaced during runtime. These tokens should be follow the format `
 ## Current state of the rework
 
 
-### Commandline arguments currently implemented:
+### Stable Commandline arguments:
 
     -a testing all submissions
     -r rerun tested submissions, also requests resending of emails

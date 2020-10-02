@@ -106,7 +106,7 @@ the [current features](#implemented-features).
 
 ### Implemented Structure:
 The image below represents the currently implemented structure of the evaluation pipeline. 
-![current stucture](current_structure.jpg)
+![current structure](current_structure.jpg)
 
 Further down below you can find a [target structure](#planned-structure)
 

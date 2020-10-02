@@ -53,8 +53,11 @@ It's worth to note, that these template massages can contain placeholder tokens,
 which can be replaced during runtime. These tokens should be follow the format `$placeholder_token$`.  
  
 
-## Current state of the rework
-
+## Current State of the Rework
+This section describes the current state of the eval pipeline. 
+We start with the currently usable switches and their behavior, [here](#stable-commandline-arguments). 
+Followed by a description of the [current structure](#implemented-structure) and finish with a short summary of 
+the [current features](#implemented-features).   
 
 ### Stable Commandline Arguments:
 
@@ -83,7 +86,9 @@ which can be replaced during runtime. These tokens should be follow the format `
   - Evaluate the results
   - marking students and submissions as passed (current bug, valgrind not taken into account)
   - integrated submission fetching from moodle course
-  - integrated automatic feedback 
+  - integrated automatic feedback
+  - evaluating memory footprint for passing 
+  - evaluate runtime statistics
 
 ## Future Development
 
@@ -91,8 +96,8 @@ which can be replaced during runtime. These tokens should be follow the format `
 
 ### Planned Features
 
-  - evaluating memory footprint for passing
-  - evaluate runtime statistics
+  
+  
   - integrate 3rd party orm like SqlAlchemy (in progress)
 
 ### Planned Integration 

@@ -5,7 +5,19 @@ student and evaluate the correctness along with the performance.
 Further it is able to persist relevant information, send feedback e-mails and generate relevant grading for moodle via 
 csv and also via the moodle grading api.   
 
-### Usage
+## Content
+1. [Usage](#usage)
+    1. [Installation and Setup](#installation-and-setup)
+2. [Current State of the Rework](#current-state-of-the-rework)
+    1. [Stable Commandline Arguments](#stable-commandline-arguments) 
+    2. [Implemented Structure](#implemented-structure) 
+    3. [Implemented Features](#implemented-features)
+3. [Future Development](#future-development)
+    1. [Planned Structure](#planned-structure)
+    2. [Planned Features](#planned-structure)
+    3. [Planned Integration](#planned-integration)
+
+## Usage
 Thanks to `__init__.py` and `__main__.py`
 it can be called by executing:
 
@@ -44,7 +56,7 @@ which can be replaced during runtime. These tokens should be follow the format `
 ## Current state of the rework
 
 
-### Stable Commandline arguments:
+### Stable Commandline Arguments:
 
     -a testing all submissions
     -r rerun tested submissions, also requests resending of emails
@@ -62,7 +74,9 @@ which can be replaced during runtime. These tokens should be follow the format `
        the user will also be ask whether to unset passed test cases
 
 
-### Implemented features:
+### Implemented Structure:
+
+### Implemented Features:
 
   - Integrating an existing submission dir into a sql-lite database
   - Running given test cases for all submissions in the database
@@ -73,8 +87,15 @@ which can be replaced during runtime. These tokens should be follow the format `
 
 ## Future Development
 
+### Planned Structure
+
+### Planned Features
+
   - evaluating memory footprint for passing
   - evaluate runtime statistics
   - integrate 3rd party orm like SqlAlchemy (in progress)
+
+### Planned Integration 
+
 
 

@@ -119,13 +119,18 @@ the [current features](#implemented-features).
   
 
 ## Future Development
+In this section we'll describe planned future reworks and structural improvements for future work.
+
 ### Planned Structure
 
 ### Planned Features
+- automated grading on moodle when ever a mail is send
 
-  - integrate 3rd party orm like SqlAlchemy (in progress)
 
 ### Planned Integration 
 
+- integrate 3rd party orm like SqlAlchemy
+- integrate the [planned structure](#planned-stucture) 
+  
 
 

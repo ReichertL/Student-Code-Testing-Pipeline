@@ -61,43 +61,68 @@ the [current features](#implemented-features).
 
 ### Stable Commandline Arguments:
 
-    -a testing all submissions
-    -r rerun tested submissions, also requests resending of emails
-    -f fetches students and submissions from moodle and saves them local
-       and generates a respective database entry
-    -v prints extended information
-    -g generating full .csv grading files for uploading at moodle 
-    -s prints short statistics for all submissions and all students
-    -d prints full information for a/some student/s submission given
-       if more than one submission is found the user is asked 
+    -f/--fetch:     Fetches all submissions and students from moodle and stores them 
+                    in a submission dir and in the provided database.
     
-    -A marks a student or a list of students as "abtestat done" if the student hasn't passed 
-       all test the user will be asked
-    -R reverts marking a student or a list of students as "abtestat done" 
-       the user will also be ask whether to unset passed test cases
+    --fetch-only:   Fetches all submissions and students from moodle and stores them 
+                    in a submission dir and in the provided database. 
+                    No test are executed afterwards. 
+    
+    -c/--check ["name1", "name2",...]:     
+                    Runs evaluation for all students given in the list of strings. 
+    
+    -a/--all:       Runs evaluation for all students. By default only if not already run.
+    
+    -u/--unpassed-students:
+                    Runs evaluation only for students, that havn't passed. 
+                    Only efficient in combination with -r/--rerun.
+    
+    -r/--rerun:     Reruns functionallity e.g. rerun tests, remail students.
+                    By default the functionality only runs if not done previously. 
+    
+    -v/--verbose:   Prints detailed information for all used functionallity.
+    
+    -d/--details ["name1","name2",...]:
+                    Prints detailed information for submissions for the specified students.
+                    If more than one submission is found the user is asked.      
+    
+    -s/--stats:     Prints stats for all students.
+    
+    -g/--generate:  Generates needed CSV files with the grade and passed information.  
+    
+    -m/--mail-to-all: 
+                    Sends a feedback mail to every student who hasn't revieved a feedback mail yet.
+                                  
+    -A/--Abtestat ["name1",...]: 
+                    Marks a student or a list of students as "abtestat done" if the student hasn't passed 
+                    all test the user will be asked.
+    
+    -R/--Revert ["name1",...]:
+                    Reverts marking a student or a list of students as "abtestat done". 
+                    The user will also be ask whether to unset passed test cases.
 
+    -D/--mark_manual ["name1",...]:
+                    Marks a submission and a student as passed if corrected manually.
 
 ### Implemented Structure:
 
-### Implemented Features:
-
-  - Integrating an existing submission dir into a sql-lite database
-  - Running given test cases for all submissions in the database
-  - Evaluate the results
-  - marking students and submissions as passed (current bug, valgrind not taken into account)
-  - integrated submission fetching from moodle course
-  - integrated automatic feedback
-  - evaluating memory footprint for passing 
-  - evaluate runtime statistics
+### Implemented Features:  
+  - Fetching submissions from moodle or a local dir 
+  - Persist student data and submission information in a sqlite database 
+  - Run a specific set of Testcases, consisting of input and output, for all submissions 
+  - Evaluate the results with regards to correctness and runtime  
+  - Marking students as passed, and also mark whether they passed an "abtestat"
+  - Send evaluation feedback to the students after running tests
+  - evaluate performance (time and space) to evaluate possible competitions
+  - dump relevant grading lists via csv and Moodle Grader API
+  
+  
 
 ## Future Development
-
 ### Planned Structure
 
 ### Planned Features
 
-  
-  
   - integrate 3rd party orm like SqlAlchemy (in progress)
 
 ### Planned Integration 

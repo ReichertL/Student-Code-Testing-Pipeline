@@ -772,14 +772,15 @@ class SQLiteDatabaseManager:
         """
         cursor = self.database.cursor()
         self.create_student_table(cursor)
+        self.create_testcase_table(cursor)
         self.create_submission_table(cursor)
-        self.create_test_case_results_table(cursor)
         self.create_compilation_table(cursor)
+        self.create_run_table(cursor)
+        self.create_testcase_result_table(cursor)
         self.create_valgrind_table(cursor)
-        self.create_mail_log(cursor)
-        self.create_test_case_table(cursor)
-        self.create_abtestat_table(cursor)
-        self.create_performance_table(cursor, self.performance_configuration)
+        #self.create_mail_log(cursor)
+        #self.create_abtestat_table(cursor)
+        #self.create_performance_table(cursor, self.performance_configuration)
         self.database.commit()
 
     def close(self):
@@ -798,10 +799,16 @@ class SQLiteDatabaseManager:
         :return: nothing
         """
         cursor.execute('''CREATE TABLE IF NOT EXISTS students
-            (student_key  INTEGER ,
-            student_name TEXT NOT NULL ,  
-           student_moodle_id INTEGER,
-           student_passed INTEGER)''')
+            (student_id  INTEGER NOT NULL PRIMARY KEY,
+            student_name TEXT NOT NULL , 
+            matrikel_number INTEGER DEFAULT 0,
+           grade INTEGER DEFAULT 0,
+           last_mailed TIMESTAMP,
+           abtestat_time TIMESTAMP)''')
+        
+        
+    #student_moodle_id INTEGER,
+     #      student_passed INTEGER)''')
 
     @staticmethod
     def create_submission_table(cursor):
@@ -811,46 +818,15 @@ class SQLiteDatabaseManager:
         :return: nothing
         """
 
-        cursor.execute('''CREATE TABLE IF NOT EXISTS submissions
-                    (student_key  INTEGER ,
-                    submission_key  INTEGER,
-                    submission_timestamp TIMESTAMP,
+        cursor.execute('''CREATE TABLE IF NOT EXISTS submission
+                    submission_id  INTEGER NOT NULL PRIMARY KEY,
+                    student_id INTEGER NOT NULL,
+                    submission_time TIMESTAMP,
                     submission_path TEXT NOT NULL,
-                    submission_is_checked INTEGER,
-                    submission_fast INTEGER,
-                    submission_mtime INTEGER,
-                    submission_passed INTEGER                    
+                    is_checked INTEGER,
+                    is_fast INTEGER,                
+                    FOREIGN KEY (student_id) REFERENCES students(student_id)
                     )''')
-
-    @staticmethod
-    def create_test_case_results_table(cursor):
-        """
-        creats the new test_case_result table if it doesn't exist
-        :param cursor: pointer to the database
-        :return: nothing
-        """
-
-        cursor.execute('''CREATE TABLE IF NOT EXISTS test_results
-                   (
-                   student_key INTEGER ,
-                   submission_key INTEGER,
-                   test_id INTEGER ,
-                   test_type TEXT NOT NULL,
-                   path TEXT NOT NULL,
-                   error_line TEXT NOT NULL,
-                   error_quality INTEGER,
-                   output_correct INTEGER,
-                   return_code INTEGER,
-                   good_input INTEGER,
-                   signal INTEGER,
-                   segfault INTEGER,
-                   timeout INTEGER,
-                   cpu_time REAL,
-                   real_time REAL,
-                   tictoc REAL,
-                   mrss INTEGER
-                   
-                   )''')
 
     @staticmethod
     def create_compilation_table(cursor):
@@ -859,23 +835,84 @@ class SQLiteDatabaseManager:
         :param cursor: pointer to the database
         :return: nothing
         """
-        cursor.execute('''CREATE TABLE IF NOT EXISTS compilations
+        cursor.execute('''CREATE TABLE IF NOT EXISTS compilation
                            (
-                           student_key INTEGER ,
-                           submission_key INTEGER,
+                           compilation_id INTEGER NOT NULL PRIMARY KEY,
+                           submission_id INTEGER NOT NULL,
+                           careless_flag INTEGER,
                            return_code INTEGER,
                            commandline TEXT NOT NULL,
-                           compiler_output TEXT NOT NULL                           
+                           compiler_output TEXT NOT NULL,
+                           FOREIGN KEY (submission_id) REFERENCES submission(submission_id)
                            )''')
 
-    @staticmethod
-    def create_valgrind_table(cursor):
 
-        cursor.execute('''CREATE TABLE IF NOT EXISTS valgrind
+    @staticmethod
+    def create_run_table(cursor):
+        """
+        creats the new compilation table if it doesn't exist
+        :param cursor: pointer to the database
+        :return: nothing
+        """
+        cursor.execute('''CREATE TABLE IF NOT EXISTS run
                            (
-                           student_key INTEGER ,
-                           submission_key INTEGER,
-                           test_id INTEGER,
+                           run_id INTEGER NOT NULL PRIMARY KEY,
+                           submission_id  INTEGER NOT NULL,
+                           compilation_id INTEGER NOT NULL,
+                           run_time TIMESTAMP,
+                           passed INTEGER,
+                           manual_passed INTEGER,
+                           FOREIGN KEY (submission_id) REFERENCES submission(submission_id),                                            
+                           FOREIGN KEY (compilation_id) REFERENCES compilation(compilation_id)
+
+                           )''')
+
+
+
+
+    @staticmethod
+    def create_testcase_result_table(cursor):
+        """
+        creats the new test_case_result table if it doesn't exist
+        :param cursor: pointer to the database
+        :return: nothing
+        """
+
+        cursor.execute('''CREATE TABLE IF NOT EXISTS testcase_result
+                   (
+                   testcase_result_id INTEGER NOT NULL PRIMARY KEY,
+                   run_id INTEGER NOT NULL,
+                   testcase_id INTEGER NOT NULL,
+                   error_line TEXT,
+                   error_quality INTEGER,
+                   output_correct INTEGER,
+                   return_code INTEGER,
+                   signal INTEGER,
+                   segfault INTEGER,
+                   timeout INTEGER,
+                   cpu_time REAL,
+                   real_time REAL,
+                   tictoc REAL,
+                   mrss INTEGER,
+                   used_rlimit_data INTEGER,
+                   used_rlimit_stack INTEGER,
+                   used_rlimit_cpu INTEGER,
+                   used_valgrind_data INTEGER,
+                   used_valgrind_stack INTEGER,
+                   used_valgrind_cpu INTEGER,
+                   num_executions INTEGER,
+                   FOREIGN KEY (run_id) REFERENCES run(run_id),
+                   FOREIGN KEY (testcase_id) REFERENCES testcase(testcase_id)
+                   )''')
+
+
+    @staticmethod
+    def create_valgrind_result_table(cursor):
+
+        cursor.execute('''CREATE TABLE IF NOT EXISTS valgrind_result
+                           (
+                           valgrind_result_id INTEGER NOT NULL PRIMARY KEY,
+                           testcase_result_id INTEGER NOT NULL,
                            ok INTEGER,
                            invalid_read_count INTEGER ,
                            invalid_write_count INTEGER,
@@ -897,28 +934,29 @@ class SQLiteDatabaseManager:
                            summary_errors INTEGER ,                                                     
                            summary_contexts INTEGER ,                                                     
                            summary_suppressed_bytes INTEGER ,                                                     
-                           summary_suppressed_blocks INTEGER                                                
-                           )''')
+                           summary_suppressed_blocks INTEGER,
+                            FOREIGN KEY (testcase_result_id) REFERENCES testcase_result(testcase_result_id)
+                            )''')
+
+#TODO: Mail log lieber als logfile!!
+    #@staticmethod
+    #def create_mail_log(cursor):#
+#
+ #       cursor.execute('''CREATE TABLE IF NOT EXISTS mail_log
+  #                         (student_key INTEGER,
+   #                        submission_key INTEGER,
+    #                       last_mailed TIMESTAMP,
+     #                      massage TEXT NOT NULL                                            
+      #                     )''')
 
     @staticmethod
-    def create_mail_log(cursor):
-
-        cursor.execute('''CREATE TABLE IF NOT EXISTS mail_log
-                           (student_key INTEGER,
-                           submission_key INTEGER,
-                           last_mailed TIMESTAMP,
-                           massage TEXT NOT NULL                                            
-                           )''')
-
-    @staticmethod
-    def create_test_case_table(cursor):
-        cursor.execute('''CREATE TABLE IF NOT EXISTS test_cases
+    def create_testcase_table(cursor):
+        cursor.execute('''CREATE TABLE IF NOT EXISTS testcase
                            (test_case_id INTEGER,
                            path TEXT NOT NULL ,
-                           input TEXT NOT NULL ,
-                           output TEXT NOT NULL, 
                            error_expected INTEGER ,
                            valgrind_needed INTEGER ,
+                           mtime TEXT,
                            short_id TEXT NOT NULL,                                            
                            description TEXT NOT NULL,                                            
                            hint TEXT NOT NULL ,                                           

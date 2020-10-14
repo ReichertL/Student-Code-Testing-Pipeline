@@ -21,11 +21,14 @@ csv and also via the moodle grading api.
 Thanks to `__init__.py` and `__main__.py`
 it can be called by executing:
 
-`python3 /path/to/eval_pipeline/`
-or
-`/path/to/eval_pipeline/__main__.py`
+`/path/to/eval_pipeline/__main__.py [args]`
 
 Relevant switches and flags are listed in Section [Commandline arguments](#stable-commandline-arguments)
+
+For convenience it is possible to create an alias or symbolic link(see [Installation and Setup]).
+It can then be called by:
+
+`check [args]`
 
 ### Installation and Setup
 

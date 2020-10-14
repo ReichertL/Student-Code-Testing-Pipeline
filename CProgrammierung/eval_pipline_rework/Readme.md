@@ -6,8 +6,10 @@ Further it is able to persist relevant information, send feedback e-mails and ge
 csv and also via the moodle grading api.   
 
 ## Content
-1. [Usage](#usage)
-    1. [Installation and Setup](#installation-and-setup)
+1. [How to Start](#how-to-start)
+    1. [Installation](#installation-and-setup)
+    * [Setup](#setup)
+    * [Usage](#usage)
 2. [Current State of the Rework](#current-state-of-the-rework)
     1. [Stable Commandline Arguments](#stable-commandline-arguments) 
     2. [Implemented Structure](#implemented-structure) 
@@ -17,21 +19,17 @@ csv and also via the moodle grading api.
     2. [Planned Features](#planned-structure)
     3. [Planned Integration](#planned-integration)
 
-## Usage
-Thanks to `__init__.py` and `__main__.py`
-it can be called by executing:
+## How to Start
+### Installation 
+Ensure that python3.8 is installed if not use the following command (works on Ubuntu 18.04):
 
-`/path/to/eval_pipeline/__main__.py [args]`
+`$ sudo apt-get install python3.8 python3.8-dev python3.8-distutils python3.8-venv`
 
-Relevant switches and flags are listed in Section [Commandline arguments](#stable-commandline-arguments)
+Install required packet bs4 for python3.8 by using:
 
-For convenience it is possible to create an alias or symbolic link(see [Installation and Setup]).
-It can then be called by:
+`python3.8 -m pip install bs4`
 
-`check [args]`
-
-### Installation and Setup
-
+### Setup
 
 There needs to be a resource directory inside the `eval_pipline directory`
 which contains:
@@ -54,7 +52,21 @@ If you want to use the automatic email functionality you might want to define a 
 where you define all relevant error messages that can be part of an email to a student.
 It's worth to note, that these template massages can contain placeholder tokens,
 which can be replaced during runtime. These tokens should be follow the format `$placeholder_token$`.  
- 
+
+
+### Usage
+Thanks to `__init__.py` and `__main__.py`
+it can be called by executing:
+
+`/path/to/eval_pipeline/__main__.py [args]`
+
+Relevant switches and flags are listed in Section [Commandline arguments](#stable-commandline-arguments)
+
+For convenience it is possible to create an alias or symbolic link(see [Installation and Setup]).
+It can then be called by:
+
+`check [args]`
+
 
 ## Current State of the Rework
 This section describes the current state of the eval pipeline. 

@@ -33,25 +33,25 @@ class SQLiteDatabaseManager:
 
         p = resolve_absolute_path("/resources/config_performance_evaluator.config")
         self.performance_configuration = ConfigReader().read_file(str(p))
+        cursor = self.database.cursor()
+        self.foreign_key_constraint(cursor)
 
     def is_empty(self):
         cursor = self.database.cursor()
-        cursor.execute("""SELECT * FROM students""")
+        cursor.execute("""SELECT * FROM student""")
         results = cursor.fetchone()
         return results is None or len(results) <= 0
 
     def insert_test_case_information(self, test_case):
         cursor = self.database.cursor()
 
-        cursor.execute("""SELECT * FROM test_cases WHERE test_case_id=?""",
+        cursor.execute("""SELECT * FROM testcase WHERE testcase_id=?""",
                        [test_case.id])
         result = cursor.fetchall()
         if result is None or len(result) == 0:
-            cursor.execute("""INSERT INTO test_cases VALUES (?,?,?,?,?,?,?,?,?,?)
+            cursor.execute("""INSERT INTO testcase VALUES (?,?,?,?,?,?,?,?)
              """, [test_case.id,
                    test_case.path,
-                   test_case.test_input,
-                   test_case.test_output,
                    1 if test_case.error_expected else 0,
                    1 if test_case.valgrind_needed else 0,
                    test_case.short_id,
@@ -68,7 +68,7 @@ class SQLiteDatabaseManager:
     def get_test_case_by_id(self, id):
         cursor = self.database.cursor()
 
-        cursor.execute("""SELECT * FROM test_cases WHERE test_case_id=?""",
+        cursor.execute("""SELECT * FROM testcase WHERE testcase_id=?""",
                        [id])
         raw_result = cursor.fetchall()
         raw_result = raw_result[0]
@@ -777,7 +777,7 @@ class SQLiteDatabaseManager:
         self.create_compilation_table(cursor)
         self.create_run_table(cursor)
         self.create_testcase_result_table(cursor)
-        self.create_valgrind_table(cursor)
+        self.create_valgrind_result_table(cursor)
         #self.create_mail_log(cursor)
         #self.create_abtestat_table(cursor)
         #self.create_performance_table(cursor, self.performance_configuration)
@@ -809,6 +809,12 @@ class SQLiteDatabaseManager:
         
     #student_moodle_id INTEGER,
      #      student_passed INTEGER)''')
+    
+    @staticmethod
+    def foreign_key_constraint(cursor):
+        cursor.execute(
+        '''PRAGMA foreign_keys=ON'''
+        )
 
     @staticmethod
     def create_submission_table(cursor):
@@ -819,7 +825,7 @@ class SQLiteDatabaseManager:
         """
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS submission
-                    submission_id  INTEGER NOT NULL PRIMARY KEY,
+                    (submission_id  INTEGER NOT NULL PRIMARY KEY,
                     student_id INTEGER NOT NULL,
                     submission_time TIMESTAMP,
                     submission_path TEXT NOT NULL,
@@ -952,11 +958,11 @@ class SQLiteDatabaseManager:
     @staticmethod
     def create_testcase_table(cursor):
         cursor.execute('''CREATE TABLE IF NOT EXISTS testcase
-                           (test_case_id INTEGER,
+                           (testcase_id INTEGER,
                            path TEXT NOT NULL ,
                            error_expected INTEGER ,
                            valgrind_needed INTEGER ,
-                           mtime TEXT,
+                           mtime Integer,
                            short_id TEXT NOT NULL,                                            
                            description TEXT NOT NULL,                                            
                            hint TEXT NOT NULL ,                                           

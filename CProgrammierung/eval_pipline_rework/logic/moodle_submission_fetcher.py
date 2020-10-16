@@ -177,6 +177,6 @@ class MoodleSubmissionFetcher:
         re_submission_dir = re.compile(r'(.+)_(\d+)_assignsubmission_file_')
         mo = re_submission_dir.match(d)
         student_name = mo.group(1)
-        student_id = database_manager.get_student_by_name(student_name)
+        student_id = database_manager.get_student_by_name(student_name).id
         submission_id = mo.group(2)
         return student_id, student_name, submission_id

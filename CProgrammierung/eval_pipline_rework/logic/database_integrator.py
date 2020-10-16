@@ -58,7 +58,7 @@ class DatabaseIntegrator:
             student_moodle_id = student_details[student_details.find("_") + 1:]
             if len(student_name) > 0 and len(student_moodle_id) > 0:
                 new_student = database_manager \
-                    .get_student_by_name(student_name)
+                    .get_student_by_moodleID(student_moodle_id)
             for file in files:
                 if file.__str__().find(".swp") > 0:
                     continue
@@ -77,9 +77,10 @@ class DatabaseIntegrator:
                     old_file = os.path.join(root, file)
                     shutil.move(old_file, new_file)
 
-                new_submission = Submission()
-                new_submission.path = root + os.path.sep + filename
-                new_submission.mtime = int(os
-                                           .path
-                                           .getmtime(new_submission.path))
-                database_manager.insert_submission(new_student, new_submission)
+                database_manager.insert_submission(new_student, root + os.path.sep + filename, os.path.getmtime(new_submission.path))
+                #new_submission = Submission()
+                #new_submission.path = root + os.path.sep + filename
+                #new_submission.mtime = int(os
+                #                           .path
+                #                           .getmtime(new_submission.path))
+                #database_manager.insert_submission(new_student, new_submission)

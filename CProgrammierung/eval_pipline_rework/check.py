@@ -7,6 +7,7 @@ submissionsParameter: none, reads commandline arguments to determine behavior
 """
 import os
 import traceback
+import logging
 from signal import SIGABRT, SIGTERM, SIGSEGV, SIGILL, signal, SIGINT
 
 from logic.database_integrator import DatabaseIntegrator
@@ -19,6 +20,7 @@ from persistence.database_manager import SQLiteDatabaseManager
 from util.argument_extractor import ArgumentExtractor
 from util.lockfile import LockFile
 from util.playground import Playground
+from alchemy.database_manager import DatabaseManager 
 
 LOCK_FILE_PATH = '/run/lock/check.lock'
 
@@ -29,12 +31,15 @@ def run():
     in args specified functionality
     """
     try:
+        logging.basicConfig(format='%(name)s - %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
         argument_extractor = ArgumentExtractor()
         args = argument_extractor.get_arguments()
+        #database_manager=DatabaseManager()        
         database_manager = SQLiteDatabaseManager()
         database_manager.create()
         if args.fetch or args.fetch_only:
             # Execute Submission Fetching if needed determined by the provided args
+            logging.debug("fetching")
             fetcher = MoodleSubmissionFetcher(args)
             fetcher.run(database_manager)
             database_integrator = DatabaseIntegrator()

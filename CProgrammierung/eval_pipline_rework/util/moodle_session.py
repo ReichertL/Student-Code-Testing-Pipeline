@@ -105,7 +105,7 @@ class MoodleSession:
         # dump teilnehmer list as json
         if res:
             for i in res:
-                Student(i, res[i], database_manager)
+                Student(i, res[i], database_manager) #Todo:was mach das hier?????
         else:
             with open('users.html', 'w') as f:
                 f.write(r.text)

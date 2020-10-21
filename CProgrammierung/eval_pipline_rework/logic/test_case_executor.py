@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import logging
 
 from logic.performance_evaluator import PerformanceEvaluator
 from models.compilation import Compilation
@@ -20,6 +21,16 @@ from util.config_reader import ConfigReader
 from util.gcc import hybrid_gcc
 from util.named_pipe_open import NamedPipeOpen
 from util.result_parser import ResultParser
+
+
+from alchemy.testcases import Testcase
+from alchemy.submissions import Submission
+from alchemy.database_manager import DatabaseManager
+
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
+
 
 
 def unlink_safe(path):
@@ -89,7 +100,6 @@ class TestCaseExecutor:
     """
     args = {}
     configuration = ""
-    test_cases = {}
     sudo_user = ''
     sudo = []
     unshare = []
@@ -113,98 +123,50 @@ class TestCaseExecutor:
         """
             runs specified test cases
         """
-        self.test_cases = self.load_tests(database_manager)
+        self.load_tests(database_manager)  #TODO: Mit flag versehen, so dass testcases nur eingelesen werden wenn es manuell gefordert wird
 
-        pending_submissions = self.retrieve_pending_submissions(
-            database_manager)
-
-        for student_key in pending_submissions:
-            current_student = database_manager.get_student_by_key(student_key)
-            for unchecked_submission in pending_submissions[student_key]:
-
-                compilation_result = self \
-                    .compile_single_submission(unchecked_submission.path)
-                unchecked_submission.compilation = compilation_result
-
-                database_manager \
-                    .insert_compilation_result(current_student,
-                                               unchecked_submission,
-                                               compilation_result)
-
-                if not len(self.args.compile) > 0:
-                    test_case_results = self \
-                        .check(current_student, unchecked_submission)
-                    if test_case_results:
-                        for test_case_result in test_case_results:
-                            database_manager \
-                                .insert_test_case_result(current_student,
-                                                         unchecked_submission,
-                                                         test_case_result)
-                    database_manager \
-                        .set_submission_checked(unchecked_submission)
-                    if unchecked_submission.passed:
-                        database_manager.set_student_passed(current_student)
-                database_manager \
-                    .get_test_case_result(current_student,
-                                          unchecked_submission)
-
+        pending_submissions = self.retrieve_pending_submissions(database_manager)
+        
+        logging.debug(database_manager.session.query(Submission).all())
+        logging.debug(pending_submissions)
+        for submission in pending_submissions:
+            student=database_manager.get_student_by_submissionID(submission)
+            run = self.compile_single_submission(submission)
+            database_manager.session.add(run)
+            database_manager.session.commit()    
+                
+            if (not len(self.args.compile) > 0):
+                if run.compilation_return_code==0:
+                    testcase_results = self.check(database_manager, student,submission,run)
+                else:
+                    print(f'Submission of '
+                        f'{student.name} submitted at '
+                        f'{submission.submission_time} did not compile.')
+            
     def retrieve_pending_submissions(self, database_manager):
         """Extracts submissions that should be evaluated
         based on the commandline arguments
         :return: list of submissions
         """
-
         submissions = {}
         students = []
         if self.args.check:
-            for i in self.args.check:
-                students.append(database_manager.get_student_by_name(i))
+            for name in self.args.check:
+                submissions_student=database_manager.get_submissions_not_checked_by_name(name)
+                submissions.append(submissions_student)
+                
 
         if self.args.all:
-            students = database_manager.get_all_students()
+            submissions=database_manager.get_submissions_not_checked()
+                        
 
         if self.args.unpassed:
-            students = self.get_unpassed_students(database_manager)
-
-        for student in students:
-            student.get_all_submissions(database_manager)
-            unchecked_submissions = []
-            if student.submissions is not None:
-                if self.args.rerun:
-                    try:
-                        unchecked_submissions = [max(student.submissions,
-                                                     key=lambda s: s.mtime)]
-                    except ValueError:
-                        print(f'INFO: Cannot rerun, '
-                              f'student "{student.name}" '
-                              f'has no submissions yet')
-                        unchecked_submissions = []
-                else:
-                    unchecked_submissions = student.get_unchecked_submissions()
-            if len(unchecked_submissions) > 0:
-                submissions.update({student
-                                   .data_base_key: unchecked_submissions})
-
+            students = database_manager.get_students_not_passed()
         return submissions
 
-    @staticmethod
-    def get_unpassed_students(database_manager):
-        """
-        Retrieves unpassed marked students
-        :param database_manager: the database which
-        provides student information
-        :return: all unpassed students
-        """
-        students = database_manager.get_all_students()
-        for student in students:
-            student.get_all_submissions(database_manager)
-        unpassed_students = [i for i in students
-                             if (not i.passed and
-                                 i.submissions is not None
-                                 and len(i.submissions) > 0)]
-        return unpassed_students
 
-    def compile_single_submission(self, path: str, strict=True):
+    def compile_single_submission(self, submission, strict=True):
+        path=submission.submission_path
         """Tries to compile a c file at configuration
         @:param configuration string describing
         the configuration of the configuration c file
@@ -238,9 +200,7 @@ class TestCaseExecutor:
             self.configuration['DOCKER_IMAGE_GCC'],
             self.configuration['DOCKER_CONTAINER_GCC'],
             self.configuration['DOCKER_SHARED_DIRECTORY'])
-        return Compilation(return_code=return_code,
-                           commandline=commandline,
-                           output=gcc_stderr)
+        return Run(submission.id, return_code, gcc_stderr)
 
     def load_tests(self, database_manager):
         """
@@ -258,7 +218,7 @@ class TestCaseExecutor:
         for key in extensions:
 
             test_case_input = []
-            path_prefix = os.path.join(self.configuration["TESTS_BASE_DIR"],
+            path_prefix = os.path.join(resolve_absolute_path(self.configuration["TESTS_BASE_DIR"]),
                                        extensions[key])
             for root, _, files in os.walk(
                     path_prefix
@@ -266,66 +226,35 @@ class TestCaseExecutor:
                     topdown=False):
                 for name in files:
 
-                    if name.endswith(".json"):
-                        with open(os.path.join(root, name)) \
-                                as description_file:
-                            short_id = name.replace(".json", "")
-                            description = json.load(description_file)
-                            json_descriptions.update({short_id: description})
+                    if name.endswith(".stdin"):
+                        short_id = name.replace(".stdin", "")
+                        path=os.path.join(root, name).replace(".stdin", "")
 
-                    if not name.endswith('.stdin'):
-                        continue
+                        json_file=(root+"/"+name).replace(".stdin", ".json")
+                        if(os.path.exists(json_file)):
+                            with open(json_file) \
+                                    as description_file:
+                                json_rep=json.load(description_file)
+                                description = json_rep["short_desc"]
+                                hint = json_rep["hint"]
+                                logging.debug(root)
+                                type=json_rep["type"]
+                                testcase = Testcase(path, short_id, description, hint, type)
+                                database_manager.session.add(testcase)
+                                #logging.debug(testcase)
+                        else: 
+                            description= short_id
+                            hint = f"bei {short_id}"
+                            type="UNSPEZIFIED"
+                            if extensions["GOOD"] in root: type="GOOD"
+                            elif extensions["BAD"] in root: type="BAD"
+                            elif extensions["EXTRA"] in root: type="EXTRA" #TODO:support for other types here?
+                            logging.debug(root)
+                            testcase = Testcase(path, short_id, description, hint, type)
+                            database_manager.session.add(testcase)
+        database_manager.session.commit()
 
-                    path = os.path.join(root, name). \
-                        replace(".stdin", ""). \
-                        replace(".stdout", "")
-
-                    test_output = ""
-                    with open(f"{path}.stdin") as input_file:
-                        test_input = input_file.read()
-                    if key != "BAD":
-                        with open(f"{path}.stdout") as output_file:
-                            test_output = output_file.read()
-
-                    test_case = TestCase(path,
-                                         test_input,
-                                         test_output,
-                                         error_expected=(key == "BAD"))
-                    test_case.type = key
-                    test_case_input.append(test_case)
-
-            path_mapping = [(key, test_case_input)]
-            test_cases.update(path_mapping)
-        all_test_cases = []
-
-        for key in test_cases:
-            for test_case in test_cases[key]:
-                test_case.valgrind_needed = key != "EXTRA"
-                test_case.type_good_input = key != "BAD"
-                test_case.id = test_case_id
-                try:
-                    test_case.description = \
-                        json_descriptions[test_case.short_id]["short_desc"]
-                except KeyError:
-                    test_case.description = test_case.short_id
-                try:
-                    test_case.hint = \
-                        json_descriptions[test_case.short_id]["hint"]
-                except KeyError:
-                    test_case.hint = f"bei {test_case.short_id}"
-
-                test_case_id = test_case_id + 1
-                database_manager.insert_test_case_information(test_case)
-                all_test_cases.append(test_case)
-
-        test_cases.update([("ALL", all_test_cases)])
-
-        return test_cases
-
-    def check(self, student,
-              submission,
-              force_performance=False,
-              ):
+    def check(self, database_manager, student,submission, run, force_performance=False):
         """
         checks the submission of a student
         :param student: the student which is the author of this submission
@@ -334,86 +263,75 @@ class TestCaseExecutor:
         :return: true if a check was conducted, else false
         """
 
-        source = submission.path
+        source = submission.submission_path
         if submission.is_checked:
             if self.args.rerun:
                 Warn(f'You forced to re-run tests on submission by '
-                     f'{student.name} submitted at {submission.timestamp}.\n'
+                     f'{student.name} submitted at {submission.submission_time}.\n'
 
-                     f'This is the {submission.submission_key + 1}. '
-                     f'submission, saved as {submission.path}')
+                     f'This is submission {submission.id}'
+                     f', saved at {submission.submission_path}')
             else:
-                return False
+                return
         print(f'running tests for '
               f'{student.name} submitted at '
-              f'{submission.timestamp}')
+              f'{submission.submission_time}')
         sys.stdout.flush()
-        submission.compilation = self.compile_single_submission(source)
-        all_results = []
+        compiled= self.compile_single_submission(submission)
 
-        bad_input_results = []
-        good_input_results = []
-        extra_input_results = []
 
-        submission.tests_good_input = good_input_results
-        submission.tests_bad_input = bad_input_results
-        submission.tests_extra_input = extra_input_results
 
-        if submission.compilation.return_code == 0:
-            for test in self.test_cases["BAD"]:
-                result = self.check_for_error(submission, test)
-                result.type = "BAD"
-                result.type_good_input = False
-                result.id = test.id
-                bad_input_results.append(result)
-            for test in self.test_cases["GOOD"]:
-                result = self.check_output(submission,
-                                           test,
-                                           sort_first_arg_and_diff)
-                result.type = "GOOD"
-                result.id = test.id
-                good_input_results.append(result)
-
-        passed = submission.compilation.return_code == 0
-        for i in bad_input_results:
-            all_results.append(i)
-        for i in good_input_results:
-            all_results.append(i)
-        for i in all_results:
-            passed = passed and i.passed()
-
+        if compiled.compilation_return_code== 0:
+            for test in database_manager.get_testcases_bad():
+                testcase_result, valgrind_output = self.check_for_error(submission,run, test)
+                database_manager.session.add(testcase_result)
+                if not valgrind_output == None: database_manager.session.add(valgrind_output)
+                
+            for test in database_manager.get_testcases_good():
+                testcase_result, valgrind_output =self.check_output(submission,run,test,sort_first_arg_and_diff)
+                database_manager.session.add(testcase_result)
+                if not valgrind_output == None: database_manager.session.add(valgrind_output)
+                
+            #This deals with testcases that are allowed to fail gracefully, but if they don't they have to return the correct value
+            for test in database_manager.get_testcases_bad_or_output():
+                testcase_result, valgrind_output = self.check_for_error_or_output(submission,run, test)
+                database_manager.session.add(testcase_result)
+                if not valgrind_output == None: database_manager.session.add(valgrind_output)
+                            
+            database_manager.session.commit()
+        else:
+            Warn(f'Something went wrong! '
+                     f'Submission by {student.name} submitted at {submission.submission_time}'
+                     f' did not compile but compiled earlier.\n'
+                     f'This is submission {submission.id}'
+                     f', saved at {submission.submission_path}')
+        
         submission.is_checked = True
         submission.timestamp = datetime.datetime.now()
-        student.passed = student.passed or passed
-        if submission.passed:
+
+        passed = database_manager.run_is_passed(run)
+        if passed:
             performance_evaluator = PerformanceEvaluator()
             performance_evaluator.evaluate_performance(submission)
-        if submission and (submission.is_performant()
-                           or force_performance):
-            print('fast submission; running performance tests')
-            for test in self.test_cases["EXTRA"]:
-                result = self.check_output(submission,
-                                           test,
-                                           sort_first_arg_and_diff)
-                result.type = "EXTRA"
-                result.id = test.id
-                extra_input_results.append(result)
+        #if passed and (submission.is_fast or force_performance):
+        if passed and  force_performance:
+            print('fast submission; running performance tests')                
+            for test in database_manager.get_testcases_performace():  
+                testcase_result, valgrind_output =self.check_output(submission,run,test,sort_first_arg_and_diff)
+                database_manager.session.add(testcase_result)
+                if not valgrind_output == None: database_manager.session.add(valgrind_output)
 
-        for i in extra_input_results:
-            all_results.append(i)
-
-        if submission.passed and submission.is_performant():
-            performance_evaluator \
-                .average_euclidean_cpu_time_competition(submission)
+        if run.passed and submission.is_fast:
+            #performance_evaluator \     #TODO Wozu ist das hier??
+             #   .average_euclidean_cpu_time_competition(submission)
             Passed()
 
         else:
             Failed()
             if self.args.verbose:
-                submission.print_stats()
-        return all_results
+                run.print_stats()        
 
-    def check_for_error(self, submission, test):
+    def check_for_error(self, submission, run, test):
         """
         checks a submission for a bad input test case
         :param submission: the submission to test
@@ -421,23 +339,21 @@ class TestCaseExecutor:
         :param verbose: enables verbose output
         :return: returns the result of the testcase
         """
-        test_case_result = self.execute_test_case(test, submission)
-        test_case_result.error_line = ''
-        test_case_result.output_correct = True
+        testcase_result, valgrind_output = self.execute_testcase(test, submission,run)
+        testcase_result.error_line = ''
+        testcase_result.output_correct = True
         parser = ResultParser()
-        parser.parse_error_file(test_case_result)
-        if test_case_result.return_code > 0 and \
-                test_case_result.error_msg_quality > 0:
-            test_case_result.output_correct = True
+        parser.parse_error_file(testcase_result)
+        if testcase_result.return_code > 0 and \
+                testcase_result.error_msg_quality > 0:
+            testcase_result.output_correct = True
         else:
-            test_case_result.output_correct = False
+            testcase_result.output_correct = False
         unlink_safe("test.stderr")
         unlink_safe("test.stdout")
-        test_case_result.student_key = submission.student_key
-        test_case_result.submission_key = submission.submission_key
-        return test_case_result
+        return testcase_result,valgrind_output
 
-    def check_output(self, submission, test, comparator):
+    def check_output(self, submission, run, test, comparator):
         """
         Checks a testcase that should be successful
         :param test: test case to execute
@@ -446,18 +362,38 @@ class TestCaseExecutor:
         :param comparator: compares to results
         :return: a TestCaseResult object encapsulating the results
         """
-        test_case_result = self.execute_test_case(test, submission)
-        test_case_result.output_correct = \
-            comparator('test.stdout',
-                       os.path.join(test.path + '.stdout'))
+        testcase_result, valgrind_output = self.execute_testcase(test, submission,run)
+        testcase_result.output_correct = comparator('test.stdout', os.path.join(test.path + '.stdout'))
         unlink_safe("test.stderr")
         unlink_safe("test.stdout")
-        test_case_result.student_key = submission.student_key
-        test_case_result.submission_key = submission.submission_key
 
-        return test_case_result
+        return testcase_result, valgrind_output
+    
+    def check_for_error_or_output(self, submission, run, test):
+        """
+        checks a submission for a bad input test case
+        :param submission: the submission to test
+        :param test: test case to execute
+        :param verbose: enables verbose output
+        :return: returns the result of the testcase
+        """
+        testcase_result, valgrind_output = self.execute_testcase(test, submission,run)
+        testcase_result.output_correct = comparator('test.stdout', os.path.join(test.path + '.stdout'))
+        if testcase.output_correct==False:
+            testcase_result.error_line = ''
+            testcase_result.output_correct = True
+            parser = ResultParser()
+            parser.parse_error_file(testcase_result)
+            if testcase_result.return_code > 0 and \
+                    testcase_result.error_msg_quality > 0:
+                testcase_result.output_correct = True
+            else:
+                testcase_result.output_correct = False
+            unlink_safe("test.stderr")
+            unlink_safe("test.stdout")
+        return testcase_result,valgrind_output
 
-    def execute_test_case(self, test_case, submission):
+    def execute_testcase(self, testcase, submission,run):
         """
         tests a submission with a testcaseabtestat
         :param submission: the submission to test
@@ -466,13 +402,15 @@ class TestCaseExecutor:
         :param verbose: enables verbose output
         :return: returns a test_case_result object
         """
-        tic = time.time()
+        limits=self.get_limits_time()
         parser = ResultParser()
+        result = Testcase_Result(run.id,testcase.id)
         if self.args.verbose:
             print(f'--- executing '
-                  f'{"".join(submission.path.split("/")[-2:])} '
-                  f'< {test_case.short_id} ---')
-        with NamedPipeOpen(f"{test_case.path}.stdin") as fin, \
+                  f'{"".join(submission.submission_path.split("/")[-2:])} '
+                  f'< {testcase.short_id} ---')
+        tic = time.time()
+        with NamedPipeOpen(f"{testcase.path}.stdin") as fin, \
                 open('test.stdout', 'bw') as fout, \
                 open('test.stderr', 'bw') as ferr:
             args = ['./loesung']
@@ -486,40 +424,43 @@ class TestCaseExecutor:
                 stdin=fin,
                 stdout=fout,
                 stderr=ferr,
-                preexec_fn=self.set_limits_time,
+                preexec_fn=self.set_limits_time(limits),
                 cwd='/tmp')
             try:
                 p.wait(150)
             except subprocess.TimeoutExpired:
                 sudokill(p)
             duration = time.time() - tic
-            result = TestCaseResult(test_case.path)
             result.return_code = p.returncode
             if p.returncode in (-9, -15, None):
-                result.timeout = False
+                result.timeout=True
                 if result.return_code is None:
                     result.return_code = -15
                 duration = -1
             else:
+                #sets timeout, segfault, signal,mrss, cpu_time
                 with open(self.configuration["TIME_OUT_PATH"]) as file:
-                    parser.parse_time_file(test_case_result=result, file=file)
-            if self.args.verbose and not result.timeout:
+                    parser.parse_time_file(result, file)
+            if self.args.verbose and result.timeout:
                 print('-> TIMEOUT')
-            result.tictoc = duration
+            result.tictoc = duration            
+            result.rlimit_data=limits[0]
+            result.rlimit_stack=limits[1]
+            result.rlimit_cpu=limits[2]
             fin.close()
 
             if self.args.verbose:
                 print(f'--- finished '
-                      f'{"".join(submission.path.split("/")[-2:])} '
-                      f'< {test_case.short_id} ---')
+                      f'{"".join(submission.submission_path.split("/")[-2:])} '
+                      f'< {testcase.short_id} ---')
 
-        result.vg['ok'] = None
-        if test_case.valgrind_needed and result.timeout and result.segfault:
+        valgrind_output=None
+        if testcase.valgrind_needed and (not result.timeout) and (not result.segfault):
             if self.args.verbose:
                 print(f'--- executing valgrind '
-                      f'{"".join(submission.path.split("/")[-2:])} '
-                      f'< {test_case.short_id} ---')
-            with NamedPipeOpen(f"{test_case.path}.stdin") as fin:
+                      f'{"".join(submission.submission_path.split("/")[-2:])} '
+                      f'< {testcase.short_id} ---')
+            with NamedPipeOpen(f"{testcase.submission_path}.stdin") as fin:
                 p = subprocess.Popen(self.sudo
                                      + self.unshare
                                      + [self.configuration["VALGRIND_PATH"],
@@ -530,7 +471,7 @@ class TestCaseExecutor:
                                      stdin=fin,
                                      stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL,
-                                     preexec_fn=self.set_limits_valgrind,
+                                     preexec_fn=self.set_limits_valgrind(limits),
                                      cwd='/tmp')
                 try:
                     p.wait(300)
@@ -538,70 +479,31 @@ class TestCaseExecutor:
                     sudokill(p)
             if p.returncode not in (-9, -15, None):
                 try:
-                    with open(self
-                                      .configuration["VALGRIND_OUT_PATH"], 'br') as f:
-                        result.vg = parser.parse_valgrind_file(f)
+                    with open(self.configuration["VALGRIND_OUT_PATH"], 'br') as f:
+                        valgrind_output= parser.parse_valgrind_file(testcase.id,f)
                 except FileNotFoundError:
                     pass
             if self.args.verbose:
                 print(f'--- finished valgrind '
-                      f'{"".join(submission.path.split("/")[-2:])} < '
-                      f'{test_case.short_id} ---')
-            result.description = test_case.description
-            result.hint = test_case.hint
+                      f'{"".join(submission.submission_path.split("/")[-2:])} < '
+                      f'{testcase.short_id} ---')
             unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)
-        return result
+        return result, valgrind_output
 
-    def set_limits_time(self):
+    def get_limits_time(self):
+        if not self.args.final:
+            return [self.configuration["RLIMIT_DATA"],self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]
+        else: 
+            return [self.configuration["RLIMIT_DATA_CARELESS"],self.configuration["RLIMIT_STACK_CARELESS"],self.configuration["RLIMIT_CPU_CARELESS"]]  
+    
+    def set_limits_time(self, limits):
         """
         Sets runtime ressources depending on the possible
         final flag
         nothing
         """
-        if not self.args.final:
-            resource.setrlimit(resource.RLIMIT_DATA,
-                               2 * (self
-                                    .configuration["RLIMIT_DATA"],))
-            resource.setrlimit(resource.RLIMIT_STACK,
-                               2 * (self
-                                    .configuration["RLIMIT_STACK"],))
-            resource.setrlimit(resource.RLIMIT_CPU,
-                               2 * (self
-                                    .configuration["RLIMIT_CPU"],))
-        else:
-            resource.setrlimit(resource.RLIMIT_DATA,
-                               2 * (self
-                                    .configuration["RLIMIT_DATA_CARELESS"],))
-            resource.setrlimit(resource.RLIMIT_STACK,
-                               2 * (self
-                                    .configuration["RLIMIT_STACK_CARELESS"],))
-            resource.setrlimit(resource.RLIMIT_CPU,
-                               2 * (self
-                                    .configuration["RLIMIT_CPU_CARELESS"],))
+        resource.setrlimit(resource.RLIMIT_DATA,2 * (limits[0],))
+        resource.setrlimit(resource.RLIMIT_STACK,2 * (limits[1],))
+        resource.setrlimit(resource.RLIMIT_CPU,2 * (limits[2],))
 
-    def set_limits_valgrind(self):
-        """
-        Sets valgrind runtime ressources depending on the possible
-        final flag
-        nothing
-        """
-        if not self.args.final:
-            resource.setrlimit(resource.RLIMIT_DATA,
-                               2 * (self
-                                    .configuration["VALGRIND_DATA"],))
-            resource.setrlimit(resource.RLIMIT_STACK,
-                               2 * (self
-                                    .configuration["VALGRIND_STACK"],))
-            resource.setrlimit(resource.RLIMIT_CPU,
-                               2 * (self
-                                    .configuration["VALGRIND_CPU"],))
-        else:
-            resource.setrlimit(resource.RLIMIT_DATA,
-                               2 * (self
-                                    .configuration["RLIMIT_DATA_CARELESS"],))
-            resource.setrlimit(resource.RLIMIT_STACK,
-                               2 * (self
-                                    .configuration["RLIMIT_STACK_CARELESS"],))
-            resource.setrlimit(resource.RLIMIT_CPU,
-                               2 * (self
-                                    .configuration["RLIMIT_CPU_CARELESS"],))
+

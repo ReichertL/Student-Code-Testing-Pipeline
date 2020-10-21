@@ -23,6 +23,11 @@ from util.playground import Playground
 from alchemy.database_manager import DatabaseManager 
 
 LOCK_FILE_PATH = '/run/lock/check.lock'
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
+
+
+
 
 def run():
     """
@@ -31,15 +36,17 @@ def run():
     in args specified functionality
     """
     try:
-        logging.basicConfig(format='%(name)s - %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+                
+        logging.debug("test")
+
         argument_extractor = ArgumentExtractor()
         args = argument_extractor.get_arguments()
-        #database_manager=DatabaseManager()        
-        database_manager = SQLiteDatabaseManager()
-        database_manager.create()
+        database_manager=DatabaseManager()        
+        ##database_manager = SQLiteDatabaseManager()
+        ##database_manager.create()
         if args.fetch or args.fetch_only:
             # Execute Submission Fetching if needed determined by the provided args
-            logging.debug("fetching")
             fetcher = MoodleSubmissionFetcher(args)
             fetcher.run(database_manager)
             database_integrator = DatabaseIntegrator()
@@ -48,7 +55,7 @@ def run():
         if not args.fetch_only:
             # Execute test cases if needed determined by the provided args
             executor = TestCaseExecutor(args)
-            executor.run(database_manager=database_manager)
+           ## executor.run(database_manager=database_manager)
 
         # Send Moodle feedback to students if needed determined by args
         if args.mail_to_all or len(args.mailto) > 0 or args.debug:
@@ -92,8 +99,12 @@ def run():
 
         # optional playground to try new implemented features
         if args.playground:
-            playground = Playground()
-            playground.run()
+            database_manager_new=DatabaseManager()        
+            database_manager_new.functionality()
+            executor = TestCaseExecutor(args)
+            executor.run(database_manager=database_manager_new)
+            #playground = Playground()
+            #playground.run()
     finally:
         try:
             cleanup()

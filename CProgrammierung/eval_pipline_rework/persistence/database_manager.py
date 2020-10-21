@@ -7,6 +7,7 @@ import sys
 from datetime import datetime
 from os.path import getmtime
 
+
 from models.compilation import Compilation
 from models.mail_information import MailInformation
 from models.student import Student
@@ -15,6 +16,7 @@ from models.test_case import TestCase
 from models.test_case_result import TestCaseResult
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
+
 
 
 class SQLiteDatabaseManager:
@@ -35,6 +37,7 @@ class SQLiteDatabaseManager:
         self.performance_configuration = ConfigReader().read_file(str(p))
         cursor = self.database.cursor()
         self.foreign_key_constraint(cursor)
+
 
     def is_empty(self):
         cursor = self.database.cursor()

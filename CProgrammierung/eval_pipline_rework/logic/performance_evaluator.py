@@ -23,66 +23,39 @@ class PerformanceEvaluator:
         self.configuration = ConfigReader() \
             .read_file(os.path.abspath(config_path))
 
-    def evaluate_performance(self, submission):
+    def evaluate_performance(self, submission, run, database_manager):
         """
-        checks whether a submission is performant
+        checks whether a submission is performant based on one run
         :param submission: the respective submission
         :return: None
         """
         performant = True
-        metric = self.average_euclidean_cpu_time(submission)
+        metric = database_manager.get_avg_cputime_run(run)
         if metric > self.configuration["THRESHOLD"]:
             performant = False
+        if submission.is_fast==False or submission.is_fast==None:
+            submission.performant = performant
 
-        submission.performant = performant
-        submission.performant = True
-
-    def evaluate_competition(self, submission):
+    def evaluate_competition(self, submission, database_manager):
         """
         evaluates a submission for the competition
         (a optional metric)
         :param submission: the respective submission
         :return: the average cpu time
         """
-        return self.average_euclidean_cpu_time_competition(submission)
+        return self.average_euclidean_cpu_time_competition(run, database_manager)
+
 
     @staticmethod
-    def average_euclidean_cpu_time(submission):
-        """
-        computes the average euclidean cpu time
-        (optional metric)
-        :param submission: the respective submission
-        :return: the average cpu time
-        """
-        good_test_cases = submission.tests_good_input
-        bad_test_cases = submission.tests_bad_input
-        dist = 0.0
-        for i in good_test_cases:
-            dist = dist + i.cpu_time
-        for i in bad_test_cases:
-            dist = dist + i.cpu_time
-
-        dist = dist / (len(good_test_cases) + len(bad_test_cases))
-        return dist
-
-    @staticmethod
-    def average_euclidean_cpu_time_competition(submission):
+    def average_euclidean_cpu_time_competition(run, database_manager):
         """
         computes the average euclidean cpu time for the competition
         with regard to the extra testcases
         (optional metric)
-        :param submission: the respective submission
+        :param run: the respective run
         :return: the average cpu time
         """
-        extra_test_cases = submission.tests_extra_input
-        if len(extra_test_cases) == 0:
-            return float('nan')
-        dist = 0.0
-        for i in extra_test_cases:
-            dist = dist + i.cpu_time
-
-        dist = dist / (len(extra_test_cases))
-        return dist
+        return database_manager.get_avg_cputime_run_performance(run)
 
     @staticmethod
     def geometric_mean_space(submission):

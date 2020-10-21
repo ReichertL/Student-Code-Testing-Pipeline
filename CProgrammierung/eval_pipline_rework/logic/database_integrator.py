@@ -66,9 +66,7 @@ class DatabaseIntegrator:
 
                 if not file.startswith("loesung_202"):
                     timestamp_extension = datetime.datetime.fromtimestamp(
-                        int(os
-                            .path
-                            .getmtime(root + os.path.sep + file))) \
+                        int(os.path.getmtime(root + os.path.sep + file))) \
                         .__str__()
                     regex_timestamp = re.sub("-|:|\s", "_",
                                              timestamp_extension)
@@ -76,11 +74,6 @@ class DatabaseIntegrator:
                     new_file = os.path.join(root, filename)
                     old_file = os.path.join(root, file)
                     shutil.move(old_file, new_file)
-
-                database_manager.insert_submission(new_student, root + os.path.sep + filename, os.path.getmtime(new_submission.path))
-                #new_submission = Submission()
-                #new_submission.path = root + os.path.sep + filename
-                #new_submission.mtime = int(os
-                #                           .path
-                #                           .getmtime(new_submission.path))
-                #database_manager.insert_submission(new_student, new_submission)
+                path=root + os.path.sep + filename
+                ts=datetime.datetime.fromtimestamp(os.path.getmtime(path))
+                database_manager.insert_submission(new_student, path, ts)

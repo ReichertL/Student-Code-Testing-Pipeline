@@ -16,6 +16,8 @@ from util.colored_massages import Warn
 from util.config_reader import ConfigReader
 from util.moodle_session import MoodleSession
 
+from alchemy.students import Student
+
 
 def mkdir(path):
     """
@@ -139,14 +141,14 @@ class MoodleSubmissionFetcher:
             return new
         dir_listing = os.listdir(new_submissions_dir)
         for d in dir_listing:
-            student_id, student_name, _ = self. \
+            student= self. \
                 dirname_to_student(d, database_manager)
             src_dir = os.path.join(new_submissions_dir, d)
             src = os.path.join(src_dir, 'loesung.c')
 
             if not os.path.exists(src):
                 Warn('Student "{}" ({}) did not submit a source file.'.format(
-                    student_name, student_id))
+                    student.name, student.id))
                 continue
             dest_dir = os.path.join(all_submissions_dir, d)
             timestamp_extension = datetime \
@@ -160,7 +162,7 @@ class MoodleSubmissionFetcher:
                 os.mkdir(dest_dir)
 
             shutil.move(src, dest)
-            new.append((student_id, student_name))
+            new.append((student.name, student.id))
         return new
 
     @staticmethod
@@ -177,6 +179,12 @@ class MoodleSubmissionFetcher:
         re_submission_dir = re.compile(r'(.+)_(\d+)_assignsubmission_file_')
         mo = re_submission_dir.match(d)
         student_name = mo.group(1)
-        student_id = database_manager.get_student_by_name(student_name).id
-        submission_id = mo.group(2)
-        return student_id, student_name, submission_id
+        moodle_id = mo.group(2)
+
+        student=database_manager.get_student_by_name(student_name)
+        if student==None:
+            Warn("Student with name "+str(student_name)+" did not exist. An database entrie is now created.")
+            student=Student(student_name,moodle_id )
+            database_manager.session.add(student)
+            database_manager.session.commit()
+        return student

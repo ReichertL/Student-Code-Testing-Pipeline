@@ -12,7 +12,9 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 
-from models.student import Student
+from alchemy.students import Student
+
+#from models.student import Student
 from util.absolute_path_resolver import resolve_absolute_path
 
 AJAX_HEADERS = {
@@ -73,7 +75,7 @@ class MoodleSession:
     def read_users_cached(self, database_manager):
         """Read in the users list found in a cache file 'teilnehmer.json' in
         the current working directory."""
-        self.teilnehmer = database_manager.get_all_students()
+        self.teilnehmer = database_manager.get_students_all()
 
     @property
     def moodle_base_url(self):
@@ -105,7 +107,12 @@ class MoodleSession:
         # dump teilnehmer list as json
         if res:
             for i in res:
-                Student(i, res[i], database_manager) #Todo:was mach das hier?????
+                student_exists=database_manager.get_student_by_name(i)
+                if student_exists==None:
+                    student=Student(i, res[i])
+                    database_manager.session.add(student)
+            database_manager.session.commit()
+                
         else:
             with open('users.html', 'w') as f:
                 f.write(r.text)

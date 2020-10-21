@@ -55,7 +55,7 @@ def run():
         if not args.fetch_only:
             # Execute test cases if needed determined by the provided args
             executor = TestCaseExecutor(args)
-           ## executor.run(database_manager=database_manager)
+            #executor.run(database_manager=database_manager)
 
         # Send Moodle feedback to students if needed determined by args
         if args.mail_to_all or len(args.mailto) > 0 or args.debug:

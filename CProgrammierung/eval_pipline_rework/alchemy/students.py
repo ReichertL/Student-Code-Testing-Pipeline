@@ -19,6 +19,7 @@ class Student(Base):
    def __init__(self, name, moodle_id):   
         self.name = name
         self.moodle_id=moodle_id      
+
         
    def __repr__(self):
         return ("(Student: " + str(self.id) + "," + str(self.name)+")")

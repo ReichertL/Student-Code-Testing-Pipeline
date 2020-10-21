@@ -42,6 +42,11 @@ class DatabaseManager:
         if (len(result)<1):       
             return True
         return False
+    
+    def get_students_all(self):
+        result = self.session.query(Student).all()      
+        return result
+        
 
     def get_student_by_name(self, student_name):
         result = self.session.query(Student).filter_by(name=student_name).order_by(Student.id).first()      

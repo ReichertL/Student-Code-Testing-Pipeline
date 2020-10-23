@@ -36,7 +36,7 @@ class ResultParser:
             testcase_result.cpu_time = float(ls[0]) + float(ls[1])
             testcase_result.mrss = 1024 * int(ls[2])
             testcase_result.return_code = int(ls[3])
-            #test_case_result.realtime = float(ls[4])
+            realtime = float(ls[4])
             break
 
     @staticmethod

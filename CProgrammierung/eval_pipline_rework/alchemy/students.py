@@ -7,9 +7,9 @@ class Student(Base):
    __tablename__ = 'Student'
    
    id = Column(Integer, primary_key =  True)
-   name = Column(String, nullable=False)
-   moodle_id = Column(Integer,nullable=False)
-   matrikel_nr = Column(Integer)
+   name = Column(String, nullable=False, unique=True)
+   moodle_id = Column(Integer,nullable=False, unique=True)
+   matrikel_nr = Column(Integer, unique=True)
    grade = Column(String)
    last_mailed = Column(DateTime)
    abtestat_time = Column(DateTime)

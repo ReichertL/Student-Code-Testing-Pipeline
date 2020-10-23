@@ -18,13 +18,15 @@ from models.test_case_result import TestCaseResult
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn, Passed, Failed
 from util.config_reader import ConfigReader
-from util.gcc import hybrid_gcc
+from util.gcc import hybrid_gcc, native_gcc
 from util.named_pipe_open import NamedPipeOpen
 from util.result_parser import ResultParser
 
 
 from alchemy.testcases import Testcase
 from alchemy.submissions import Submission
+from alchemy.runs import Run
+from alchemy.testcase_results import Testcase_Result
 from alchemy.database_manager import DatabaseManager
 
 
@@ -126,11 +128,8 @@ class TestCaseExecutor:
         self.load_tests(database_manager)  #TODO: Mit flag versehen, so dass testcases nur eingelesen werden wenn es manuell gefordert wird
 
         pending_submissions = self.retrieve_pending_submissions(database_manager)
-        
-        logging.debug(database_manager.session.query(Submission).all())
-        logging.debug(pending_submissions)
         for submission in pending_submissions:
-            student=database_manager.get_student_by_submissionID(submission)
+            student=database_manager.get_student_by_submission(submission)
             run = self.compile_single_submission(submission)
             database_manager.session.add(run)
             database_manager.session.commit()    
@@ -148,12 +147,13 @@ class TestCaseExecutor:
         based on the commandline arguments
         :return: list of submissions
         """
-        submissions = {}
-        students = []
+        submissions = []
+
         if self.args.check:
             for name in self.args.check:
-                submissions_student=database_manager.get_submissions_not_checked_by_name(name)
-                submissions.append(submissions_student)
+                submissions_student=database_manager.get_submissions_not_checked_for_name(name)
+                submissions.extend(submissions_student)
+                    
                 
 
         if self.args.all:
@@ -162,6 +162,11 @@ class TestCaseExecutor:
 
         if self.args.unpassed:
             students = database_manager.get_students_not_passed()
+            logging.debug(students)
+            for student in students:
+                submissions_students=database_manager.get_all_submissions_for_name(student.name)
+                submissions.extend(submissions_students)
+        logging.debug(submissions)
         return submissions
 
 
@@ -187,20 +192,14 @@ class TestCaseExecutor:
         if not strict:
             gcc_args.remove('-Werror')
         submission_executable_path = '/tmp/loesung'
-        # uncomment the following to enable compilation using the host's
-        # native gcc:
-        # commandline, return_code, gcc_stderr = native_gcc(
-        # gcc_args + self.configuration.get('CFLAGS_LOCAL', []),
-        # path,
-        # submission_executable_path)
-        commandline, return_code, gcc_stderr = hybrid_gcc(
+        commandline, return_code, gcc_stderr = hybrid_gcc(  
             gcc_args,
             path,
             submission_executable_path,
             self.configuration['DOCKER_IMAGE_GCC'],
             self.configuration['DOCKER_CONTAINER_GCC'],
             self.configuration['DOCKER_SHARED_DIRECTORY'])
-        return Run(submission.id, return_code, gcc_stderr)
+        return Run(submission.id,commandline, return_code, gcc_stderr)
 
     def load_tests(self, database_manager):
         """
@@ -229,6 +228,7 @@ class TestCaseExecutor:
                     if name.endswith(".stdin"):
                         short_id = name.replace(".stdin", "")
                         path=os.path.join(root, name).replace(".stdin", "")
+                        #logging.debug(short_id)
 
                         json_file=(root+"/"+name).replace(".stdin", ".json")
                         if(os.path.exists(json_file)):
@@ -237,10 +237,10 @@ class TestCaseExecutor:
                                 json_rep=json.load(description_file)
                                 description = json_rep["short_desc"]
                                 hint = json_rep["hint"]
-                                logging.debug(root)
+                                #logging.debug(root)
                                 type=json_rep["type"]
                                 testcase = Testcase(path, short_id, description, hint, type)
-                                database_manager.session.add(testcase)
+                                database_manager.testcase_create_or_update(testcase)
                                 #logging.debug(testcase)
                         else: 
                             description= short_id
@@ -249,10 +249,9 @@ class TestCaseExecutor:
                             if extensions["GOOD"] in root: type="GOOD"
                             elif extensions["BAD"] in root: type="BAD"
                             elif extensions["EXTRA"] in root: type="EXTRA" #TODO:support for other types here?
-                            logging.debug(root)
+                            #logging.debug(root)
                             testcase = Testcase(path, short_id, description, hint, type)
-                            database_manager.session.add(testcase)
-        database_manager.session.commit()
+                            database_manager.testcase_create_or_update(testcase)
 
     def check(self, database_manager, student,submission, run, force_performance=False):
         """
@@ -283,18 +282,22 @@ class TestCaseExecutor:
 
         if compiled.compilation_return_code== 0:
             for test in database_manager.get_testcases_bad():
+                logging.debug("Testcase "+str(test.short_id))
                 testcase_result, valgrind_output = self.check_for_error(submission,run, test)
                 database_manager.session.add(testcase_result)
                 if not valgrind_output == None: database_manager.session.add(valgrind_output)
                 
             for test in database_manager.get_testcases_good():
+                logging.debug("Testcase "+str(test.short_id))
+
                 testcase_result, valgrind_output =self.check_output(submission,run,test,sort_first_arg_and_diff)
                 database_manager.session.add(testcase_result)
                 if not valgrind_output == None: database_manager.session.add(valgrind_output)
                 
             #This deals with testcases that are allowed to fail gracefully, but if they don't they have to return the correct value
             for test in database_manager.get_testcases_bad_or_output():
-                testcase_result, valgrind_output = self.check_for_error_or_output(submission,run, test)
+                logging.debug("Testcase "+str(test.short_id))
+                testcase_result, valgrind_output = self.check_for_error_or_output(submission,run, test, sort_first_arg_and_diff )
                 database_manager.session.add(testcase_result)
                 if not valgrind_output == None: database_manager.session.add(valgrind_output)
                             
@@ -307,12 +310,13 @@ class TestCaseExecutor:
                      f', saved at {submission.submission_path}')
         
         submission.is_checked = True
+        database_manager.session.commit()
         submission.timestamp = datetime.datetime.now()
 
         passed = database_manager.run_is_passed(run)
         if passed:
             performance_evaluator = PerformanceEvaluator()
-            performance_evaluator.evaluate_performance(submission)
+            performance_evaluator.evaluate_performance(submission,run,database_manager)
         #if passed and (submission.is_fast or force_performance):
         if passed and  force_performance:
             print('fast submission; running performance tests')                
@@ -369,7 +373,7 @@ class TestCaseExecutor:
 
         return testcase_result, valgrind_output
     
-    def check_for_error_or_output(self, submission, run, test):
+    def check_for_error_or_output(self, submission, run, test,comparator):
         """
         checks a submission for a bad input test case
         :param submission: the submission to test
@@ -379,7 +383,7 @@ class TestCaseExecutor:
         """
         testcase_result, valgrind_output = self.execute_testcase(test, submission,run)
         testcase_result.output_correct = comparator('test.stdout', os.path.join(test.path + '.stdout'))
-        if testcase.output_correct==False:
+        if testcase_result.output_correct==False:
             testcase_result.error_line = ''
             testcase_result.output_correct = True
             parser = ResultParser()

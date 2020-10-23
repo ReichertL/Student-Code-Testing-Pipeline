@@ -3,11 +3,14 @@ Implements all functionality needed to run
 performance statistics
 """
 import os
+import logging
 
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
 from util.htable import table_format
 
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 class PerformanceEvaluator:
     """
@@ -31,10 +34,10 @@ class PerformanceEvaluator:
         """
         performant = True
         metric = database_manager.get_avg_cputime_run(run)
-        if metric > self.configuration["THRESHOLD"]:
+        if metric > float(self.configuration["THRESHOLD"]):
             performant = False
         if submission.is_fast==False or submission.is_fast==None:
-            submission.performant = performant
+            submission.is_fast = performant
 
     def evaluate_competition(self, submission, database_manager):
         """

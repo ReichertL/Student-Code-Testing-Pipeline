@@ -12,9 +12,7 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 
-from alchemy.students import Student
-
-#from models.student import Student
+from models.student import Student
 from util.absolute_path_resolver import resolve_absolute_path
 
 AJAX_HEADERS = {

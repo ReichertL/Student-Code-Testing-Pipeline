@@ -11,7 +11,7 @@ class Testcase(Base):
     id = Column(Integer, primary_key =  True)
     path = Column(String, nullable=False)
     valgrind_needed = Column(Boolean)
-    short_id = Column(String,nullable=False)
+    short_id = Column(String,nullable=False, unique=True)
     description = Column(String,nullable=False)
     hint = Column(String,nullable=False)
     type = Column(String,nullable=False)
@@ -36,3 +36,10 @@ class Testcase(Base):
                                 str(self.type)+")")
     
 
+    def update( self,testcase):
+        self.path=testcase.path
+        self.valgrind_needed=testcase.valgrind_needed
+        self.short_id=testcase.short_id
+        self.description=testcase.description
+        self.hint=testcase.hint
+        self.type=testcase.type

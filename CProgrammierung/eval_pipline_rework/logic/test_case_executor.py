@@ -315,6 +315,8 @@ class TestCaseExecutor:
 
         passed = database_manager.run_is_passed(run)
         if passed:
+            student.grade=1
+            database_manager.session.commit()
             performance_evaluator = PerformanceEvaluator()
             performance_evaluator.evaluate_performance(submission,run,database_manager)
         #if passed and (submission.is_fast or force_performance):

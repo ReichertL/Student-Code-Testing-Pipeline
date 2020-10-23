@@ -11,6 +11,7 @@ class Submission(Base):
    submission_path = Column(String, nullable=False)
    is_checked = Column(Boolean, default=False)
    is_fast = Column(Boolean)
+   student_notified=Collumn(Boolean)
 
    runs = relationship("Run", backref="Submission.id")   
 

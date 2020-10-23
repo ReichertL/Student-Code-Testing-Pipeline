@@ -87,7 +87,7 @@ class ResultGenerator:
         :param points: the points he/she received
         :return: nothing
         """
-        row = [student.moodle_id, student.name, points]
+        row = [student.matrikel_nr, student.name, points]
         self.to_dump_list.append(row)
 
     def dump_list(self):

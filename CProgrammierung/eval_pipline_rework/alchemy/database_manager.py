@@ -62,6 +62,13 @@ class DatabaseManager:
         #todo:test function
         return result
 
+
+    def is_student_passed(self,name):
+        results=self.session.query(Student).join(Submission, Submission.student_id==Student.id).join(Run, Run.submission_id==Submission.id).filter(Run.passed==True,Student.name==name).count()
+        if results >0:
+            return True
+        return False
+
     def get_students_passed(self):
         #This syntax also returns the other collums: 
         #results=self.session.query(Student,Submission, Run).join(Submission, Submission.student_id==Student.id).join(Run, Run.submission_id==Submission.id).filter_by(passed=True).group_by(Student.name).all()
@@ -72,14 +79,22 @@ class DatabaseManager:
         results=self.session.query(Student).join(Submission, Submission.student_id==Student.id).join(Run, Run.submission_id==Submission.id).filter(Run.passed==False).group_by(Student.name).all()
         return results
 
+        
+    def get_sumbissions_students_to_notify(self)
+        results=self.session.query(Student, Submission).join(Submission, Submission.student_id==Student.id).filter(Submission.is_checked==True, Submission.student_notified==False).all()
+        return results
+
+    def get_last_submission_for_student(self,name)
+        results=self.session.query(Student, Submission).join(Submission, Submission.student_id==Student.id).filter(Submission.is_checked==True, Student.name==name).order_by(Submission.submission_time).last()
+        return results
+    
+
 
     def insert_submission(self,student, path, time):
         sub=Submission(student.id, path)
         sub.submission_time=time
         self.session.add(sub)
         self.session.commit()
-
-
 
 
     def get_submissions_not_checked(self):
@@ -126,7 +141,6 @@ class DatabaseManager:
         return failed_testcases
         
 
-#todo test these
     def get_testcases_bad (self):
         testcases=self.session.query(Testcase).filter(Testcase.type=="BAD").all()
         return testcases        
@@ -159,10 +173,15 @@ class DatabaseManager:
             logging.info("New testcase inserted or altered one upgedated.")
 
 
+    def get_testcase_results_bad_for_run(self, run):
+        results=self.session.query(Testcase_Results).join(Testcases).filter(Testcases.type=="Bad", Testcase_Result.run_id==run.id).all()
+        return results
+
+    def get_testcase_results_good_for_run(self, run):
+        results=self.session.query(Testcase_Results).join(Testcases).filter(Testcases.type=="GOOD", Testcase_Result.run_id==run.id).all()
+        return results
 
     def get_avg_cputime_run(self,r):
-
-        
         avg=self.session.query(func.avg(Testcase_Result.cpu_time)).filter_by(run_id=r.id).scalar()
         return avg
 
@@ -170,6 +189,9 @@ class DatabaseManager:
     def get_avg_cputime_run_performance(self,r , testcase_type):
         avg=self.session.query(func.avg(Testcase_Result.cpu_time)).join(Testcase).filter(Testcase_Result.run_id==r.id, Testcase.type=="PERFORMANCE" ).scalar()
         return avg
+ 
+
+ 
  
     def functionality(self):
         

@@ -65,7 +65,7 @@ class MoodleReporter:
 
         return failed_snippet
 
-    def generate_mail_content(self, student, submission):
+    def generate_mail_content(self, student, submission,run):
         """
         generates the mail itself
         for a given student and submission
@@ -87,24 +87,24 @@ class MoodleReporter:
                 mail_templates.update({identifier: text})
 
         mail = mail_templates["greeting"].replace("$name$", student.name)
-        if submission.passed:
+        if run.passed:
             if self.args.final:
                 mail += mail_templates["successful_final"]
             else:
                 mail += mail_templates["successful"]
         else:
-            if submission.compilation is not None and submission.compilation:
+            if run.compilation is not None and run.compilation:
                 bad_failed_description = {}
                 good_failed_description = {}
-                for i in submission.tests_bad_input:
-                    if not i.passed():
+                for i in database_manager.get_testcase_results_bad_for_run(run):
+                    if not i.output_correct:
                         bad_failed_description = i \
                             .get_failed_description(bad_failed_description)
-                for i in submission.tests_good_input:
-                    if not i.passed():
+                for i in database_manager.get_testcase_results_bad_for_run(run):
+                    if not i.output_correct:
                         good_failed_description = i \
                             .get_failed_description(good_failed_description)
-
+                #TODO: Bad or OUTPUT is missing
                 good_failed_snippet = mail_templates["good_test_failed_intro"]
                 if len(bad_failed_description) > 0:
                     mail += mail_templates["bad_test_failed_intro"]
@@ -122,12 +122,12 @@ class MoodleReporter:
                                                      mail_templates)
 
             else:
-                if submission.compilation is not None:
+                if run.compilation_return_code !=0:
                     mail += mail_templates["not_compiled"] \
                         .replace("$commandline$",
-                                 submission.compilation.commandline) \
+                                 run.command_line) \
                         .replace("$compilation_output$",
-                                 submission.compilation.output)
+                                 run.compiler_output)
                 else:
                     print(f"--{student.name}'s submission was not compiled "
                           f"before mailing him--")
@@ -137,13 +137,13 @@ class MoodleReporter:
             if not self.args.final:
                 mail += mail_templates["further_attempts"]
             else:
-                if student.passed:
+                if database_manager.is_student_passed(student.name):
                     mail += mail_templates["extra_passed_final"]
                 else:
                     mail += mail_templates["not_passed_final"]
         mail += mail_templates["ending"] \
             .replace("$submission_timestamp$",
-                     datetime.fromtimestamp(submission.mtime)
+                     datetime.fromtimestamp(submission.submission_time) #TODO passt das?
                      .strftime('%d.%m.%Y, %T Uhr'))
 
         if not self.args.final:
@@ -151,7 +151,7 @@ class MoodleReporter:
         mail += "\n"
         return mail
 
-    def send_mail(self, student, submission, text, grade=None):
+    def send_mail(self,database_manager, student, submission, text, grade=None):
         """
         Interaction for sending a mail with regards to
         corrector interaction
@@ -166,7 +166,7 @@ class MoodleReporter:
         stats_path = 'stats'
         text_path = "text"
         with open(stats_path, 'w') as f:
-            submission.print_stats(f)
+            run.print_stats(f,database_manager)
         with open(text_path, 'w') as f:
             f.write(text)
 
@@ -264,45 +264,41 @@ class MoodleReporter:
             to_mail = database_manager.get_all_students()
         if len(self.args.mailto) > 0:
             for student_name in self.args.mailto:
-                to_mail.append(database_manager.
-                               get_student_by_name(student_name))
+                to_mail.extend(database_manager.get_last_submission_for_student(name))
 
-        for student in to_mail:
-            submissions = database_manager.get_submissions_for_student(student)
-            if len(submissions) > 0:
-                submissions = sorted(
-                    submissions, key=lambda x: x.timestamp
-                )
+        to_mail.extend(database_manager.get_students_to_notify())
 
-                mail_information = database_manager. \
-                    get_mail_information(student
-                                         , submissions[-1])
-                already_mailed = False
+        sorted_to_mail=sorted(to_mail, key= lambda stud, sub:(stud.name, sub.submission_time))
+        
+        for student,submission in sorted_to_mail:
 
-                if mail_information is not None:
-                    if mail_information.time_stamp is not None:
-                        if self.args.verbose and \
-                                (self.args.rerun or self.args.force):
-                            print(f"Already send a mail to {student.name} "
-                                  f"at {mail_information.time_stamp}")
-                        already_mailed = True
-                        if self.args.verbose and \
-                                (self.args.rerun or self.args.force):
-                            print('Send anyway? (y/n) ', end='', flush=True)
-                            if sys.stdin.readline()[:1] == 'y':
-                                already_mailed = False
+            
+                
+            if submission.student_notified==True and (self.args.rerun or self.args.force):
+                print(f"Already send a mail to {student.name} "
+                        f"at {mail_information.time_stamp}"
+                print('Send anyway? (y/n) ', end='', flush=True)
+                if sys.stdin.readline()[:1] != 'y':
+                    continue
 
-                if (not already_mailed) or self.args.rerun:
-                    if self.args.verbose:
-                        print(f"Sending mail to {student.name}, "
+                if self.args.verbose:
+                    print(f"Sending mail to {student.name}, "
                               f"mailed at {datetime.now()}")
-                    submission = submissions[-1]
-                    text = self.generate_mail_content(student, submission)
-                    success = self.send_mail(student, submission, text)
-                    if success:
-                        if student.passed:
-                            self.dump_generator.add_line(student, 1)
-                        database_manager.insert_mail_information(student
-                                                                 , submission
-                                                                 , text)
+            elif(submission.student_notified==True):
+                continue
+                
+            run=sorted(submission.runs, run.execution_time) #gets last run
+            text = self.generate_mail_content(student, submission,run)
+            success = self.send_mail(database_manager,student, submission, text )
+            if success:
+                    if student.passed:
+                        self.dump_generator.add_line(student, 1)
+                    self.write_to_mail_log(student, submission,text)
         self.dump_generator.dump_list()
+
+
+    def write_to_mail_log(self, student, submission, text):
+        path=resolve_absolute_path(self.configuration["MAIL_LOG"])
+        with open(path, "a") as mail_log:
+            mail_log.write(str(datetime.now())+" Mail sent to "+str(student.name)+"for submission from the "+str(submission.submission_time)+". The sent mail was: \n"+str(text))
+        

@@ -16,6 +16,7 @@ from logic.moodle_submission_fetcher import MoodleSubmissionFetcher
 from logic.performance_evaluator import PerformanceEvaluator
 from logic.result_generator import ResultGenerator
 from logic.test_case_executor import TestCaseExecutor
+from logic.abtestat_functions import Abtestat_Functions
 from persistence.database_manager import SQLiteDatabaseManager
 from util.argument_extractor import ArgumentExtractor
 from util.lockfile import LockFile
@@ -38,8 +39,6 @@ def run():
     try:
 
                 
-        logging.debug("test")
-
         argument_extractor = ArgumentExtractor()
         args = argument_extractor.get_arguments()
         database_manager=DatabaseManager()        
@@ -54,31 +53,29 @@ def run():
 
         if not args.fetch_only:
             # Execute test cases if needed determined by the provided args
-            logging.debug("Args not Fetch only. Running Testcase executor")
             executor = TestCaseExecutor(args)
             executor.run(database_manager=database_manager)
 
         # Send Moodle feedback to students if needed determined by args
         if args.mail_to_all or len(args.mailto) > 0 or args.debug:
+            #TODO Check
             reporter = MoodleReporter(args)
             reporter.run(database_manager=database_manager)
 
         # marks students as abtestat done or reverts this operation
-        result_generator = ResultGenerator()
+
         if len(args.abtestat) > 0:
-            students = [database_manager.get_student_by_name(student_name) for student_name in args.abtestat]
-            for student in students:
-                database_manager.mark_as_done(student)
+           Abtestat_Functions.abtestat_mark_as_done(database_manager, args.abtestat)
+            
         if len(args.revert) > 0:
-            students = [database_manager.get_student_by_name(student_name) for student_name in args.revert]
-            for student in students:
-                database_manager.revert_abtestat(student)
+            Abtestat_Functions.abtestat_revert(database_manager, args.revert)
 
         if len(args.mark_manual) > 0:
             for student_name in args.mark_manual:
                 student = database_manager.get_student_by_name(student_name)
                 database_manager.mark_submission_passed(student)
 
+        result_generator = ResultGenerator()
         # generates a csv dump for moodle grading
         if args.generate:
             result_generator.generate_csv_dump(database_manager)
@@ -92,11 +89,9 @@ def run():
 
         # evaluates and shows performance statistics for all students which have passed
         if args.show_performance:
-            studentlog = database_manager.get_all_students()
-            for student in studentlog:
-                student.get_all_submissions(database_manager)
+            students = database_manager.get_students_all()
             performance_evaluator = PerformanceEvaluator()
-            performance_evaluator.evaluate(studentlog, database_manager)
+            performance_evaluator.evaluate(students, database_manager)
 
         # optional playground to try new implemented features
         if args.playground:

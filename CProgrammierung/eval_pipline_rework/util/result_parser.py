@@ -1,4 +1,10 @@
 import re
+import logging
+
+from alchemy.valgrind_outputs import Valgrind_Output
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 re_pid = re.compile(rb'==\d+==')
 re_error = re.compile(rb'(?i)error|warn|unknown|not|wrong|invalid|fehler|unbekannt|kein|nicht|falsch')

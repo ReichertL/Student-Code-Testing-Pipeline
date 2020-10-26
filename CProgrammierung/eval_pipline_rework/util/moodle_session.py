@@ -8,11 +8,11 @@ import sys
 import time
 from pathlib import Path
 
+from alchemy.students import Student
 import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 
-from models.student import Student
 from util.absolute_path_resolver import resolve_absolute_path
 
 AJAX_HEADERS = {
@@ -73,7 +73,7 @@ class MoodleSession:
     def read_users_cached(self, database_manager):
         """Read in the users list found in a cache file 'teilnehmer.json' in
         the current working directory."""
-        self.teilnehmer = database_manager.get_students_all()
+        self.teilnehmer = Student.get_students_all()
 
     @property
     def moodle_base_url(self):

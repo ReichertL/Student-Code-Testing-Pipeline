@@ -181,10 +181,5 @@ class MoodleSubmissionFetcher:
         student_name = mo.group(1)
         moodle_id = mo.group(2)
 
-        student=database_manager.get_student_by_name(student_name)
-        if student==None:
-            Warn("Student with name "+str(student_name)+" did not exist. An database entrie is now created.")
-            student=Student(student_name,moodle_id )
-            database_manager.session.add(student)
-            database_manager.session.commit()
+        student=Student.get_or_insert(student_name, moodle_id)
         return student

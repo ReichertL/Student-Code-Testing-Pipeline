@@ -276,7 +276,7 @@ class MoodleReporter:
                 
             if submission.student_notified==True and (self.args.rerun or self.args.force):
                 print(f"Already send a mail to {student.name} "
-                        f"at {mail_information.time_stamp}"
+                        f"at {mail_information.time_stamp}")
                 print('Send anyway? (y/n) ', end='', flush=True)
                 if sys.stdin.readline()[:1] != 'y':
                     continue

@@ -33,11 +33,12 @@ class PerformanceEvaluator:
         :return: None
         """
         performant = True
-        metric = database_manager.get_avg_cputime_run(run)
+        metric = database_manager.get_avg_runtime(run)
         if metric > float(self.configuration["THRESHOLD"]):
             performant = False
         if submission.is_fast==False or submission.is_fast==None:
             submission.is_fast = performant
+            database_manager.session.commit()
 
     def evaluate_competition(self, submission, database_manager):
         """
@@ -46,11 +47,11 @@ class PerformanceEvaluator:
         :param submission: the respective submission
         :return: the average cpu time
         """
-        return self.average_euclidean_cpu_time_competition(run, database_manager)
+        return self.average_euclidean_runtime_competition(run, database_manager)
 
 
     @staticmethod
-    def average_euclidean_cpu_time_competition(run, database_manager):
+    def average_euclidean_runtime_competition(run, database_manager):
         """
         computes the average euclidean cpu time for the competition
         with regard to the extra testcases
@@ -58,10 +59,10 @@ class PerformanceEvaluator:
         :param run: the respective run
         :return: the average cpu time
         """
-        return database_manager.get_avg_cputime_run_performance(run)
+        return database_manager.get_avg_runtime_performace(run)
 
-    @staticmethod
-    def geometric_mean_space(submission):
+    #@staticmethod
+    #def geometric_mean_space(submission):
         """
         computes the geometric mean of
         all maximum resident set sizes
@@ -69,29 +70,29 @@ class PerformanceEvaluator:
         :param submission: the respective submission
         :return: the geometric mean of the maximum resident set sizes
         """
-        good_test_cases = submission.tests_good_input
-        n = len(good_test_cases) + 1
-        geom_mean = 1.0
-        for i in good_test_cases:
-            current_component = i.mrss ** (1 / float(n))
-            geom_mean *= current_component
+    #    good_test_cases = submission.tests_good_input
+    #    n = len(good_test_cases) + 1
+    #    geom_mean = 1.0
+    #    for i in good_test_cases:
+ #   #        current_component = i.mrss ** (1 / float(n))
+  #          geom_mean *= current_component
+#
+   #     return geom_mean
 
-        return geom_mean
-
-    def get_time_performance(self, submission):
+   # def get_time_performance(self, submission):
         """
         retrieves a dictionary of all needed cpu time
         for given testcases
         :param submission: the respective submission
         :return: A dictionary of testcase ids to needed cpu time
         """
-        testcases = submission.tests_good_input
-        testcases.extend(submission.tests_extra_input)
-        result = {}
-        for i in testcases:
-            if i.short_id in self.configuration["PERFORMANCE_TEST_CASES_TIME"]:
-                result.update({i.short_id: i.cpu_time})
-        return result
+    #    testcases = submission.tests_good_input
+    #    testcases.extend(submission.tests_extra_input)
+    #    result = {}
+    #    for i in testcases:
+    #        if i.short_id in self.configuration["PERFORMANCE_TEST_CASES_TIME"]:
+    #            result.update({i.short_id: i.cpu_time})
+    #    return result
 
     def get_space_performance(self, submission):
         """

@@ -1,9 +1,14 @@
 python3.8 -m pip install sqlalchemy
 
 
-make sure docker is installed:
+make sure docker + valgrind is installed:
 sudo apt install docker.io
+sudo apt install valgrind
+
 
 Run build file for Docker:
 cd /CProgrammierung/dockerfiles
 ./build.sh
+
+find cours id, submission id and id of account used for logging into moodel for config_submission_fetcher.config:
+        -open courses/submission/profile site and use ID from get-Request (Check the URL!)

@@ -3,6 +3,7 @@ import logging
 from sqlalchemy import *
 from alchemy.base import Base 
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import expression
 
 import alchemy.database_manager as dbm
 
@@ -17,7 +18,7 @@ class Testcase(Base):
 
     id = Column(Integer, primary_key =  True)
     path = Column(String, nullable=False)
-    valgrind_needed = Column(Boolean,default=True)
+    valgrind_needed = Column(Boolean,default=True,server_default=expression.true())
     short_id = Column(String,nullable=False, unique=True)
     description = Column(String,nullable=False)
     hint = Column(String,nullable=False)

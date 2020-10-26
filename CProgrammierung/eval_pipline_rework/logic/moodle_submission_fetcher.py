@@ -50,7 +50,7 @@ class MoodleSubmissionFetcher:
             resolve_absolute_path(relative_submission_path)
         self.moodle_session = None
 
-    def run(self, database_manager):
+    def run(self):
         """
         runs fetching functionality
         :param database_manager:
@@ -61,11 +61,10 @@ class MoodleSubmissionFetcher:
         self.moodle_session = \
             MoodleSession(username,
                           session_state,
-                          self.configuration,
-                          database_manager)
-        self.moodle_session.update_teilnehmer(database_manager)
+                          self.configuration)
+        self.moodle_session.update_teilnehmer()
         mkdir(self.submission_base_dir)
-        self.fetch_abgaben(database_manager)
+        self.fetch_abgaben()
 
     def get_login_data(self, username=None):
         """Get the desired moodle username. This can be given either by the
@@ -97,7 +96,7 @@ class MoodleSubmissionFetcher:
             username = input('username: ')
         return username, d.get(username, {})
 
-    def fetch_abgaben(self, database_manager, dryrun=False, noimport=False):
+    def fetch_abgaben(self, dryrun=False, noimport=False):
         """
         collects all submissions from a
         specified source (moodle or local directory)
@@ -142,7 +141,7 @@ class MoodleSubmissionFetcher:
         dir_listing = os.listdir(new_submissions_dir)
         for d in dir_listing:
             student= self. \
-                dirname_to_student(d, database_manager)
+                dirname_to_student(d)
             src_dir = os.path.join(new_submissions_dir, d)
             src = os.path.join(src_dir, 'loesung.c')
 
@@ -166,7 +165,7 @@ class MoodleSubmissionFetcher:
         return new
 
     @staticmethod
-    def dirname_to_student(d, database_manager):
+    def dirname_to_student(d):
         """
         Extracts the student name and
         the submission id from a directory name

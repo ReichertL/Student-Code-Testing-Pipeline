@@ -31,7 +31,7 @@ class DatabaseIntegrator:
     def __str__(self):
         return "DatabaseIntegrator"
 
-    def integrate_submission_dir(self, database_manager):
+    def integrate_submission_dir(self):
         """
         given a submission directory
         this function integrates all

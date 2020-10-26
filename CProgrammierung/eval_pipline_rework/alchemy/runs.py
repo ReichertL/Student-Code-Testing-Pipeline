@@ -3,6 +3,7 @@ import logging
 from sqlalchemy import *
 from alchemy.base import Base
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import expression
 
 
 import alchemy.database_manager as dbm
@@ -21,13 +22,13 @@ class Run(Base):
    
     id = Column(Integer, primary_key =  True)
     submission_id=Column(Integer,  ForeignKey("Submission.id"),nullable=False)
-    careless_flag = Column(Boolean, default=False)
+    careless_flag = Column(Boolean, default=False,server_default=expression.false())
     command_line=Column(String, nullable=False)
     compilation_return_code = Column(Integer, nullable=False)
     compiler_output=Column(String, nullable=False)
    
     execution_time = Column(DateTime)
-    passed = Column(Boolean, default=False)
+    passed = Column(Boolean, default=False,server_default=expression.false())
     manual_overwrite_passed= Column(Boolean)
 
     testcase_results = relationship("Testcase_Result", backref="Run.id")
@@ -47,7 +48,7 @@ class Run(Base):
                                 str(self.compiler_output)  +")")
 
     # use like: f=sys.stdout
-    def print_stats(self, f, database_manager):
+    def print_stats(self, f):
         #map_to_int = lambda test_case_result: 1 if self.passe else 0
         if self.compilation_return_code!=0:
             print(red('compilation failed; compiler errors follow:'), file=f)

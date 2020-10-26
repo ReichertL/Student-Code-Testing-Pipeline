@@ -122,26 +122,28 @@ class TestCaseExecutor:
         unshare_path = configuration["UNSHARE_PATH"]
         self.unshare = [unshare_path, '-r', '-n']
 
-    def run(self, database_manager):
+    def run(self):
         """
             runs specified test cases
         """
-        self.load_tests(database_manager)  #TODO: Mit flag versehen, so dass testcases nur eingelesen werden wenn es manuell gefordert wird
+        self.load_tests()  #TODO: Mit flag versehen, so dass testcases nur eingelesen werden wenn es manuell gefordert wird
 
-        pending_submissions = self.retrieve_pending_submissions(database_manager)
+        pending_submissions = self.retrieve_pending_submissions()
+        if pending_submissions==None:
+            return
         for submission, student in pending_submissions:
             does_compile = self.compile_single_submission(submission)
             run=Run.insert_run(does_compile)
                 
             if (not len(self.args.compile) > 0):
                 if run.compilation_return_code==0:
-                    testcase_results = self.check(database_manager, student,submission,run)
+                    testcase_results = self.check( student,submission,run)
                 else:
                     print(f'Submission of '
                         f'{student.name} submitted at '
                         f'{submission.submission_time} did not compile.')
             
-    def retrieve_pending_submissions(self, database_manager):
+    def retrieve_pending_submissions(self):
         """Extracts submissions that should be evaluated
         based on the commandline arguments
         :return: list of submissions
@@ -201,7 +203,7 @@ class TestCaseExecutor:
             self.configuration['DOCKER_SHARED_DIRECTORY'])
         return Run(submission.id,commandline, return_code, gcc_stderr)
 
-    def load_tests(self, database_manager):
+    def load_tests(self):
         """
         Loads the in the config file specified testcases for good bad and extra
         :return: dictionary of list test_case
@@ -255,7 +257,7 @@ class TestCaseExecutor:
                             testcase = Testcase(path, short_id, description, hint, type)
                             Testcase.create_or_update(testcase)
 
-    def check(self, database_manager, student,submission, run, force_performance=False):
+    def check(self,  student,submission, run, force_performance=False):
         """
         checks the submission of a student
         :param student: the student which is the author of this submission
@@ -320,7 +322,7 @@ class TestCaseExecutor:
             student.grade=1
             dbm.session.commit()
             performance_evaluator = PerformanceEvaluator()
-            performance_evaluator.evaluate_performance(submission,run,database_manager)
+            performance_evaluator.evaluate_performance(submission,run)
         #if passed and (submission.is_fast or force_performance):
         if passed and  force_performance:
             print('fast submission; running performance tests')                
@@ -338,7 +340,7 @@ class TestCaseExecutor:
         else:
             Failed()
             if self.args.verbose:
-                run.print_stats(sys.stdout,database_manager)        
+                run.print_stats(sys.stdout)        
 
     def check_for_error(self, submission, run, test):
         """

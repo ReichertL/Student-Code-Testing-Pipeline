@@ -44,7 +44,7 @@ class MoodleScrapeError(Exception):
 
 
 class MoodleSession:
-    def __init__(self, username, session_state, configuration, database_manager, interactive=True):
+    def __init__(self, username, session_state, configuration, interactive=True):
         self.configuration = configuration
         self.full_name = '<unknown>'
         self.userid = ''
@@ -57,7 +57,7 @@ class MoodleSession:
         self.domain = configuration["MOODLE_DOMAIN"]
         DEFAULT_SESSION_HEADERS['Host'] = self.domain
         self.session.headers.update(DEFAULT_SESSION_HEADERS)
-        self.read_users_cached(database_manager)
+        self.read_users_cached()
         self.username = username
         self.session_state = session_state
         if session_state and session_state.get('logged_in'):
@@ -70,7 +70,7 @@ class MoodleSession:
         self._grader_contextid = None
         self._grader_assignmentid = None
 
-    def read_users_cached(self, database_manager):
+    def read_users_cached(self):
         """Read in the users list found in a cache file 'teilnehmer.json' in
         the current working directory."""
         self.teilnehmer = Student.get_students_all()
@@ -79,7 +79,7 @@ class MoodleSession:
     def moodle_base_url(self):
         return 'https://' + self.domain
 
-    def update_teilnehmer(self, database_manager):
+    def update_teilnehmer(self):
         """Fetch moodle course user index and save names and user ids as json.
 
         course_id defaults to constants.MOODLE_COURSE_ID
@@ -105,12 +105,8 @@ class MoodleSession:
         # dump teilnehmer list as json
         if res:
             for i in res:
-                student_exists=database_manager.get_student_by_name(i)
-                if student_exists==None:
-                    student=Student(i, res[i])
-                    database_manager.session.add(student)
-            database_manager.session.commit()
-                
+                Student.get_or_insert(i, res[i])
+
         else:
             with open('users.html', 'w') as f:
                 f.write(r.text)

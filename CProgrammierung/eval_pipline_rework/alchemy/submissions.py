@@ -1,6 +1,8 @@
 from sqlalchemy import *
 from alchemy.base import Base
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import expression
+
 
 import alchemy.database_manager as dbm
 from alchemy.students import Student
@@ -12,7 +14,7 @@ class Submission(Base):
     student_id=Column(Integer,  ForeignKey("Student.id"),nullable=False)
     submission_time = Column(DateTime)
     submission_path = Column(String, nullable=False)
-    is_checked = Column(Boolean, default=False)
+    is_checked = Column(Boolean, default=False,server_default=expression.false())
     is_fast = Column(Boolean)
     student_notified=Column(Boolean)
 

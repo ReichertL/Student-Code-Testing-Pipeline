@@ -5,6 +5,9 @@ performance statistics
 import os
 import logging
 
+from alchemy.testcase_results import Testcase_Result
+import alchemy.database_manager as dbm
+
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
 from util.htable import table_format
@@ -26,32 +29,32 @@ class PerformanceEvaluator:
         self.configuration = ConfigReader() \
             .read_file(os.path.abspath(config_path))
 
-    def evaluate_performance(self, submission, run, database_manager):
+    def evaluate_performance(self, submission, run):
         """
         checks whether a submission is performant based on one run
         :param submission: the respective submission
         :return: None
         """
         performant = True
-        metric = database_manager.get_avg_runtime(run)
+        metric = Testcase_Result.get_avg_runtime(run)
         if metric > float(self.configuration["THRESHOLD"]):
             performant = False
         if submission.is_fast==False or submission.is_fast==None:
             submission.is_fast = performant
-            database_manager.session.commit()
+            dbm.session.commit()
 
-    def evaluate_competition(self, submission, database_manager):
+    def evaluate_competition(self, run):
         """
         evaluates a submission for the competition
         (a optional metric)
         :param submission: the respective submission
         :return: the average cpu time
         """
-        return self.average_euclidean_runtime_competition(run, database_manager)
+        return self.average_euclidean_runtime_competition(run)
 
 
     @staticmethod
-    def average_euclidean_runtime_competition(run, database_manager):
+    def average_euclidean_runtime_competition(run):
         """
         computes the average euclidean cpu time for the competition
         with regard to the extra testcases
@@ -59,7 +62,7 @@ class PerformanceEvaluator:
         :param run: the respective run
         :return: the average cpu time
         """
-        return database_manager.get_avg_runtime_performace(run)
+        return Testcase_Result.get_avg_runtime_performace(run)
 
     #@staticmethod
     #def geometric_mean_space(submission):
@@ -79,7 +82,9 @@ class PerformanceEvaluator:
 #
    #     return geom_mean
 
-   # def get_time_performance(self, submission):
+    def get_time_performance(self, submission):
+        raise Exeption("Not Implemented!")
+
         """
         retrieves a dictionary of all needed cpu time
         for given testcases
@@ -95,12 +100,14 @@ class PerformanceEvaluator:
     #    return result
 
     def get_space_performance(self, submission):
+        raise Exeption("Not Implemented!")
+
         """
         calculates the needed space of a submission
         :param submission: the respective submission
         :return: dictionary mrss to geometric mean
         """
-        return {"mrss": self.geometric_mean_space(submission)}
+        #return {"mrss": self.geometric_mean_space(submission)}
 
     def get_performance(self, submission):
         """
@@ -113,16 +120,16 @@ class PerformanceEvaluator:
         performance_stats.update(self.get_space_performance(submission))
         return performance_stats
 
-    def insert_performance(self, database_manager, submission):
+    def insert_performance(self,  submission):
         """
         inserts a performance into a database
         :param database_manager: the respective database manager
         :param submission: the respective submission
         :return: None
         """
-        result = self.get_performance(submission)
-        student = database_manager.get_student_by_key(submission.student_key)
-        database_manager.insert_performance(student, result)
+        raise Exeption("Not Implemented!")
+        #result = self.get_performance(submission)
+        #Run.insert_performance(student, result)
 
     def evaluate(self, studentlog, database_manager):
         """
@@ -133,6 +140,8 @@ class PerformanceEvaluator:
         :param database_manager: a database representation
         :return:None
         """
+        raise Exeption("Not Implemented!")
+
         students = [i for i in studentlog if i.passed]
         for i in students:
             for j in i.submissions:

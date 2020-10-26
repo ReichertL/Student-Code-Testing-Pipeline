@@ -1,15 +1,17 @@
 from sqlalchemy import *
 from alchemy.base import Base
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import expression
+
 
 class Valgrind_Output(Base):
     __tablename__ = 'Valgrind_Output'
    
     id = Column(Integer, primary_key =  True)
     testcase_result_id=Column(Integer,  ForeignKey("Testcase_Result.id"),nullable=False)
-    ok=Column(Boolean, default=False)               #
-    invalid_read_count=Column(Integer,default=0)    #
-    invalid_write_count=Column(Integer, default=0)  #
+    ok=Column(Boolean, default=False,server_default=expression.false())               #
+    invalid_read_count=Column(Integer,default=0,server_default='0')    #
+    invalid_write_count=Column(Integer, default=0, server_default='0')  #
 
     #in use at exit
     in_use_at_exit_bytes=Column(Integer)

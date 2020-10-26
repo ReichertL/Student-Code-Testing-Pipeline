@@ -17,7 +17,6 @@ from logic.performance_evaluator import PerformanceEvaluator
 from logic.result_generator import ResultGenerator
 from logic.test_case_executor import TestCaseExecutor
 from logic.abtestat_functions import Abtestat_Functions
-from persistence.database_manager import SQLiteDatabaseManager
 from util.argument_extractor import ArgumentExtractor
 from util.lockfile import LockFile
 from util.playground import Playground
@@ -47,32 +46,32 @@ def run():
         if args.fetch or args.fetch_only:
             # Execute Submission Fetching if needed determined by the provided args
             fetcher = MoodleSubmissionFetcher(args)
-            fetcher.run(database_manager)
+            fetcher.run()
             database_integrator = DatabaseIntegrator()
-            database_integrator.integrate_submission_dir(database_manager)
+            database_integrator.integrate_submission_dir()
 
         if not args.fetch_only:
             # Execute test cases if needed determined by the provided args
             executor = TestCaseExecutor(args)
-            executor.run(database_manager=database_manager)
+            executor.run()
 
         # Send Moodle feedback to students if needed determined by args
         if args.mail_to_all or len(args.mailto) > 0 or args.debug:
             #TODO Check
             reporter = MoodleReporter(args)
-            reporter.run(database_manager=database_manager)
+            reporter.run()
 
         # marks students as abtestat done or reverts this operation
 
         if len(args.abtestat) > 0:
-           Abtestat_Functions.abtestat_mark_as_done(database_manager, args.abtestat)
+           Abtestat_Functions.abtestat_mark_as_done(args.abtestat)
             
         if len(args.revert) > 0:
-            Abtestat_Functions.abtestat_revert(database_manager, args.revert)
+            Abtestat_Functions.abtestat_revert( args.revert)
 
         if len(args.mark_manual) > 0:
             for student_name in args.mark_manual:
-                student = database_manager.get_student_by_name(student_name)
+                student = Student.get_student_by_name(student_name)
                 database_manager.mark_submission_passed(student)
 
         result_generator = ResultGenerator()
@@ -98,7 +97,7 @@ def run():
             database_manager_new=DatabaseManager()        
             database_manager_new.functionality()
             executor = TestCaseExecutor(args)
-            executor.run(database_manager=database_manager_new)
+            executor.run()
             #playground = Playground()
             #playground.run()
     finally:

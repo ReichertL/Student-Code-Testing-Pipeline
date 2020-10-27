@@ -67,10 +67,8 @@ class Submission(Base):
 
     @classmethod            
     def get_last_for_name(cls,name):
-        logging.debug(name)
         results=dbm.session.query(Submission,Student).join(Student)\
             .filter(Submission.is_checked==True,Student.name==name).order_by(Submission.submission_time.desc()).first()
-        logging.debug(results[1].name)
         return results
 
     @classmethod

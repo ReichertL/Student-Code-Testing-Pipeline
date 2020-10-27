@@ -57,12 +57,10 @@ def run():
 
         # Send Moodle feedback to students if needed determined by args
         if args.mail_to_all or len(args.mailto) > 0 or args.debug:
-            #TODO Check
             reporter = MoodleReporter(args)
             reporter.run()
 
         # marks students as abtestat done or reverts this operation
-
         if len(args.abtestat) > 0:
            Abtestat_Functions.abtestat_mark_as_done(args.abtestat)
             
@@ -75,29 +73,24 @@ def run():
         result_generator = ResultGenerator()
         # generates a csv dump for moodle grading
         if args.generate:
-            result_generator.generate_csv_dump(database_manager)
+            result_generator.generate_csv_dump()
         # prints short statistics for all submissions
         if args.stats:
-            result_generator.print_short_stats(database_manager)
+            result_generator.print_short_stats()
 
         # prints detailed information about a specific student submission
         if len(args.details) > 0:
-            result_generator.print_details(database_manager, args.details)
+            result_generator.print_details(args.details)
 
         # evaluates and shows performance statistics for all students which have passed
         if args.show_performance:
-            students = database_manager.get_students_all()
             performance_evaluator = PerformanceEvaluator()
-            performance_evaluator.evaluate(students, database_manager)
+            performance_evaluator.evaluate(students)
 
         # optional playground to try new implemented features
         if args.playground:
-            database_manager_new=DatabaseManager()        
-            database_manager_new.functionality()
-            executor = TestCaseExecutor(args)
-            executor.run()
-            #playground = Playground()
-            #playground.run()
+            pass
+
     finally:
         try:
             cleanup()

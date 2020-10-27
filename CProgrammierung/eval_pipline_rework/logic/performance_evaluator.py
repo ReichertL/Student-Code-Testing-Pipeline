@@ -7,10 +7,12 @@ import logging
 
 from alchemy.testcase_results import Testcase_Result
 import alchemy.database_manager as dbm
+from alchemy.students import Students
 
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
 from util.htable import table_format
+
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)
@@ -82,76 +84,45 @@ class PerformanceEvaluator:
 #
    #     return geom_mean
 
-    def get_time_performance(self, submission):
-        raise Exeption("Not Implemented!")
 
-        """
-        retrieves a dictionary of all needed cpu time
-        for given testcases
-        :param submission: the respective submission
-        :return: A dictionary of testcase ids to needed cpu time
-        """
-    #    testcases = submission.tests_good_input
-    #    testcases.extend(submission.tests_extra_input)
-    #    result = {}
-    #    for i in testcases:
-    #        if i.short_id in self.configuration["PERFORMANCE_TEST_CASES_TIME"]:
-    #            result.update({i.short_id: i.cpu_time})
-    #    return result
 
-    def get_space_performance(self, submission):
-        raise Exeption("Not Implemented!")
-
-        """
-        calculates the needed space of a submission
-        :param submission: the respective submission
-        :return: dictionary mrss to geometric mean
-        """
-        #return {"mrss": self.geometric_mean_space(submission)}
-
-    def get_performance(self, submission):
+    def get_performance(self, run):
         """
         Computes a complete performance dictionary
         :param submission: the respective submission
         :return: the performance dictionary
         """
-        performance_stats = {}
-        performance_stats.update(self.get_time_performance(submission))
-        performance_stats.update(self.get_space_performance(submission))
-        return performance_stats
+        
+        time=Testcase_Result.get_avg_runtime_performance(run)
+        space=Testcase_Result.get_avg_space_performance(run)
+        return performance_stats[time,space]
 
-    def insert_performance(self,  submission):
-        """
-        inserts a performance into a database
-        :param database_manager: the respective database manager
-        :param submission: the respective submission
-        :return: None
-        """
-        raise Exeption("Not Implemented!")
-        #result = self.get_performance(submission)
-        #Run.insert_performance(student, result)
 
-    def evaluate(self, studentlog, database_manager):
+    def evaluate(self, studentlog):
+
         """
         evaluates all students if they had passed
         with regard to their performance
         and prints the results into a file an to console
         :param studentlog: studentlog with all students
-        :param database_manager: a database representation
         :return:None
         """
-        raise Exeption("Not Implemented!")
-
-        students = [i for i in studentlog if i.passed]
-        for i in students:
-            for j in i.submissions:
-                if j.passed:
-                    self.insert_performance(database_manager, j)
+        performances = []
+        students = Students.get_students_passed()
+        for student in students:
+            for submission in student.submissions:
+                for run in submission.runs:
+                    if run.passed:
+                        p=self.get_performance(run)
+                        performance.append(p)
+        
+        #TODO Continue                
+        raise Error("not implemented")
 
         performances = []
         for i in students:
             if (p := database_manager.get_performance(i)) is not None:
-                performances.append(p)
+                
 
         key_list = list(performances[0].keys())
 

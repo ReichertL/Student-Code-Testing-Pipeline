@@ -87,4 +87,8 @@ class Student(Base):
         results=dbm.session.query(Student).join(sub.Submission, sub.Submission.student_id==Student.id).join(r.Run, r.Run.submission_id==sub.Submission.id).filter(r.Run.passed==False).group_by(Student.name).all()
         return results
 
+    @classmethod
+    def get_abtestat_done(cls):
+        result = dbm.session.query(Student).filter_by(grade="2").all()      
+        return result
 

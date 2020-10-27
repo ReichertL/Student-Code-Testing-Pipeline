@@ -48,6 +48,36 @@ class Run(Base):
                                 str(self.compilation_return_code) + "," + \
                                 str(self.compiler_output)  +")")
 
+
+
+
+    # use like: f=sys.stdout
+    def print_small_stats(self, f):
+        output = ''
+        if self.compilation_return_code!=0:
+            output = output + (red('Compilation failed. '))
+            print(output)
+            return
+
+        output = output + (green('Compilation successful. '))
+
+        failed_bad=len(Testcase_Result.get_failed_bad(self))
+        all = len(Testcase.get_all_bad())
+        if failed_bad > 0:
+            output = output + (red(f'{failed_bad} / {all} bad tests failed. '))
+        else:
+            output = output + (green(f'0 / {all} bad tests failed. '))
+
+        failed_good=len(Testcase_Result.get_failed_good(self))
+        all = len(Testcase.get_all_good())
+        if failed_good > 0:
+            output = output + (red(f'{failed_good} / {all} good tests failed. '))
+        else:
+            output = output + (green(f'0 / {all} good tests failed. '))
+
+        print(output, file=f)
+        
+
     # use like: f=sys.stdout
     def print_stats(self, f):
         #map_to_int = lambda test_case_result: 1 if self.passe else 0
@@ -88,13 +118,15 @@ class Run(Base):
             print(red(f'{len(failed_good)} / {all} tests concerning good input failed.')
                   , file=f)
             print(file=f)
-            logging.debug(failed_good)
             failed_good.sort(key=lambda x: x[1].short_id)
             print(table_format(
                 '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {output} | {error_description}',
                self.create_stats(failed_good),
                 titles='auto'), file=f)
             print(file=f)
+
+
+
 
     @classmethod
     def create_stats(cls,results):
@@ -109,7 +141,6 @@ class Run(Base):
             line['output']=str(result.output_correct)
             line['error_description']=str(result.error_msg_quality)
             stats.append(line)
-        #logging.debug(stats)
         return stats
    
     @classmethod
@@ -132,6 +163,8 @@ class Run(Base):
     
     @classmethod
     def get_last_for_submission(cls,submission):
-        run=dbm.session.query(Run).filter(Run.submission_id==submission.id).order_by(Run.execution_time.desc()).first()
+        run=dbm.session.query(Run).filter(Run.submission_id==submission.id, Run.passed==True).order_by(Run.execution_time.desc()).first()
+        if run==None:
+            run=dbm.session.query(Run).filter(Run.submission_id==submission.id).order_by(Run.execution_time.desc()).first()
         return run
    

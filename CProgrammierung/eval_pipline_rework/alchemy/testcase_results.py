@@ -150,10 +150,21 @@ class Testcase_Result(Base):
     def get_avg_runtime(cls,r):
         avg=dbm.session.query(func.avg(Testcase_Result.tictoc)).filter_by(run_id=r.id).scalar()
         return avg
+    
+    @classmethod
+    def get_avg_space(cls,r):
+        avg=dbm.session.query(func.avg(Testcase_Result.mrss)).filter_by(run_id=r.id).scalar()
+        return avg
+
 
     @classmethod
-    def get_avg_runtime_performance(cls,r , testcase_type):
+    def get_avg_runtime_performance(cls,r ):
         avg=dbm.session.query(func.avg(Testcase_Result.tictoc)).join(Testcase).filter(Testcase_Result.run_id==r.id, Testcase.type=="PERFORMANCE" ).scalar()
+        return avg
+ 
+    @classmethod
+    def get_avg_space_performance(cls,r ):
+        avg=dbm.session.query(func.avg(Testcase_Result.mrss)).join(Testcase).filter(Testcase_Result.run_id==r.id, Testcase.type=="PERFORMANCE" ).scalar()
         return avg
  
 

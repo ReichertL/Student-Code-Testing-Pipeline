@@ -243,6 +243,8 @@ class MoodleReporter:
                         self.moodle_session \
                             .update_grading(student.moodle_id, grade)
                         print('INFO: updated moodle grade to {}'.format(grade))
+                        student.grade=grade
+                        dbm.session.commit()
 
                 break
             elif answer == 'n':
@@ -309,7 +311,7 @@ class MoodleReporter:
                 
             run=Run.get_last_for_submission(submission)
             text = self.generate_mail_content(student, submission,run)
-            success = self.send_mail(student, submission, run, text )
+            success = self.send_mail(student, submission, run, text,student.grade )
             if success:
                     if run.passed:
                         self.dump_generator.add_line(student)
@@ -322,7 +324,7 @@ class MoodleReporter:
 
     def write_to_mail_log(self, student, submission, text):
         path=resolve_absolute_path(self.configuration["MAIL_LOG"])
-        with open(path, "a") as mail_log:
+        with open(path, "a+") as mail_log:
             mail_log.write(str(datetime.now())+" Mail sent to "+str(student.name)+"for submission from the "+str(submission.submission_time)+". The sent mail was: \n"+str(text))
         
     

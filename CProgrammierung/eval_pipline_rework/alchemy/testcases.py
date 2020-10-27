@@ -55,28 +55,28 @@ class Testcase(Base):
 
         
     @classmethod    
-    def get_all_bad (self):
+    def get_all_bad (cls):
         testcases=dbm.session.query(Testcase).filter(Testcase.type=="BAD").all()
         return testcases        
 
        
     @classmethod    
-    def get_all_good(self):
+    def get_all_good(cls):
         testcases=dbm.session.query(Testcase).filter_by(type="GOOD").all()
         return testcases    
 
     @classmethod    
-    def get_all_bad_or_output(self):
+    def get_all_bad_or_output(cls):
         testcases=dbm.session.query(Testcase).filter_by(type="BAD_OR_OUTPUT").all()
         return testcases   
         
     @classmethod        
-    def get_all_performance(self):
+    def get_all_performance(cls):
         testcases=dbm.session.query(Testcase).filter_by(type="PERFORMANCE").all()
         return testcases    
 
     @classmethod    
-    def create_or_update(self,new_testcase):
+    def create_or_update(cls,new_testcase):
         #logging.debug("create or update")
         tc_exists=dbm.session.query(Testcase).filter(Testcase.short_id==new_testcase.short_id,Testcase.path==new_testcase.path, Testcase.valgrind_needed==new_testcase.valgrind_needed, Testcase.description==new_testcase.description, Testcase.hint==new_testcase.hint, Testcase.type==new_testcase.type).count()
 
@@ -90,6 +90,8 @@ class Testcase(Base):
                 dbm.session.commit()            
             logging.info("New testcase inserted or altered one upgedated.")
 
-
-
-
+    @classmethod
+    def get_by_ID(id):
+        testcase=dbm.session.query(Testcase).filter(Testcase.id==id).first()
+        return testcases
+            

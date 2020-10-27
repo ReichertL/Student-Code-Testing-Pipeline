@@ -10,10 +10,10 @@ from sqlalchemy import create_engine, and_, or_
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from alchemy.base import Base 
-import alchemy.students 
-import alchemy.submissions
-import alchemy.runs
-import alchemy.testcases 
+import alchemy.students as s
+import alchemy.submissions as sub
+import alchemy.runs as r
+import alchemy.testcases as tc
 from alchemy.testcase_results import Testcase_Result
 from alchemy.valgrind_outputs import Valgrind_Output
 
@@ -43,7 +43,53 @@ class DatabaseManager:
 
 
     
+    @classmethod
+    def marke_passed_manually(self,names):
+        for name in names:
+            student = s.Student.get_student_by_name(name)
+            if student is None:
+                print(f"No student with this name {name} found!")
+                continue
+            submissions = student.submissions
+            logging.debug(submissions)
+            if len(submissions) > 1:
+                print("More than one submission found. Please select!")
+                for index, submission in zip(range(0,
+                                                   len(submissions)),
+                                             submissions):
+                    print(f"[{index + 1}]: {submission.timestamp}")
 
+                answer_accepted = False
+                answer = 0
+                while not answer_accepted:
+                    answer = sys.stdin.readline()[0]
+                    try:
+                        answer = int(answer) - 1
+                        if len(submissions) > answer >= 0:
+                            answer_accepted = True
+                        else:
+                            print(f"{answer + 1} is not in range of"
+                                  f"[{1},{len(submissions)}],"
+                                  f"please select again!")
+                    except ValueError:
+                        print(f"{answer} is not a number,"
+                              f"please select again!")
+
+                
+                runs=submissions[answer].runs
+                for run in runs:
+                    run.passed=True
+                    run.manual_overwrite_passed=True
+                    session.commit()
+            elif len(submissions)==1:
+                runs=submissions[0].runs
+                logging.debug(runs)
+                for run in runs:
+                    run.passed=True
+                    run.manual_overwrite_passed=True
+                    session.commit()
+            else:  
+                print(f"Student {name} has not submitted any solutions yet.")
 
  
 

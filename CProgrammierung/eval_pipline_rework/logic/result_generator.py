@@ -6,6 +6,8 @@ import csv
 import datetime
 import sys
 
+from alchemy.students import Student
+from alchemy.submissions import Submission
 
 class ResultGenerator:
     """
@@ -79,7 +81,7 @@ class ResultGenerator:
                 if submission.is_checked:
                     submission.print_small_stats()
 
-    def add_line(self, student, points):
+    def add_line(self, student):
         """
         adds a line to the list of students
         that should be contained in the csv result dump
@@ -87,7 +89,7 @@ class ResultGenerator:
         :param points: the points he/she received
         :return: nothing
         """
-        row = [student.matrikel_nr, student.name, points]
+        row = [student.matrikel_nr, student.name, student.grade]
         self.to_dump_list.append(row)
 
     def dump_list(self):

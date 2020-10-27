@@ -183,6 +183,7 @@ class TestCaseExecutor:
         @:return Compilation object
                 (gcc_return_code, commandline call , gcc_stderr)
         """
+        careless_flag=False
 
         gcc_args = [self.configuration["GCC_PATH"]] + \
                    self.configuration["CFLAGS"]
@@ -190,6 +191,7 @@ class TestCaseExecutor:
         if self.args.final:
             gcc_args = [self.configuration["GCC_PATH"]] + \
                        self.configuration["CFLAGS_CARELESS"]
+            careless_flag=True
 
         if not strict:
             gcc_args.remove('-Werror')
@@ -201,7 +203,7 @@ class TestCaseExecutor:
             self.configuration['DOCKER_IMAGE_GCC'],
             self.configuration['DOCKER_CONTAINER_GCC'],
             self.configuration['DOCKER_SHARED_DIRECTORY'])
-        return Run(submission.id,commandline, return_code, gcc_stderr)
+        return Run(submission.id,commandline, careless_flag, return_code, gcc_stderr)
 
     def load_tests(self):
         """

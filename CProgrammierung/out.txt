@@ -63,10 +63,10 @@ document.body.className += ' jsenabled';
             <ul class="navbar-nav d-none d-md-flex">
                 <!-- custom_menu -->
                 <li class="dropdown nav-item">
-    <a class="dropdown-toggle nav-link" id="drop-down-5f9816ef1980d5f9816ef12d9110" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#"  aria-controls="drop-down-menu-5f9816ef1980d5f9816ef12d9110">
+    <a class="dropdown-toggle nav-link" id="drop-down-5f9825fac6e045f9825fac1e6b10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#"  aria-controls="drop-down-menu-5f9825fac6e045f9825fac1e6b10">
         MOODLE-HILFEN
     </a>
-    <div class="dropdown-menu" role="menu" id="drop-down-menu-5f9816ef1980d5f9816ef12d9110" aria-labelledby="drop-down-5f9816ef1980d5f9816ef12d9110">
+    <div class="dropdown-menu" role="menu" id="drop-down-menu-5f9825fac6e045f9825fac1e6b10" aria-labelledby="drop-down-5f9825fac6e045f9825fac1e6b10">
                 <a class="dropdown-item" role="menuitem" href="https://moodle.hu-berlin.de/course/view.php?id=40916" title="Übersichten, FAQ, Beispiele, Kontakt">Überblick</a>
                 <a class="dropdown-item" role="menuitem" href="https://moodle.hu-berlin.de//mod/glossary/view.php?id=321858" title="Häufig gestellte Fragen">FAQ</a>
                 <a class="dropdown-item" role="menuitem" href="https://moodle.hu-berlin.de/course/index.php?categoryid=906" title="Moodle-Kurse zu verschiedenen Themen zur Einsicht und Ansicht">Infos, Beispiele (dt.)</a>
@@ -80,10 +80,10 @@ document.body.className += ' jsenabled';
                 <a class="dropdown-item" role="menuitem" href="#" data-action="tool_usertours/resetpagetour"" title="de">Informations-Tour ansehen</a>
     </div>
 </li><li class="dropdown nav-item">
-    <a class="dropdown-toggle nav-link" id="drop-down-5f9816ef198ed5f9816ef12d9111" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#"  aria-controls="drop-down-menu-5f9816ef198ed5f9816ef12d9111">
+    <a class="dropdown-toggle nav-link" id="drop-down-5f9825fac6ee15f9825fac1e6b11" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#"  aria-controls="drop-down-menu-5f9825fac6ee15f9825fac1e6b11">
         Kurse suchen
     </a>
-    <div class="dropdown-menu" role="menu" id="drop-down-menu-5f9816ef198ed5f9816ef12d9111" aria-labelledby="drop-down-5f9816ef198ed5f9816ef12d9111">
+    <div class="dropdown-menu" role="menu" id="drop-down-menu-5f9825fac6ee15f9825fac1e6b11" aria-labelledby="drop-down-5f9825fac6ee15f9825fac1e6b11">
                 <a class="dropdown-item" role="menuitem" href="https://moodle.hu-berlin.de/course/search.php" title="Schnellsuche">Schnellsuche</a>
                 <a class="dropdown-item" role="menuitem" href="https://moodle.hu-berlin.de/course/view.php?id=40917&amp;topic=0" title="Weitere Suchmöglichkeiten (Überblick)">Erweiterte Suche</a>
                 <div class="dropdown-divider" role="presentation"></div>
@@ -108,6 +108,8 @@ document.body.className += ' jsenabled';
     </div>
 </li><li class="nav-item">
     <a class="nav-item nav-link" href="https://moodle.hu-berlin.de/?lang=en" title="Switch to English Moodle interface. For preferred languages go to: My Moodle &gt; Preferences">EN</a>
+</li><li class="nav-item">
+    <a class="nav-item nav-link" href="https://www.cms.hu-berlin.de/de/stoerungen/standardseite?act=id&amp;id=18371" title="Zur Wartungsmeldung">⚒  BETRIEBSUNTERBRECHUNG DER FIREWALL AM 28. OKTOBER 7-7:30 UHR ⚒</a>
 </li>
                 <!-- page_heading_menu -->
                 
@@ -124,7 +126,7 @@ document.body.className += ' jsenabled';
     <div class="popover-region-toggle nav-link"
         data-region="popover-region-toggle"
         role="button"
-        aria-controls="popover-region-container-5f9816ef1a98d5f9816ef12d9112"
+        aria-controls="popover-region-container-5f9825fac7e2b5f9825fac1e6b12"
         aria-haspopup="true"
         aria-label="Mitteilungsfenster ohne neue Systemnachrichten anzeigen"
         tabindex="0">
@@ -134,7 +136,7 @@ document.body.className += ' jsenabled';
 
     </div>
     <div 
-        id="popover-region-container-5f9816ef1a98d5f9816ef12d9112"
+        id="popover-region-container-5f9825fac7e2b5f9825fac1e6b12"
         class="popover-region-container"
         data-region="popover-region-container"
         aria-expanded="false"
@@ -180,7 +182,7 @@ document.body.className += ' jsenabled';
                 </a>
     </div>
 </div><div class="popover-region collapsed" data-region="popover-region-messages">
-    <a id="message-drawer-toggle-5f9816ef1ca735f9816ef12d9113" class="nav-link d-inline-block popover-region-toggle position-relative" href="#"
+    <a id="message-drawer-toggle-5f9825faca4195f9825fac1e6b13" class="nav-link d-inline-block popover-region-toggle position-relative" href="#"
             role="button">
         <i class="icon fa fa-comment fa-fw "  title="Direkte Mitteilungen" aria-label="Direkte Mitteilungen"></i>
         <div class="count-container hidden" data-region="count-container"
@@ -312,56 +314,56 @@ document.body.className += ' jsenabled';
                             <div class="dropdown-menu dropdown-menu-right menu align-tr-br" id="action-menu-2-menu" data-rel="menu-content" aria-labelledby="action-menu-toggle-2" role="menu" data-align="tr-br">
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/course/edit.php?id=100185" id="action_link5f9816ef12d9126" class=""  role="menuitem" ><i class="icon fa fa-cog fa-fw " aria-hidden="true"  ></i>Einstellungen bearbeiten</a>
+    <a href="https://moodle.hu-berlin.de/course/edit.php?id=100185" id="action_link5f9825fac1e6b26" class=""  role="menuitem" ><i class="icon fa fa-cog fa-fw " aria-hidden="true"  ></i>Einstellungen bearbeiten</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/grade/edit/tree/index.php?id=100185" id="action_link5f9816ef12d9127" class=""  role="menuitem" ><i class="icon fa fa-cog fa-fw " aria-hidden="true"  ></i>Setup für Bewertungen</a>
+    <a href="https://moodle.hu-berlin.de/grade/edit/tree/index.php?id=100185" id="action_link5f9825fac1e6b27" class=""  role="menuitem" ><i class="icon fa fa-cog fa-fw " aria-hidden="true"  ></i>Setup für Bewertungen</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/backup/backup.php?id=100185" id="action_link5f9816ef12d9128" class=""  role="menuitem" ><i class="icon fa fa-file-zip-o fa-fw " aria-hidden="true"  ></i>Sicherung</a>
+    <a href="https://moodle.hu-berlin.de/backup/backup.php?id=100185" id="action_link5f9825fac1e6b28" class=""  role="menuitem" ><i class="icon fa fa-file-zip-o fa-fw " aria-hidden="true"  ></i>Sicherung</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/backup/restorefile.php?contextid=3520425" id="action_link5f9816ef12d9129" class=""  role="menuitem" ><i class="icon fa fa-level-up fa-fw " aria-hidden="true"  ></i>Wiederherstellen</a>
+    <a href="https://moodle.hu-berlin.de/backup/restorefile.php?contextid=3520425" id="action_link5f9825fac1e6b29" class=""  role="menuitem" ><i class="icon fa fa-level-up fa-fw " aria-hidden="true"  ></i>Wiederherstellen</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/backup/import.php?id=100185" id="action_link5f9816ef12d9130" class=""  role="menuitem" ><i class="icon fa fa-level-up fa-fw " aria-hidden="true"  ></i>Import</a>
+    <a href="https://moodle.hu-berlin.de/backup/import.php?id=100185" id="action_link5f9825fac1e6b30" class=""  role="menuitem" ><i class="icon fa fa-level-up fa-fw " aria-hidden="true"  ></i>Import</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/course/reset.php?id=100185" id="action_link5f9816ef12d9131" class=""  role="menuitem" ><i class="icon fa fa-arrow-left fa-fw " aria-hidden="true"  ></i>Zurücksetzen</a>
+    <a href="https://moodle.hu-berlin.de/course/reset.php?id=100185" id="action_link5f9825fac1e6b31" class=""  role="menuitem" ><i class="icon fa fa-arrow-left fa-fw " aria-hidden="true"  ></i>Zurücksetzen</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/admin/tool/recyclebin/index.php?contextid=3520425" id="action_link5f9816ef12d9132" class=""  role="menuitem" ><i class="icon fa fa-trash fa-fw "  title="Papierkorb" aria-label="Papierkorb"></i>Papierkorb</a>
+    <a href="https://moodle.hu-berlin.de/admin/tool/recyclebin/index.php?contextid=3520425" id="action_link5f9825fac1e6b32" class=""  role="menuitem" ><i class="icon fa fa-trash fa-fw "  title="Papierkorb" aria-label="Papierkorb"></i>Papierkorb</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/course/admin.php?courseid=100185" id="action_link5f9816ef12d9133" class=""  role="menuitem" ><i class="icon fa fa-cog fa-fw "  title="Weitere Kurse auf Ihrem Dashboard ..." aria-label="Weitere Kurse auf Ihrem Dashboard ..."></i>Weitere Kurse auf Ihrem Dashboard ...</a>
+    <a href="https://moodle.hu-berlin.de/course/admin.php?courseid=100185" id="action_link5f9825fac1e6b33" class=""  role="menuitem" ><i class="icon fa fa-cog fa-fw "  title="Weitere Kurse auf Ihrem Dashboard ..." aria-label="Weitere Kurse auf Ihrem Dashboard ..."></i>Weitere Kurse auf Ihrem Dashboard ...</a>
 
 
 
@@ -555,56 +557,56 @@ document.body.className += ' jsenabled';
                             <div class="dropdown-menu dropdown-menu-right menu align-tr-br" id="action-menu-3-menu" data-rel="menu-content" aria-labelledby="action-menu-toggle-3" role="menu" data-align="tr-br">
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/user/index.php?id=100185" id="action_link5f9816ef12d9134" class=""  role="menuitem" ><i class="icon fa fa-user-plus fa-fw " aria-hidden="true"  ></i>Personen und Rollen</a>
+    <a href="https://moodle.hu-berlin.de/user/index.php?id=100185" id="action_link5f9825fac1e6b34" class=""  role="menuitem" ><i class="icon fa fa-user-plus fa-fw " aria-hidden="true"  ></i>Personen und Rollen</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/enrol/instances.php?id=100185" id="action_link5f9816ef12d9135" class=""  role="menuitem" ><i class="icon fa fa-fw fa-fw " aria-hidden="true"  ></i>Einschreibemethoden</a>
+    <a href="https://moodle.hu-berlin.de/enrol/instances.php?id=100185" id="action_link5f9825fac1e6b35" class=""  role="menuitem" ><i class="icon fa fa-fw fa-fw " aria-hidden="true"  ></i>Einschreibemethoden</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/enrol/editinstance.php?courseid=100185&id=184584&type=manual" id="action_link5f9816ef12d9136" class="ml-4"  role="menuitem" ><i class="icon fa fa-fw fa-fw " aria-hidden="true"  ></i>Manuelle Einschreibung</a>
+    <a href="https://moodle.hu-berlin.de/enrol/editinstance.php?courseid=100185&id=184584&type=manual" id="action_link5f9825fac1e6b36" class="ml-4"  role="menuitem" ><i class="icon fa fa-fw fa-fw " aria-hidden="true"  ></i>Manuelle Einschreibung</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/enrol/editinstance.php?courseid=100185&id=184585&type=self" id="action_link5f9816ef12d9137" class="ml-4"  role="menuitem" ><i class="icon fa fa-fw fa-fw " aria-hidden="true"  ></i>Selbsteinschreibung (Teilnehmer/in)</a>
+    <a href="https://moodle.hu-berlin.de/enrol/editinstance.php?courseid=100185&id=184585&type=self" id="action_link5f9825fac1e6b37" class="ml-4"  role="menuitem" ><i class="icon fa fa-fw fa-fw " aria-hidden="true"  ></i>Selbsteinschreibung (Teilnehmer/in)</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/group/index.php?id=100185" id="action_link5f9816ef12d9138" class=""  role="menuitem" ><i class="icon fa fa-users fa-fw " aria-hidden="true"  ></i>Gruppen</a>
+    <a href="https://moodle.hu-berlin.de/group/index.php?id=100185" id="action_link5f9825fac1e6b38" class=""  role="menuitem" ><i class="icon fa fa-users fa-fw " aria-hidden="true"  ></i>Gruppen</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/admin/roles/permissions.php?contextid=3520425" id="action_link5f9816ef12d9139" class=""  role="menuitem" ><i class="icon fa fa-fw fa-fw " aria-hidden="true"  ></i>Rechte ändern</a>
+    <a href="https://moodle.hu-berlin.de/admin/roles/permissions.php?contextid=3520425" id="action_link5f9825fac1e6b39" class=""  role="menuitem" ><i class="icon fa fa-fw fa-fw " aria-hidden="true"  ></i>Rechte ändern</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/admin/roles/check.php?contextid=3520425" id="action_link5f9816ef12d9140" class="ml-4"  role="menuitem" ><i class="icon fa fa-unlock-alt fa-fw " aria-hidden="true"  ></i>Rechte prüfen</a>
+    <a href="https://moodle.hu-berlin.de/admin/roles/check.php?contextid=3520425" id="action_link5f9825fac1e6b40" class="ml-4"  role="menuitem" ><i class="icon fa fa-unlock-alt fa-fw " aria-hidden="true"  ></i>Rechte prüfen</a>
 
 
 
 </div>
                                             <div class="dropdown-item">
 
-    <a href="https://moodle.hu-berlin.de/enrol/otherusers.php?id=100185" id="action_link5f9816ef12d9141" class=""  role="menuitem" ><i class="icon fa fa-user-plus fa-fw " aria-hidden="true"  ></i>Weitere Personen</a>
+    <a href="https://moodle.hu-berlin.de/enrol/otherusers.php?id=100185" id="action_link5f9825fac1e6b41" class=""  role="menuitem" ><i class="icon fa fa-user-plus fa-fw " aria-hidden="true"  ></i>Weitere Personen</a>
 
 
 
@@ -621,12 +623,12 @@ document.body.className += ' jsenabled';
 
                         <div class="region_main_settings_menu_proxy"></div>
                     <span class="notifications" id="user-notifications"></span>
-                    <div role="main"><span id="maincontent"></span><h2>Teilnehmer/innen</h2><div class="d-flex justify-content-end" data-region="wrapper" data-table-uniqueid="user-index-participants-100185"><div class="singlebutton enrolusersbutton enrol_manual_plugin"><form method="get" action="https://moodle.hu-berlin.de/enrol/manual/manage.php" id="enrolusersbutton-1"><div><input type="submit" value="Nutzer/innen einschreiben" class="btn btn-secondary my-1" /><input type="hidden" name="enrolid" value="184584" /><input type="hidden" name="id" value="100185" /></div></form></div></div><div id="core_user-participantsfilter-5f9816ef24f2c5f9816ef12d9143" class="filter-group my-2 p-2 bg-light border-radius border" data-table-region="user-index-participants-100185" data-table-course-id="100185" data-filterverb="1">
+                    <div role="main"><span id="maincontent"></span><h2>Teilnehmer/innen</h2><div class="d-flex justify-content-end" data-region="wrapper" data-table-uniqueid="user-index-participants-100185"><div class="singlebutton enrolusersbutton enrol_manual_plugin"><form method="get" action="https://moodle.hu-berlin.de/enrol/manual/manage.php" id="enrolusersbutton-1"><div><input type="submit" value="Nutzer/innen einschreiben" class="btn btn-secondary my-1" /><input type="hidden" name="enrolid" value="184584" /><input type="hidden" name="id" value="100185" /></div></form></div></div><div id="core_user-participantsfilter-5f9825fad15f05f9825fac1e6b43" class="filter-group my-2 p-2 bg-light border-radius border" data-table-region="user-index-participants-100185" data-table-course-id="100185" data-filterverb="1">
     <div data-filterregion="filtermatch" class="hidden">
-        <label for="core_user-local-participantsfilter-jointype-5f9816ef24f2c5f9816ef12d9143" class="my-0" aria-hidden="true">
+        <label for="core_user-local-participantsfilter-jointype-5f9825fad15f05f9825fac1e6b43" class="my-0" aria-hidden="true">
             Finde
         </label>
-        <select class="custom-select" data-filterfield="join" id="core_user-local-participantsfilter-jointype-5f9816ef24f2c5f9816ef12d9143"
+        <select class="custom-select" data-filterfield="join" id="core_user-local-participantsfilter-jointype-5f9825fad15f05f9825fac1e6b43"
                 aria-label="Wie mehrere Filter kombiniert werden sollten">
             <option value="0">keine Auswahl</option>
             <option selected=selected value="1">Beliebig</option>
@@ -641,16 +643,16 @@ document.body.className += ' jsenabled';
                 <legend class="sr-only">Filter 1</legend>
                 <div class="border-radius my-2 p-2 bg-white border d-flex flex-column flex-md-row align-items-md-start">
                     <div class="d-flex flex-column flex-md-row align-items-md-center">
-                        <label for="core_user-local-participantsfilter-filterrow-jointype-5f9816ef24f2c5f9816ef12d9143" class="mr-md-2 mb-md-0">Finde</label>
-                        <select class="custom-select mb-1 mb-md-0 mr-md-2" data-filterfield="join" id="core_user-local-participantsfilter-filterrow-jointype-5f9816ef24f2c5f9816ef12d9143">
+                        <label for="core_user-local-participantsfilter-filterrow-jointype-5f9825fad15f05f9825fac1e6b43" class="mr-md-2 mb-md-0">Finde</label>
+                        <select class="custom-select mb-1 mb-md-0 mr-md-2" data-filterfield="join" id="core_user-local-participantsfilter-filterrow-jointype-5f9825fad15f05f9825fac1e6b43">
                             <option value="0">keine Auswahl</option>
                             <option selected=selected value="1">Beliebig</option>
                             <option value="2">Alles</option>
                         </select>
                     </div>
         
-                    <label class="sr-only pt-2" for="core_user-local-participantsfilter-filterrow-filtertype-5f9816ef24f2c5f9816ef12d9143">filtertype</label>
-                    <select class="custom-select mb-1 mb-md-0 mr-md-2" data-filterfield="type" id="core_user-local-participantsfilter-filterrow-filtertype-5f9816ef24f2c5f9816ef12d9143">
+                    <label class="sr-only pt-2" for="core_user-local-participantsfilter-filterrow-filtertype-5f9825fad15f05f9825fac1e6b43">filtertype</label>
+                    <select class="custom-select mb-1 mb-md-0 mr-md-2" data-filterfield="type" id="core_user-local-participantsfilter-filterrow-filtertype-5f9825fad15f05f9825fac1e6b43">
                         <option value="">Auswahl</option>
                         <option value="keywords">Stichwort</option>
                         <option value="status">Status</option>
@@ -856,7 +858,7 @@ document.body.className += ' jsenabled';
         </div>
     </div>
     <div
-    id="drawer-5f9816ef207905f9816ef12d9142"
+    id="drawer-5f9825facd3235f9825fac1e6b42"
     class=" drawer bg-white hidden"
     aria-expanded="false"
     aria-hidden="true"
@@ -864,7 +866,7 @@ document.body.className += ' jsenabled';
     role="region"
     tabindex="0"
 >
-            <div id="message-drawer-5f9816ef207905f9816ef12d9142" class="message-app" data-region="message-drawer" role="region">
+            <div id="message-drawer-5f9825facd3235f9825fac1e6b42" class="message-app" data-region="message-drawer" role="region">
             <div class="closewidget bg-light border-bottom text-right">
                 <a class="text-dark" data-action="closedrawer" href="#">
                      <i class="icon fa fa-window-close fa-fw "  title="Schließen" aria-label="Schließen"></i>
@@ -1051,13 +1053,13 @@ document.body.className += ' jsenabled';
                             <ul class="nav nav-pills nav-fill" role="tablist">
                                 <li class="nav-item">
                                     <a
-                                        id="contacts-tab-5f9816ef207905f9816ef12d9142"
+                                        id="contacts-tab-5f9825facd3235f9825fac1e6b42"
                                         class="nav-link active"
-                                        href="#contacts-tab-panel-5f9816ef207905f9816ef12d9142"
+                                        href="#contacts-tab-panel-5f9825facd3235f9825fac1e6b42"
                                         data-toggle="tab"
                                         data-action="show-contacts-section"
                                         role="tab"
-                                        aria-controls="contacts-tab-panel-5f9816ef207905f9816ef12d9142"
+                                        aria-controls="contacts-tab-panel-5f9825facd3235f9825fac1e6b42"
                                         aria-selected="true"
                                     >
                                         Kontakte
@@ -1065,13 +1067,13 @@ document.body.className += ' jsenabled';
                                 </li>
                                 <li class="nav-item">
                                     <a
-                                        id="requests-tab-5f9816ef207905f9816ef12d9142"
+                                        id="requests-tab-5f9825facd3235f9825fac1e6b42"
                                         class="nav-link"
-                                        href="#requests-tab-panel-5f9816ef207905f9816ef12d9142"
+                                        href="#requests-tab-panel-5f9825facd3235f9825fac1e6b42"
                                         data-toggle="tab"
                                         data-action="show-requests-section"
                                         role="tab"
-                                        aria-controls="requests-tab-panel-5f9816ef207905f9816ef12d9142"
+                                        aria-controls="requests-tab-panel-5f9825facd3235f9825fac1e6b42"
                                         aria-selected="false"
                                     >
                                         Anfragen
@@ -1090,10 +1092,10 @@ document.body.className += ' jsenabled';
                     aria-live="polite"
                     data-region="lazy-load-list"
                     data-user-id="163898"
-                                        id="contacts-tab-panel-5f9816ef207905f9816ef12d9142"
+                                        id="contacts-tab-panel-5f9825facd3235f9825fac1e6b42"
                     data-section="contacts"
                     role="tabpanel"
-                    aria-labelledby="contacts-tab-5f9816ef207905f9816ef12d9142"
+                    aria-labelledby="contacts-tab-5f9825facd3235f9825fac1e6b42"
 
                 >
                     
@@ -1127,10 +1129,10 @@ document.body.className += ' jsenabled';
                     aria-live="polite"
                     data-region="lazy-load-list"
                     data-user-id="163898"
-                                        id="requests-tab-panel-5f9816ef207905f9816ef12d9142"
+                                        id="requests-tab-panel-5f9825facd3235f9825fac1e6b42"
                     data-section="requests"
                     role="tabpanel"
-                    aria-labelledby="requests-tab-5f9816ef207905f9816ef12d9142"
+                    aria-labelledby="requests-tab-5f9825facd3235f9825fac1e6b42"
 
                 >
                     
@@ -1485,7 +1487,7 @@ document.body.className += ' jsenabled';
                         style="overflow-y: auto"
                     ></div>
                 </div>                <div class="h-100 view-overview-body" aria-hidden="false" data-region="view-overview"  data-user-id="163898">
-                    <div id="message-drawer-view-overview-container-5f9816ef207905f9816ef12d9142" class="d-flex flex-column h-100" style="overflow-y: auto">
+                    <div id="message-drawer-view-overview-container-5f9825facd3235f9825fac1e6b42" class="d-flex flex-column h-100" style="overflow-y: auto">
                             
                             
                             <div
@@ -1496,9 +1498,9 @@ document.body.className += ' jsenabled';
                                     <button
                                         class="btn btn-link w-100 text-left p-1 p-sm-2 d-flex align-items-center overview-section-toggle collapsed"
                                         data-toggle="collapse"
-                                        data-target="#view-overview-favourites-target-5f9816ef207905f9816ef12d9142"
+                                        data-target="#view-overview-favourites-target-5f9825facd3235f9825fac1e6b42"
                                         aria-expanded="false"
-                                        aria-controls="view-overview-favourites-target-5f9816ef207905f9816ef12d9142"
+                                        aria-controls="view-overview-favourites-target-5f9825facd3235f9825fac1e6b42"
                                     >
                                         <span class="collapsed-icon-container">
                                             <i class="icon fa fa-caret-right fa-fw " aria-hidden="true"  ></i>
@@ -1526,9 +1528,9 @@ document.body.className += ' jsenabled';
                                 aria-live="polite"
                                 data-region="lazy-load-list"
                                 data-user-id="163898"
-                                            id="view-overview-favourites-target-5f9816ef207905f9816ef12d9142"
+                                            id="view-overview-favourites-target-5f9825facd3235f9825fac1e6b42"
             aria-labelledby="view-overview-favourites-toggle"
-            data-parent="#message-drawer-view-overview-container-5f9816ef207905f9816ef12d9142"
+            data-parent="#message-drawer-view-overview-container-5f9825facd3235f9825fac1e6b42"
 
                             >
                                 
@@ -1559,9 +1561,9 @@ document.body.className += ' jsenabled';
                                     <button
                                         class="btn btn-link w-100 text-left p-1 p-sm-2 d-flex align-items-center overview-section-toggle collapsed"
                                         data-toggle="collapse"
-                                        data-target="#view-overview-group-messages-target-5f9816ef207905f9816ef12d9142"
+                                        data-target="#view-overview-group-messages-target-5f9825facd3235f9825fac1e6b42"
                                         aria-expanded="false"
-                                        aria-controls="view-overview-group-messages-target-5f9816ef207905f9816ef12d9142"
+                                        aria-controls="view-overview-group-messages-target-5f9825facd3235f9825fac1e6b42"
                                     >
                                         <span class="collapsed-icon-container">
                                             <i class="icon fa fa-caret-right fa-fw " aria-hidden="true"  ></i>
@@ -1589,9 +1591,9 @@ document.body.className += ' jsenabled';
                                 aria-live="polite"
                                 data-region="lazy-load-list"
                                 data-user-id="163898"
-                                            id="view-overview-group-messages-target-5f9816ef207905f9816ef12d9142"
+                                            id="view-overview-group-messages-target-5f9825facd3235f9825fac1e6b42"
             aria-labelledby="view-overview-group-messages-toggle"
-            data-parent="#message-drawer-view-overview-container-5f9816ef207905f9816ef12d9142"
+            data-parent="#message-drawer-view-overview-container-5f9825facd3235f9825fac1e6b42"
 
                             >
                                 
@@ -1622,9 +1624,9 @@ document.body.className += ' jsenabled';
                                     <button
                                         class="btn btn-link w-100 text-left p-1 p-sm-2 d-flex align-items-center overview-section-toggle collapsed"
                                         data-toggle="collapse"
-                                        data-target="#view-overview-messages-target-5f9816ef207905f9816ef12d9142"
+                                        data-target="#view-overview-messages-target-5f9825facd3235f9825fac1e6b42"
                                         aria-expanded="false"
-                                        aria-controls="view-overview-messages-target-5f9816ef207905f9816ef12d9142"
+                                        aria-controls="view-overview-messages-target-5f9825facd3235f9825fac1e6b42"
                                     >
                                         <span class="collapsed-icon-container">
                                             <i class="icon fa fa-caret-right fa-fw " aria-hidden="true"  ></i>
@@ -1652,9 +1654,9 @@ document.body.className += ' jsenabled';
                                 aria-live="polite"
                                 data-region="lazy-load-list"
                                 data-user-id="163898"
-                                            id="view-overview-messages-target-5f9816ef207905f9816ef12d9142"
+                                            id="view-overview-messages-target-5f9825facd3235f9825fac1e6b42"
             aria-labelledby="view-overview-messages-toggle"
-            data-parent="#message-drawer-view-overview-container-5f9816ef207905f9816ef12d9142"
+            data-parent="#message-drawer-view-overview-container-5f9825facd3235f9825fac1e6b42"
 
                             >
                                 
@@ -1743,10 +1745,10 @@ document.body.className += ' jsenabled';
                                                 type="radio"
                                                 name="message_blocknoncontacts"
                                                 class="custom-control-input"
-                                                id="block-noncontacts-5f9816ef207905f9816ef12d9142-1"
+                                                id="block-noncontacts-5f9825facd3235f9825fac1e6b42-1"
                                                 value="1"
                                             >
-                                            <label class="custom-control-label ml-2" for="block-noncontacts-5f9816ef207905f9816ef12d9142-1">
+                                            <label class="custom-control-label ml-2" for="block-noncontacts-5f9825facd3235f9825fac1e6b42-1">
                                                 Nur meine Kontakte
                                             </label>
                                         </div>
@@ -1755,10 +1757,10 @@ document.body.className += ' jsenabled';
                                                 type="radio"
                                                 name="message_blocknoncontacts"
                                                 class="custom-control-input"
-                                                id="block-noncontacts-5f9816ef207905f9816ef12d9142-0"
+                                                id="block-noncontacts-5f9825facd3235f9825fac1e6b42-0"
                                                 value="0"
                                             >
-                                            <label class="custom-control-label ml-2" for="block-noncontacts-5f9816ef207905f9816ef12d9142-0">
+                                            <label class="custom-control-label ml-2" for="block-noncontacts-5f9825facd3235f9825fac1e6b42-0">
                                                 Meine Kontakte und jeder aus meinen Kursen
                                             </label>
                                         </div>
@@ -1772,8 +1774,8 @@ document.body.className += ' jsenabled';
                             <h3 class="mb-2 mt-4 h6 font-weight-bold">Allgemein</h3>
                             <div data-preference="entertosend">
                                 <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" id="enter-to-send-5f9816ef207905f9816ef12d9142" >
-                                    <label class="custom-control-label" for="enter-to-send-5f9816ef207905f9816ef12d9142">
+                                    <input type="checkbox" class="custom-control-input" id="enter-to-send-5f9825facd3235f9825fac1e6b42" >
+                                    <label class="custom-control-label" for="enter-to-send-5f9825facd3235f9825fac1e6b42">
                                         Zum Senden die Eingabetaste tippen
                                     </label>
                                 </div>
@@ -2266,6 +2268,7 @@ document.body.className += ' jsenabled';
                                             </ul>
                                         </li>
                                             <li><a href="https://moodle.hu-berlin.de/?lang=en" title="Switch to English Moodle interface. For preferred languages go to: My Moodle &gt; Preferences">EN</a></li>
+                                            <li><a href="https://www.cms.hu-berlin.de/de/stoerungen/standardseite?act=id&amp;id=18371" title="Zur Wartungsmeldung">⚒  BETRIEBSUNTERBRECHUNG DER FIREWALL AM 28. OKTOBER 7-7:30 UHR ⚒</a></li>
                         </ul>
                 </nav>
                 <a href="https://download.moodle.org/mobile?version=2020061502&amp;lang=de&amp;iosappid=633359593&amp;androidappid=com.moodle.moodlemobile">Laden Sie die mobile App</a><div class="policiesfooter"><a href="https://moodle.hu-berlin.de/admin/tool/policy/viewall.php?returnurl=https%3A%2F%2Fmoodle.hu-berlin.de%2Fuser%2Findex.php%3Fpage%3D0%26amp%3Bperpage%3D5000%26amp%3Bcontextid%3D0%26amp%3Bid%3D100185%26amp%3Bnewcourse">Datenschutzinformation</a></div>
@@ -2419,14 +2422,14 @@ function(
     $,
     Popover
 ) {
-    var toggle = $('#message-drawer-toggle-5f9816ef1ca735f9816ef12d9113');
+    var toggle = $('#message-drawer-toggle-5f9825faca4195f9825fac1e6b13');
     Popover.init(toggle);
 });
 ;
 
 require(['jquery', 'core_message/message_drawer'], function($, MessageDrawer) {
-    var root = $('#message-drawer-5f9816ef207905f9816ef12d9142');
-    MessageDrawer.init(root, '5f9816ef207905f9816ef12d9142', false);
+    var root = $('#message-drawer-5f9825facd3235f9825fac1e6b42');
+    MessageDrawer.init(root, '5f9825facd3235f9825fac1e6b42', false);
 });
 ;
 
@@ -2447,7 +2450,7 @@ require(['theme_boost_campus/catchshortcuts'], function(mod) {
 M.util.js_pending('enrol_manual/quickenrolment'); require(['enrol_manual/quickenrolment'], function(amd) {amd.init({"contextid":3520425}); M.util.js_complete('enrol_manual/quickenrolment');});;
 
 require(['core_user/participantsfilter'], function(ParticipantsFilter) {
-    ParticipantsFilter.init('core_user-participantsfilter-5f9816ef24f2c5f9816ef12d9143');
+    ParticipantsFilter.init('core_user-participantsfilter-5f9825fad15f05f9825fac1e6b43');
 });
 ;
 
@@ -2482,7 +2485,7 @@ M.str = {"moodle":{"lastmodified":"Zuletzt ge\u00e4ndert","name":"Titel\/Bezeich
 Y.use("moodle-filter_mathjaxloader-loader",function() {M.filter_mathjaxloader.configure({"mathjaxconfig":"MathJax.Hub.Config({\r\n    config: [\"Accessible.js\", \"Safe.js\"],\r\n    errorSettings: { message: [\"!\"] },\r\n    skipStartupTypeset: true,\r\n    messageStyle: \"none\"\r\n});\r\n","lang":"de"});
 });
 M.util.help_popups.setup(Y);
- M.util.js_pending('random5f9816ef12d9144'); Y.on('domready', function() { M.util.js_complete("init");  M.util.js_complete('random5f9816ef12d9144'); });
+ M.util.js_pending('random5f9825fac1e6b44'); Y.on('domready', function() { M.util.js_complete("init");  M.util.js_complete('random5f9825fac1e6b44'); });
 })();
 //]]>
 </script>

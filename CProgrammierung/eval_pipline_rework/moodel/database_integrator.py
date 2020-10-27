@@ -59,9 +59,9 @@ class DatabaseIntegrator:
                          .sep, "") \
                 .replace("_assignsubmission_file_", "")
             student_name = student_details[0:student_details.find("_")]
-            student_moodle_id = student_details[student_details.find("_") + 1:]
-            if len(student_name) > 0 and len(student_moodle_id) > 0:
-                new_student = Student.get_student_by_moodleID(student_moodle_id)
+            wired_id = student_details[student_details.find("_") + 1:]
+            if len(student_name) > 0 and len(wired_id) > 0:
+                new_student = Student.get_student_by_name(student_name)
             for file in files:
                 if file.__str__().find(".swp") > 0:
                     continue

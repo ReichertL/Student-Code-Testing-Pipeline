@@ -33,9 +33,10 @@ class Run(Base):
 
     testcase_results = relationship("Testcase_Result", backref="Run.id")
    
-    def __init__(self, submission_id, command_line, compilation_return_code,compiler_output):   
+    def __init__(self, submission_id, command_line, careless_flag, compilation_return_code,compiler_output):   
         self.submission_id = submission_id
         self.command_line=command_line
+        self.careless_flag=careless_flag
         self.compilation_return_code=compilation_return_code
         self.compiler_output=compiler_output
 
@@ -96,7 +97,7 @@ class Run(Base):
             print(file=f)
 
     @classmethod
-    def create_stats(self,results):
+    def create_stats(cls,results):
         stats=list()       
         for result, testcase, valgrind in results:
             line={'id':str(testcase.short_id)}
@@ -112,7 +113,7 @@ class Run(Base):
         return stats
    
     @classmethod
-    def is_passed(self,r):
+    def is_passed(cls,r):
         count=dbm.session.query(Testcase_Result)\
             .join(Valgrind_Output, Valgrind_Output.testcase_result_id==Testcase_Result.id)\
             .filter(Testcase_Result.run_id==r.id, Valgrind_Output.ok==True, Testcase_Result.output_correct==True).count()
@@ -121,12 +122,16 @@ class Run(Base):
         return False
 
     @classmethod
-    def insert_run(self,r):
-        exists=dbm.session.query(Run).filter_by(submission_id=r.submission_id, command_line=r.command_line,careless_flag=r.careless_flag).first()
+    def insert_run(cls,run):
+        exists=dbm.session.query(Run).filter(Run.submission_id==run.submission_id, Run.command_line==run.command_line, Run.careless_flag==run.careless_flag).first()
         if exists==None:
-            dbm.session.add(r)
+            dbm.session.add(run)
             dbm.session.commit()
-            return r
+            return run
         return exists   
-   
+    
+    @classmethod
+    def get_last_for_submission(cls,submission):
+        run=dbm.session.query(Run).filter(Run.submission_id==submission.id).order_by(Run.execution_time.desc()).first()
+        return run
    

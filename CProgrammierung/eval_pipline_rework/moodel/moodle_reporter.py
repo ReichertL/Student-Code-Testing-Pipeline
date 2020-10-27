@@ -6,13 +6,24 @@ import os
 import subprocess
 import sys
 from datetime import datetime
+import logging
 
-from logic.moodle_submission_fetcher import MoodleSubmissionFetcher
+from moodel.moodle_submission_fetcher import MoodleSubmissionFetcher
 from logic.result_generator import ResultGenerator
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
-from util.moodle_session import MoodleSession
+from moodel.moodle_session import MoodleSession
 
+
+from alchemy.submissions import Submission
+from alchemy.students import Student
+from alchemy.runs import Run
+from alchemy.testcase_results import Testcase_Result
+
+import alchemy.database_manager as dbm
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 class MoodleReporter:
     """
@@ -74,10 +85,8 @@ class MoodleReporter:
         :return: the email string as HTML
         """
         mail_templates = {}
-        for root, _, files in os.walk(
-                self.configuration["MAIL_TEMPLATE_DIR"]
-                ,
-                topdown=False):
+        mail_template_path=resolve_absolute_path(self.configuration["MAIL_TEMPLATE_DIR"])
+        for root, _, files in os.walk(mail_template_path,topdown=False):
             for file in files:
                 path = os.path.join(root + os.path.sep + file)
                 identifier = file.replace(".mail", "")
@@ -85,7 +94,6 @@ class MoodleReporter:
                 with open(path, "r") as content:
                     text = text.join(content.readlines())
                 mail_templates.update({identifier: text})
-
         mail = mail_templates["greeting"].replace("$name$", student.name)
         if run.passed:
             if self.args.final:
@@ -93,57 +101,64 @@ class MoodleReporter:
             else:
                 mail += mail_templates["successful"]
         else:
-            if run.compilation is not None and run.compilation:
-                bad_failed_description = {}
-                good_failed_description = {}
-                for i in database_manager.get_testcase_results_bad_for_run(run):
-                    if not i.output_correct:
-                        bad_failed_description = i \
-                            .get_failed_description(bad_failed_description)
-                for i in database_manager.get_testcase_results_bad_for_run(run):
-                    if not i.output_correct:
-                        good_failed_description = i \
-                            .get_failed_description(good_failed_description)
-                #TODO: Bad or OUTPUT is missing
-                good_failed_snippet = mail_templates["good_test_failed_intro"]
-                if len(bad_failed_description) > 0:
+            if run.compilation_return_code==0:
+                bad_failed_desc = {}
+                good_failed_desc = {}
+                bad_or_out_failed_desc ={}
+
+                for result,testcase in Testcase_Result.get_failed_output_bad(run):
+                    bad_failed_desc=self.get_failed_description( result,testcase,bad_failed_desc)
+                    logging.debug(bad_failed_desc)
+
+                for result,testcase in Testcase_Result.get_failed_output_good(run):
+                    good_failed_desc=self.get_failed_description( result,testcase,good_failed_desc)
+
+                for result,testcase in Testcase_Result.get_failed_output_bad_or_output(run):
+                    bad_or_out_failed_desc=self.get_failed_description( result,testcase,bad_or_out_failed_desc)
+                    
+
+                if len(bad_failed_desc) > 0:
                     mail += mail_templates["bad_test_failed_intro"]
-                    good_failed_snippet = \
-                        good_failed_snippet \
-                            .replace("$also_token$", "Auch wenn")
                     mail += self. \
-                        get_fail_information_snippet(bad_failed_description,
-                                                     mail_templates)
-
-                if len(good_failed_description) > 0:
-                    mail += good_failed_snippet.replace("$also_token$", "Wenn")
+                        get_fail_information_snippet(bad_failed_desc,
+                                                     mail_templates)                                    
+                if len(bad_or_out_failed_desc) > 0:
+                    mail += mail_templates["bad_or_output_test_failed_intro"]
                     mail += self. \
-                        get_fail_information_snippet(good_failed_description,
-                                                     mail_templates)
+                        get_fail_information_snippet(bad_or_out_failed_desc,
+                                                     mail_templates)   
 
-            else:
-                if run.compilation_return_code !=0:
-                    mail += mail_templates["not_compiled"] \
-                        .replace("$commandline$",
-                                 run.command_line) \
-                        .replace("$compilation_output$",
-                                 run.compiler_output)
-                else:
-                    print(f"--{student.name}'s submission was not compiled "
-                          f"before mailing him--")
+                if len(good_failed_desc) > 0:
+                    good_failed_snippet = mail_templates["good_test_failed_intro"]
+                    token="Wenn"
+                    if len(bad_failed_desc)>0 or len(bad_or_out_failed_desc)>0:
+                        token="Auch wenn"
+                    mail += good_failed_snippet.replace("$also_token$", token)
+                    mail += self. \
+                        get_fail_information_snippet(good_failed_desc, mail_templates)
+                
+
+            elif run.compilation_return_code !=0:
+                mail += mail_templates["not_compiled"] \
+                        .replace("$commandline$",run.command_line) \
+                        .replace("$compilation_output$",run.compiler_output)
                 if not self.args.final:
                     mail += mail_templates["not_compiled_hint"]
+            else:
+                print(f"--{student.name}'s submission was not compiled "
+                          f"before mailing him--")
+
 
             if not self.args.final:
                 mail += mail_templates["further_attempts"]
             else:
-                if database_manager.is_student_passed(student.name):
+                if Student.is_student_passed(student.name):
                     mail += mail_templates["extra_passed_final"]
                 else:
                     mail += mail_templates["not_passed_final"]
         mail += mail_templates["ending"] \
             .replace("$submission_timestamp$",
-                     datetime.fromtimestamp(submission.submission_time) #TODO passt das?
+                     submission.submission_time
                      .strftime('%d.%m.%Y, %T Uhr'))
 
         if not self.args.final:
@@ -151,7 +166,7 @@ class MoodleReporter:
         mail += "\n"
         return mail
 
-    def send_mail(self,database_manager, student, submission, text, grade=None):
+    def send_mail(self, student, submission, run,text, grade=None):
         """
         Interaction for sending a mail with regards to
         corrector interaction
@@ -166,7 +181,7 @@ class MoodleReporter:
         stats_path = 'stats'
         text_path = "text"
         with open(stats_path, 'w') as f:
-            run.print_stats(f,database_manager)
+            run.print_stats(f)
         with open(text_path, 'w') as f:
             f.write(text)
 
@@ -239,7 +254,7 @@ class MoodleReporter:
         os.unlink(stats_path)
         return success
 
-    def run(self, database_manager):
+    def run(self):
         """
         Iteration over all students
         which haven't received an e-mail yet
@@ -253,30 +268,35 @@ class MoodleReporter:
             get_login_data()
         self.moodle_session = MoodleSession(username,
                                             session_state,
-                                            self.configuration,
-                                            database_manager)
+                                            self.configuration)
         to_mail = []
 
         if self.args.mail_to_all:
             if self.args.verbose:
                 print("Mailing everybody who hasn't "
                       "received a mail for the latest submission yet")
-            to_mail = database_manager.get_all_students()
+            to_mail = Submission.get_sumbissions_for_notification()
+                
+        
         if len(self.args.mailto) > 0:
-            for student_name in self.args.mailto:
-                to_mail.extend(database_manager.get_last_submission_for_student(name))
+            for name in self.args.mailto:
+                sub, stud=Submission.get_last_for_name(name)
+                logging.info(stud)
+                logging.info(sub)
+                to_mail.append([stud,sub])
 
-        to_mail.extend(database_manager.get_students_to_notify())
 
-        sorted_to_mail=sorted(to_mail, key= lambda stud, sub:(stud.name, sub.submission_time))
+        sorted_to_mail=sorted(to_mail, key= lambda pair:(pair[0].name, pair[1].submission_time))
+        
+        #logging.info("mails will be sent to:\n ")
+        #for stud, sub in sorted_to_mail:
+        #    logging.info(stud)
         
         for student,submission in sorted_to_mail:
-
-            
                 
             if submission.student_notified==True and (self.args.rerun or self.args.force):
                 print(f"Already send a mail to {student.name} "
-                        f"at {mail_information.time_stamp}")
+                        f"at {submission.notification_time}")
                 print('Send anyway? (y/n) ', end='', flush=True)
                 if sys.stdin.readline()[:1] != 'y':
                     continue
@@ -287,13 +307,16 @@ class MoodleReporter:
             elif(submission.student_notified==True):
                 continue
                 
-            run=sorted(submission.runs, run.execution_time) #gets last run
+            run=Run.get_last_for_submission(submission)
             text = self.generate_mail_content(student, submission,run)
-            success = self.send_mail(database_manager,student, submission, text )
+            success = self.send_mail(student, submission, run, text )
             if success:
-                    if student.passed:
-                        self.dump_generator.add_line(student, 1)
+                    if run.passed:
+                        self.dump_generator.add_line(student)
                     self.write_to_mail_log(student, submission,text)
+                    submission.notification_time=datetime.now()
+                    submission.student_notified=True
+                    dbm.session.commit()
         self.dump_generator.dump_list()
 
 
@@ -302,3 +325,55 @@ class MoodleReporter:
         with open(path, "a") as mail_log:
             mail_log.write(str(datetime.now())+" Mail sent to "+str(student.name)+"for submission from the "+str(submission.submission_time)+". The sent mail was: \n"+str(text))
         
+    
+    def get_failed_description(self,result,testcase, description=None):
+
+        if description is None:
+            description = {}
+        if result.timeout == True:
+            self.append_self(testcase,description, "timeout")
+
+        if result.timeout and result.segfault:
+            self.append_self(testcase,description, "segfault")
+
+        if not result.returncode_correct(testcase=testcase):
+            self.append_self(testcase,description, "return_code")
+        
+        vg=result.valgrind_results
+
+        if result.valgrind_results is not None :
+
+            if vg.ok:
+                if vg.invalid_read_count > 0:
+                    self.append_self(testcase,description, "valgrind_read")
+
+                if vg.invalid_write_count > 0 :
+                    self.append_self(testcase,description, "valgrind_write")
+
+                if vg.definitely_lost_bytes!=(0 or None):
+                    self.append_self(testcase,description, "valgrind_leak")
+                elif vg.possibly_lost_bytes != (0 or None):
+                    self.append_self(testcase,description, "valgrind_leak")
+                elif vg.indirectly_lost_bytes!= (0 or None):
+                    self.append_self(testcase,description, "valgrind_leak")
+                elif vg.still_reachable_bytes != (0 or None):
+                    self.append_self(testcase,description, "valgrind_leak")
+
+        if testcase.type == "BAD":
+            if result.error_msg_quality < 1:
+                self.append_self(testcase,description, "error_massage")
+        else:
+            if not result.output_correct and not result.timeout:
+                self.append_self(testcase,description, "output")
+
+        return description
+    
+    def append_self(self,testcase, description, key):
+        update_list = []
+        if key in description:
+            update_list = description[key]
+        if len(testcase.hint) > 0:
+            update_list.append(testcase.hint)
+        else:
+            update_list.append(f"bei {testcase.short_id}")
+        description.update({key: update_list})

@@ -14,7 +14,7 @@ import sys
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn
 from util.config_reader import ConfigReader
-from util.moodle_session import MoodleSession
+from moodel.moodle_session import MoodleSession
 
 from alchemy.students import Student
 

@@ -7,13 +7,18 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-
-from alchemy.students import Student
 import requests
 from bs4 import BeautifulSoup
 import urllib.parse
+import logging
 
 from util.absolute_path_resolver import resolve_absolute_path
+from alchemy.students import Student
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
+
+
 
 AJAX_HEADERS = {
     'X-Requested-With': 'XMLHttpRequest',
@@ -87,13 +92,16 @@ class MoodleSession:
         """
         course_id = self.configuration["MOODLE_IDS"]["MOODLE_COURSE_ID"]
         re_teilnehmer = re.compile(
-            r'<a href="{}/user/view.php\?id=(\d+)&amp;course=(\d+)">'
+            r'<a href="{}/user/view.php\?id=(\d+)&amp;course=(\d+)" class="d-inline-block aabtn">'
             r'<img src="[^"]*"\s+class="[^"]*"[^>]*>([^<]+)</a>'.format(
                 re.escape(self.moodle_base_url)))
         res = {}
         url = self.moodle_base_url + '/user/index.php'
         r = self.session.get(url, params={'id': course_id, 'perpage': '5000'})
         self._last_request = r
+        #f=open("out.txt", 'w+')
+        #f.write(r.text)
+        #f.close()
         for line in r.text.splitlines():
             mo = re_teilnehmer.search(line)
             if mo:
@@ -106,10 +114,11 @@ class MoodleSession:
         if res:
             for i in res:
                 Student.get_or_insert(i, res[i])
+                print(i)
 
-        else:
-            with open('users.html', 'w') as f:
-                f.write(r.text)
+        #else:
+        #    with open('users.html', 'w') as f:
+        #        f.write(r.text)
 
     def logged_in(self):
         """Just a shortcut to the session state.

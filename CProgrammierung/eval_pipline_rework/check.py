@@ -10,9 +10,9 @@ import traceback
 import logging
 from signal import SIGABRT, SIGTERM, SIGSEGV, SIGILL, signal, SIGINT
 
-from logic.database_integrator import DatabaseIntegrator
-from logic.moodle_reporter import MoodleReporter
-from logic.moodle_submission_fetcher import MoodleSubmissionFetcher
+from moodel.database_integrator import DatabaseIntegrator
+from moodel.moodle_reporter import MoodleReporter
+from moodel.moodle_submission_fetcher import MoodleSubmissionFetcher
 from logic.performance_evaluator import PerformanceEvaluator
 from logic.result_generator import ResultGenerator
 from logic.test_case_executor import TestCaseExecutor
@@ -70,9 +70,7 @@ def run():
             Abtestat_Functions.abtestat_revert( args.revert)
 
         if len(args.mark_manual) > 0:
-            for student_name in args.mark_manual:
-                student = Student.get_student_by_name(student_name)
-                database_manager.mark_submission_passed(student)
+            DatabaseManager.marke_passed_manually(args.mark_manual)
 
         result_generator = ResultGenerator()
         # generates a csv dump for moodle grading

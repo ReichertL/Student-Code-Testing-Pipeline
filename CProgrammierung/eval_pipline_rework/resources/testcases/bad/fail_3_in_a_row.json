@@ -1,0 +1,8 @@
+{
+  "short_desc": "3_in_a_row",
+  "hint": "wenn eine Zeile drei Zahlen enthält!",
+  "valgrind": true,
+  "rlimit": "10M",
+  "returncode": 1,
+  "type":"BAD"
+}

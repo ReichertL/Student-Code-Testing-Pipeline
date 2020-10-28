@@ -7,7 +7,8 @@ import logging
 
 from alchemy.testcase_results import Testcase_Result
 import alchemy.database_manager as dbm
-from alchemy.students import Students
+from alchemy.students import Student
+from alchemy.runs import Run
 
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
@@ -50,21 +51,11 @@ class PerformanceEvaluator:
         evaluates a submission for the competition
         (a optional metric)
         :param submission: the respective submission
-        :return: the average cpu time
-        """
-        return self.average_euclidean_runtime_competition(run)
-
-
-    @staticmethod
-    def average_euclidean_runtime_competition(run):
-        """
-        computes the average euclidean cpu time for the competition
-        with regard to the extra testcases
-        (optional metric)
-        :param run: the respective run
-        :return: the average cpu time
+        :return: the average tictoc time
         """
         return Testcase_Result.get_avg_runtime_performace(run)
+
+
 
     #@staticmethod
     #def geometric_mean_space(submission):
@@ -86,52 +77,41 @@ class PerformanceEvaluator:
 
 
 
-    def get_performance(self, run):
-        """
-        Computes a complete performance dictionary
-        :param submission: the respective submission
-        :return: the performance dictionary
-        """
-        
-        time=Testcase_Result.get_avg_runtime_performance(run)
-        space=Testcase_Result.get_avg_space_performance(run)
-        return performance_stats[time,space]
 
-
-    def evaluate(self, studentlog):
+    def evaluate(self):
 
         """
         evaluates all students if they had passed
         with regard to their performance
         and prints the results into a file an to console
-        :param studentlog: studentlog with all students
         :return:None
         """
-        performances = []
-        students = Students.get_students_passed()
+        key_list=self.configuration["PERFORMANCE_TEST_CASES_TIME"]
+        performances = list()
+        students = Student.get_students_passed()
         for student in students:
-            for submission in student.submissions:
-                for run in submission.runs:
-                    if run.passed:
-                        p=self.get_performance(run)
-                        performance.append(p)
-        
-        #TODO Continue                
-        raise Error("not implemented")
-
-        performances = []
-        for i in students:
-            if (p := database_manager.get_performance(i)) is not None:
+            fastest= Run.get_fastest_run_for_student(student.name, key_list)
+            if fastest!=None:
+                run, submission, time, space=fastest
+            
+                result={'name':student.name, 'mrss':space}
+                for key in key_list:
+                    logging.debug(key)
+                    testcase_result=Testcase_Result.get_testcase_result_by_run_and_testcase(run.id,testcase_name=key)
+                    logging.debug(testcase_result)
+                    if not testcase_result==None:
+                        result[key]=testcase_result.tictoc
+                    else: result[key]=""
+                performances.append(result)
+        logging.debug(performances)
                 
-
-        key_list = list(performances[0].keys())
-
+    
         try:
             os.unlink("performances.txt")
         except FileNotFoundError:
             pass
 
-        row_format = ' | '.join(['{name}'] + ['{{{}:.2f}}'.format(col)
+        row_format = ' | '.join(['{name}'] + ['{{{}:.3f}}'.format(col)
                                               for col in
                                               self.configuration[
                                                   "PERFORMANCE_TEST_CASES_TIME"
@@ -143,6 +123,7 @@ class PerformanceEvaluator:
                 # '{name} | {example10} | {example11} |'
                 # ' {example12} | {example2001} | {example2002} |'
                 # ' {example2003} | {example2004} | {example2005} | {mrss}',
+                
                 row_format,
                 sorted(performances, key=lambda k: float(k[key_list[i]])),
                 titles='auto'))

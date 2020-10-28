@@ -148,24 +148,37 @@ class Testcase_Result(Base):
     
     @classmethod
     def get_avg_runtime(cls,r):
-        avg=dbm.session.query(func.avg(Testcase_Result.tictoc)).filter_by(run_id=r.id).scalar()
+        avg=dbm.session.query(func.avg(Testcase_Result.tictoc)).join(Testcase).filter(Testcase_Result.run_id==r.id, Testcase.type=="GOOD" ).scalar()        
         return avg
     
     @classmethod
     def get_avg_space(cls,r):
-        avg=dbm.session.query(func.avg(Testcase_Result.mrss)).filter_by(run_id=r.id).scalar()
+        avg=dbm.session.query(func.avg(Testcase_Result.mrss)).join(Testcase).filter(Testcase_Result.run_id==r.id, Testcase.type=="GOOD" ).scalar()        
         return avg
 
 
     @classmethod
-    def get_avg_runtime_performance(cls,r ):
-        avg=dbm.session.query(func.avg(Testcase_Result.tictoc)).join(Testcase).filter(Testcase_Result.run_id==r.id, Testcase.type=="PERFORMANCE" ).scalar()
+    def get_avg_runtime_performance(cls,r, keylist ):
+        avg=dbm.session.query(func.avg(Testcase_Result.tictoc)).join(Testcase).filter(Testcase_Result.run_id==r.id).filter(Testcase.short_id.in_(keylist)).scalar()
         return avg
  
     @classmethod
-    def get_avg_space_performance(cls,r ):
-        avg=dbm.session.query(func.avg(Testcase_Result.mrss)).join(Testcase).filter(Testcase_Result.run_id==r.id, Testcase.type=="PERFORMANCE" ).scalar()
+    def get_avg_space_performance(cls,r,keylist ):
+        avg=dbm.session.query(func.avg(Testcase_Result.mrss)).join(Testcase).filter(Testcase_Result.run_id==r.id).filter(Testcase.short_id.in_(keylist)).scalar()
         return avg
  
 
+    @classmethod
+    def get_testcase_result_by_run_and_testcase(cls, run_id, testcase_id=None, testcase_name=None):
+        result=None
+        if testcase_id!=None:
+            result=dbm.session.query(Testcase_Result).join(Testcase)\
+                .filter(Testcase_Result.run_id==run_id, Testcase.id==testcase_id ).first()
+        elif testcase_name!=None:
+            result=dbm.session.query(Testcase_Result).join(Testcase)\
+                .filter(Testcase_Result.run_id==run_id, Testcase.short_id==testcase_name ).first()            
+        return result
+ 
+        
+        
         

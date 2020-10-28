@@ -21,6 +21,7 @@ from util.argument_extractor import ArgumentExtractor
 from util.lockfile import LockFile
 from util.playground import Playground
 from alchemy.database_manager import DatabaseManager 
+from logic.mark_manual import marke_passed_manually
 
 LOCK_FILE_PATH = '/run/lock/check.lock'
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
@@ -68,7 +69,7 @@ def run():
             Abtestat_Functions.abtestat_revert( args.revert)
 
         if len(args.mark_manual) > 0:
-            DatabaseManager.marke_passed_manually(args.mark_manual)
+            marke_passed_manually(args.mark_manual)
 
         result_generator = ResultGenerator()
         # generates a csv dump for moodle grading
@@ -85,7 +86,7 @@ def run():
         # evaluates and shows performance statistics for all students which have passed
         if args.show_performance:
             performance_evaluator = PerformanceEvaluator()
-            performance_evaluator.evaluate(students)
+            performance_evaluator.evaluate()
 
         # optional playground to try new implemented features
         if args.playground:

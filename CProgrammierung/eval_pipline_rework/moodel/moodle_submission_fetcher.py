@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+import logging
 
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn
@@ -18,6 +19,9 @@ from moodel.moodle_session import MoodleSession
 
 from alchemy.students import Student
 
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 def mkdir(path):
     """
@@ -146,7 +150,7 @@ class MoodleSubmissionFetcher:
             src = os.path.join(src_dir, 'loesung.c')
 
             if not os.path.exists(src):
-                Warn('Student "{}" ({}) did not submit a source file.'.format(
+                Warn('Student "{}" ({}) did not submit a source file./ The file was not named loesung.c.'.format(
                     student.name, student.id))
                 continue
             dest_dir = os.path.join(all_submissions_dir, d)

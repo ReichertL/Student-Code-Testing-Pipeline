@@ -321,7 +321,9 @@ class TestCaseExecutor:
 
         passed = Run.is_passed(run)
         if passed:
-            student.grade=1
+            run.passed=True
+            if student.grade !=2:
+                student.grade=1
             dbm.session.commit()
             performance_evaluator = PerformanceEvaluator()
             performance_evaluator.evaluate_performance(submission,run)

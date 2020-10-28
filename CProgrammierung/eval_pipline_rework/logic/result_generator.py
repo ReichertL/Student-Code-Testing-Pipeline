@@ -5,10 +5,14 @@
 import csv
 import datetime
 import sys
+import logging
 
 from alchemy.students import Student
 from alchemy.submissions import Submission
 from alchemy.runs   import Run
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 class ResultGenerator:
     """
@@ -112,9 +116,11 @@ class ResultGenerator:
                 continue
             print(f"Printing details for {name}:")
             sub_stud = Submission.get_all_for_name(name)
+            logging.debug(sub_stud)
             if len(sub_stud) > 1:
                 print("More than one submission found. Please select!")
-                for index, submission, _ in zip(range(0,len(sub_stud)),sub_stud):
+                for index, pair in zip(range(0,len(sub_stud)),sub_stud):
+                    submission,student=pair
                     print(f"[{index + 1}]: {submission.submission_time}")
 
                 answer_accepted = False
@@ -133,7 +139,7 @@ class ResultGenerator:
                         print(f"{answer} is not a number,"
                               f"please select again!")
 
-                run=Run.get_last_for_submission(sub_stud[0][answer])
+                run=Run.get_last_for_submission(sub_stud[answer][0])
                 run.print_stats(sys.stdout)
 
 

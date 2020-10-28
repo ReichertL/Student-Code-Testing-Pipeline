@@ -6,6 +6,7 @@ import datetime
 import os
 import re
 import shutil
+import logging
 
 #from models.submission import Submission
 from alchemy.submissions import Submission
@@ -15,6 +16,9 @@ from alchemy.database_manager import DatabaseManager
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
 
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 class DatabaseIntegrator:
     """
@@ -46,22 +50,15 @@ class DatabaseIntegrator:
         """
         base_dir = resolve_absolute_path(
             self.configuration["SUBMISSION_BASE_DIR"])
-        for root, _, files in os.walk(
-                base_dir
-                ,
-                topdown=False):
+        for root, _, files in os.walk(base_dir,topdown=False):
             student_details = root \
-                .replace(os
-                         .path
-                         .join(base_dir, ), "") \
-                .replace(os
-                         .path
-                         .sep, "") \
+                .replace(os.path.join(base_dir, ), "") \
+                .replace(os.path.sep, "") \
                 .replace("_assignsubmission_file_", "")
             student_name = student_details[0:student_details.find("_")]
             wired_id = student_details[student_details.find("_") + 1:]
             if len(student_name) > 0 and len(wired_id) > 0:
-                new_student = Student.get_student_by_name(student_name)
+                student = Student.get_student_by_name(student_name)
             for file in files:
                 if file.__str__().find(".swp") > 0:
                     continue
@@ -79,4 +76,4 @@ class DatabaseIntegrator:
                     shutil.move(old_file, new_file)
                 path=root + os.path.sep + filename
                 ts=datetime.datetime.fromtimestamp(os.path.getmtime(path))
-                Submission.insert_submission(new_student, path, ts)
+                Submission.insert_submission(student, path, ts)

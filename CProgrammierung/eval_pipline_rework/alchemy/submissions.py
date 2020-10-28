@@ -43,6 +43,7 @@ class Submission(Base):
     @classmethod
     def insert_submission(cls,student, path, time):
         count=dbm.session.query(Submission).filter(Submission.student_id==student.id, Submission.submission_path==path, Submission.submission_time==time).count()
+        
         if count==0:
             sub=Submission(student.id, path)
             sub.submission_time=time
@@ -82,3 +83,8 @@ class Submission(Base):
         results=dbm.session.query(Student, Submission).join(Submission, Submission.student_id==Student.id).filter(Submission.is_checked==True, Student.name==name).\
             filter(or_(Submission.student_notified==False,Submission.student_notified==None )).all()
         return results
+
+
+        
+        
+        

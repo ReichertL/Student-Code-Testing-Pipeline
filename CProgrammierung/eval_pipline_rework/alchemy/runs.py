@@ -1,4 +1,5 @@
 import logging
+from functools import cmp_to_key
 
 from sqlalchemy import *
 from alchemy.base import Base
@@ -10,6 +11,7 @@ import alchemy.database_manager as dbm
 from alchemy.testcase_results import Testcase_Result
 from alchemy.valgrind_outputs import Valgrind_Output
 from alchemy.testcases import Testcase
+import alchemy.submissions as sub
 
 from util.colored_massages import red, yellow, green
 from util.htable import table_format
@@ -60,7 +62,15 @@ class Run(Base):
             return
 
         output = output + (green('Compilation successful. '))
+        
+        failed_bad=len(Testcase_Result.get_failed_bad(self))
+        failed_good=len(Testcase_Result.get_failed_good(self))
 
+        if self.passed and self.manual_overwrite_passed:
+            failed_bad=0
+            failed_good=0
+            print(f'This run was manually marked as passed (run.id={self.id})')
+            
         failed_bad=len(Testcase_Result.get_failed_bad(self))
         all = len(Testcase.get_all_bad())
         if failed_bad > 0:
@@ -68,7 +78,7 @@ class Run(Base):
         else:
             output = output + (green(f'0 / {all} bad tests failed. '))
 
-        failed_good=len(Testcase_Result.get_failed_good(self))
+        
         all = len(Testcase.get_all_good())
         if failed_good > 0:
             output = output + (red(f'{failed_good} / {all} good tests failed. '))
@@ -94,8 +104,15 @@ class Run(Base):
             print(self.command_line, file=f)
             print(self.compiler_output, file=f)
             print(hline, file=f)
-      
+        
         failed_bad=Testcase_Result.get_failed_bad(self)
+        failed_good=Testcase_Result.get_failed_good(self)
+
+        if self.passed and self.manual_overwrite_passed:
+            failed_bad=[]
+            failed_good=[]
+            print(f'This run was manually marked as passed (run.id={self.id})')
+    
         if len(failed_bad)==0 and self.compilation_return_code==0:
             print(green('All tests concerning malicious input passed.'), file=f)
         else:
@@ -110,7 +127,6 @@ class Run(Base):
                 titles='auto'), file=f)
             print(file=f)
 
-        failed_good=Testcase_Result.get_failed_good(self)
         if len(failed_good)==0 and self.compilation_return_code==0:
             print(green('All tests concerning good input passed.'), file=f)
         else:
@@ -146,8 +162,8 @@ class Run(Base):
     @classmethod
     def is_passed(cls,r):
         count=dbm.session.query(Testcase_Result)\
-            .join(Valgrind_Output, Valgrind_Output.testcase_result_id==Testcase_Result.id)\
-            .filter(Testcase_Result.run_id==r.id, Valgrind_Output.ok==True, Testcase_Result.output_correct==True).count()
+            .join(Valgrind_Output, Valgrind_Output.testcase_result_id==Testcase_Result.id, isouter=True)\
+            .filter(Testcase_Result.run_id==r.id, Valgrind_Output.ok!=False, Testcase_Result.output_correct==True).count()
         if count==0 and r.compilation_return_code==0:
             return True
         return False
@@ -167,4 +183,32 @@ class Run(Base):
         if run==None:
             run=dbm.session.query(Run).filter(Run.submission_id==submission.id).order_by(Run.execution_time.desc()).first()
         return run
+
+    @staticmethod
+    def comperator_performance(run1,run2):
+        t1=Testcase_Result.get_avg_runtime_performance(run1)
+        t2=Testcase_Result.get_avg_runtime_performance(run2)
+        return t2-t1
+          
    
+
+    @classmethod
+    def get_fastest_run_for_student(self,name, keylist):
+        results=dbm.session.query(Run, sub.Submission).join(sub.Submission).filter(Run.passed==True, sub.Submission.is_fast==True).all()
+        performance=list()
+        logging.debug(results)
+        for run,submission in results:
+            time=Testcase_Result.get_avg_runtime_performance(run, keylist)
+            space=Testcase_Result.get_avg_space_performance(run, keylist)
+            performance.append([run, submission, time, space])
+        if len(performance)>0:
+            fastest_run=performance[0]
+            fastest_time=Testcase_Result.get_avg_runtime_performance(run, keylist)
+            for r in performance:
+                r_time=Testcase_Result.get_avg_runtime_performance(run, keylist)
+                if r_time<fastest_time:
+                    fastest_run=r
+                    fastest_time=r_time
+            return fastest_run
+        return None
+        

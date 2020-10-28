@@ -25,7 +25,6 @@ class Student(Base):
         self.moodle_id=moodle_id      
 
     
-    @classmethod
     def __repr__(self):
         return ("(Student: " + str(self.id) + "," + str(self.name)+")")
 

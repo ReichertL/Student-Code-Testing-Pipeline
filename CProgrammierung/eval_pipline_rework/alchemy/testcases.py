@@ -95,3 +95,7 @@ class Testcase(Base):
         testcase=dbm.session.query(Testcase).filter(Testcase.id==id).first()
         return testcases
             
+    @classmethod
+    def get_by_shortID(short_id):
+        testcase=dbm.session.query(Testcase).filter(Testcase.short_id==short_id).first()
+        return testcases

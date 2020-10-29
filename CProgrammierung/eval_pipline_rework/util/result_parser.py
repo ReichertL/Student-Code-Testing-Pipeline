@@ -46,8 +46,8 @@ class ResultParser:
             break
 
     @staticmethod
-    def parse_valgrind_file(testcase_id,lines):
-        res=Valgrind_Output(testcase_id)
+    def parse_valgrind_file(testcase_result_id,lines):
+        res=Valgrind_Output(testcase_result_id)
         lines = list(lines)
         it = iter(lines)
         valgrind_head = re_pid.match(next(it)).group()

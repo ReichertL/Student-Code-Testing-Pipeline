@@ -78,7 +78,10 @@ class Student(Base):
     def get_students_passed(cls):
         #This syntax also returns the other colums: 
         #results=dbm.session.query(Student,Submission, Run).join(Submission, Submission.student_id==Student.id).join(Run, Run.submission_id==Submission.id).filter_by(passed=True).group_by(Student.name).all()
-        results=dbm.session.query(Student).join(sub.Submission, sub.Submission.student_id==Student.id).join(r.Run, r.Run.submission_id==sub.Submission.id).filter_by(passed=True).group_by(Student.name).all()
+        results=dbm.session.query(Student)\
+            .join(sub.Submission, sub.Submission.student_id==Student.id)\
+            .join(r.Run,r.Run.submission_id==sub.Submission.id)\
+            .filter(r.Run.passed==True).group_by(Student.name).all()
         return results
         
     @classmethod

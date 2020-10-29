@@ -120,9 +120,9 @@ class Run(Base):
             print(red(f'{len(failed_bad)} / {all} tests concerning malicious input failed.')
                   , file=f)
             print(file=f)
-            failed_bad.sort(key=lambda x: x.short_id)
+            failed_bad.sort(key=lambda x: x[1].short_id)
             print(table_format(
-                '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {err_msg} | {description}',
+                '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {output} | {error_description}',
                 self.create_stats(failed_bad),
                 titles='auto'), file=f)
             print(file=f)
@@ -162,8 +162,9 @@ class Run(Base):
     @classmethod
     def is_passed(cls,r):
         count=dbm.session.query(Testcase_Result)\
-            .join(Valgrind_Output, Valgrind_Output.testcase_result_id==Testcase_Result.id, isouter=True)\
-            .filter(Testcase_Result.run_id==r.id, Valgrind_Output.ok!=False, Testcase_Result.output_correct==True).count()
+            .join(Valgrind_Output, isouter=True)\
+            .filter(Testcase_Result.run_id==r.id)\
+            .filter(or_(Valgrind_Output.ok==False, Testcase_Result.output_correct==False)).count()
         if count==0 and r.compilation_return_code==0:
             return True
         return False

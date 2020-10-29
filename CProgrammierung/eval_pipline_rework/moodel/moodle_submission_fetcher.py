@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import subprocess
+from subprocess import DEVNULL
 import sys
 import logging
 
@@ -138,7 +139,7 @@ class MoodleSubmissionFetcher:
             os.mkdir(new_submissions_dir)
             subprocess.call(['unzip',
                              '-d', new_submissions_dir,
-                             new_submissions_zip])
+                             new_submissions_zip], stdout=DEVNULL)
             os.unlink(new_submissions_zip)
         if noimport:
             return new

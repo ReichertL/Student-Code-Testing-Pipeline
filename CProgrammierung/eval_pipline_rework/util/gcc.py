@@ -95,16 +95,15 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         pass
     if os.listdir(directory):
         raise OSError(f"Directory not empty: '{directory}'")
+    
     # create docker container, if it does not exist already
-    #print(os.path.abspath(directory))
-    #print(docker_image)
     run(SUDO_DOCKER + ['create',
                        '--name', docker_container,
                        '-v', f'{os.path.abspath(directory)}:/host',
                        docker_image],
         stdout=DEVNULL,
         stderr=DEVNULL)
-    # start docker container if required
+    # start docker container if required#
     cp = run(SUDO_DOCKER + ['start', docker_container],
              stdout=DEVNULL)
     if cp.returncode != 0:
@@ -145,6 +144,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     os.unlink(tmp_c_path)
     # directory should now be back in its original state, most likely empty
     logging.info('docker_gcc "{}" -> {}'.format(src, gcc_returncode))
+    #cp = run(SUDO_DOCKER + ['stop', docker_container],stdout=DEVNULL)
     return commandline, gcc_returncode, gcc_stderr
 
 def hybrid_gcc(gcc_args, src, dest, docker_image, docker_container, directory):

@@ -53,7 +53,7 @@ class Submission(Base):
     @classmethod    
     def get_not_checked(cls):
         submissions=dbm.session.query(Submission,Student).join(Student)\
-        .filter(or_(Submission.is_checked==False, Submission.is_checked==None)).all()
+        .filter(Submission.is_checked!=True).all()
         return submissions
 
     @classmethod            

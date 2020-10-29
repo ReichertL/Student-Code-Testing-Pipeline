@@ -114,7 +114,7 @@ class MoodleSession:
         if res:
             for i in res:
                 Student.get_or_insert(i, res[i])
-                print(i)
+                #print(i)
 
         #else:
         #    with open('users.html', 'w') as f:

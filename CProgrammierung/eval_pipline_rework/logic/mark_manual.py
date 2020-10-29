@@ -50,6 +50,7 @@ def marke_passed_manually(names):
         
                     
         for run in selected.runs:
+            if student.grade== (0 or None): student.grade=1
             run.passed=True
             run.manual_overwrite_passed=True
             performance_evaluator = PerformanceEvaluator()

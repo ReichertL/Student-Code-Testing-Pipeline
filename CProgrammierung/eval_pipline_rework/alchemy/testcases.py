@@ -44,13 +44,13 @@ class Testcase(Base):
                                 str(self.type)+")")
     
 
-    def update( self,testcase):
-        self.path=testcase.path
-        self.valgrind_needed=testcase.valgrind_needed
-        self.short_id=testcase.short_id
-        self.description=testcase.description
-        self.hint=testcase.hint
-        self.type=testcase.type
+    def update( self,path, short_id, description, hint, type, valgrind_needed):
+        self.path=path
+        self.valgrind_needed=valgrind_needed
+        self.short_id=short_id
+        self.description=description
+        self.hint=hint
+        self.type=type
         
 
         
@@ -76,16 +76,17 @@ class Testcase(Base):
         return testcases    
 
     @classmethod    
-    def create_or_update(cls,new_testcase):
+    def create_or_update(cls,path, short_id, description, hint, type, valgrind=True):
         #logging.debug("create or update")
-        tc_exists=dbm.session.query(Testcase).filter(Testcase.short_id==new_testcase.short_id,Testcase.path==new_testcase.path, Testcase.valgrind_needed==new_testcase.valgrind_needed, Testcase.description==new_testcase.description, Testcase.hint==new_testcase.hint, Testcase.type==new_testcase.type).count()
-
+        tc_exists=dbm.session.query(Testcase).filter(Testcase.short_id==short_id,Testcase.path==path, Testcase.valgrind_needed==valgrind, Testcase.description==description, Testcase.hint==hint, Testcase.type==type).count()
         if tc_exists==0:
-            similar=dbm.session.query(Testcase).filter(Testcase.short_id==new_testcase.short_id).first()
+            similar=dbm.session.query(Testcase).filter(Testcase.short_id==short_id).first()
             if not (similar==None):
-                similar.update(new_testcase)
+                similar.update(path, short_id, description, hint, type, valgrind)
                 dbm.session.commit()
             else:
+                new_testcase=Testcase(path, short_id, description, hint, type)
+                new_testcase.valgrind_needed=valgrind
                 dbm.session.add(new_testcase)
                 dbm.session.commit()            
             logging.info("New testcase inserted or altered one upgedated.")

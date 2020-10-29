@@ -57,25 +57,6 @@ class PerformanceEvaluator:
 
 
 
-    #@staticmethod
-    #def geometric_mean_space(submission):
-        """
-        computes the geometric mean of
-        all maximum resident set sizes
-        for all of the good input testcases
-        :param submission: the respective submission
-        :return: the geometric mean of the maximum resident set sizes
-        """
-    #    good_test_cases = submission.tests_good_input
-    #    n = len(good_test_cases) + 1
-    #    geom_mean = 1.0
-    #    for i in good_test_cases:
- #   #        current_component = i.mrss ** (1 / float(n))
-  #          geom_mean *= current_component
-#
-   #     return geom_mean
-
-
 
 
     def evaluate(self):
@@ -89,6 +70,7 @@ class PerformanceEvaluator:
         key_list=self.configuration["PERFORMANCE_TEST_CASES_TIME"]
         performances = list()
         students = Student.get_students_passed()
+        logging.debug(students)
         for student in students:
             fastest= Run.get_fastest_run_for_student(student.name, key_list)
             if fastest!=None:
@@ -96,9 +78,7 @@ class PerformanceEvaluator:
             
                 result={'name':student.name, 'mrss':space}
                 for key in key_list:
-                    logging.debug(key)
                     testcase_result=Testcase_Result.get_testcase_result_by_run_and_testcase(run.id,testcase_name=key)
-                    logging.debug(testcase_result)
                     if not testcase_result==None:
                         result[key]=testcase_result.tictoc
                     else: result[key]=""

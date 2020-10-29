@@ -132,6 +132,7 @@ class TestCaseExecutor:
         if pending_submissions==None:
             return
         for submission, student in pending_submissions:
+            logging.info(f'Checking Submission of {student.name} from the {submission.submission_time}')
             does_compile = self.compile_single_submission(submission)
             run=Run.insert_run(does_compile)
                 
@@ -160,15 +161,14 @@ class TestCaseExecutor:
                 submissions.append(submissions_student)
             
         if self.args.all:
-            submissions=Submission.get_not_checked()                
+            submissions=Submission.get_not_checked()   
 
         if self.args.unpassed:
             students = Student.get_students_not_passed()
             logging.debug(students)
             for student in students:
                 submissions_students=Submission.get_all_for_name(student.name)
-                submissions.append(submissions_students)
-        logging.debug(submissions)
+                submissions.extend(submissions_students)
         return submissions
 
 
@@ -244,9 +244,8 @@ class TestCaseExecutor:
                                 valgrind=json_rep["valgrind"]
                                 #logging.debug(root)
                                 type=json_rep["type"]
-                                testcase = Testcase(path, short_id, description, hint, type)
-                                testcase.valgrind_needed=valgrind
-                                Testcase.create_or_update(testcase)
+
+                                Testcase.create_or_update(path, short_id, description, hint, type, valgrind=valgrind)
                                 #logging.debug(testcase)
                         else: 
                             description= short_id
@@ -256,8 +255,7 @@ class TestCaseExecutor:
                             elif extensions["BAD"] in root: type="BAD"
                             elif extensions["EXTRA"] in root: type="EXTRA" #TODO:support for other types here?
                             #logging.debug(root)
-                            testcase = Testcase(path, short_id, description, hint, type)
-                            Testcase.create_or_update(testcase)
+                            Testcase.create_or_update(path, short_id, description, hint, type)
 
     def check(self,  student,submission, run, force_performance=False):
         """
@@ -327,19 +325,22 @@ class TestCaseExecutor:
             dbm.session.commit()
             performance_evaluator = PerformanceEvaluator()
             performance_evaluator.evaluate_performance(submission,run)
-        #if passed and (submission.is_fast or force_performance):
-        if passed and  force_performance:
-            print('fast submission; running performance tests')                
+        else: 
+            run.passed=False
+            dbm.session.commit()
+        if passed and (submission.is_fast or force_performance):
+        #if passed and  force_performance:
+            logging.info('fast submission; running performance tests')                
             for test in Testcase.get_all_performance():  
                 testcase_result, valgrind_output =self.check_output(submission,run,test,sort_first_arg_and_diff)
                 dbm.session.add(testcase_result)
                 if not valgrind_output == None: dbm.session.add(valgrind_output)
 
-        if run.passed and submission.is_fast:
+        if passed and submission.is_fast:
             #performance_evaluator \     #TODO Wozu ist das hier??
              #   .average_euclidean_cpu_time_competition(submission)
             Passed()
-        elif run.passed:
+        elif passed:
             Passed()
         else:
             Failed()
@@ -496,7 +497,7 @@ class TestCaseExecutor:
             if p.returncode not in (-9, -15, None):
                 try:
                     with open(self.configuration["VALGRIND_OUT_PATH"], 'br') as f:
-                        valgrind_output= parser.parse_valgrind_file(testcase.id,f)
+                        valgrind_output= parser.parse_valgrind_file(result.id,f)
                 except FileNotFoundError:
                     logging.error("Valgrind output file was not found.")
                     pass

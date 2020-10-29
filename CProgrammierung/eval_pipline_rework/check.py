@@ -22,6 +22,7 @@ from util.lockfile import LockFile
 from util.playground import Playground
 from alchemy.database_manager import DatabaseManager 
 from logic.mark_manual import marke_passed_manually
+from logic.execute_single import execute_singel_testcase
 
 LOCK_FILE_PATH = '/run/lock/check.lock'
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
@@ -55,7 +56,6 @@ def run():
             # Execute test cases if needed determined by the provided args
             executor = TestCaseExecutor(args)
             executor.run()
-
         # Send Moodle feedback to students if needed determined by args
         if args.mail_to_all or len(args.mailto) > 0 or args.debug:
             reporter = MoodleReporter(args)
@@ -87,10 +87,14 @@ def run():
         if args.show_performance:
             performance_evaluator = PerformanceEvaluator()
             performance_evaluator.evaluate()
+            
+        if len(args.test)>0:
+            execute_singel_testcase(args)            
 
         # optional playground to try new implemented features
         if args.playground:
-            pass
+            playground=Playground()
+            playground.run()
 
     finally:
         try:

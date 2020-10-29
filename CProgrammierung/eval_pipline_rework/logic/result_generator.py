@@ -158,7 +158,7 @@ class ResultGenerator:
 
     @classmethod    
     # use like: f=sys.stdout
-    def print_small_stats(self, run, f):
+    def print_small_stats(cls, run, f):
         output = ''
         if run.compilation_return_code!=0:
             output = output + (red('Compilation failed. '))
@@ -194,7 +194,7 @@ class ResultGenerator:
 
     @classmethod
     # use like: f=sys.stdout
-    def print_stats(self,run, f):
+    def print_stats(cls,run, f):
         if run.compilation_return_code!=0:
             print(red('compilation failed; compiler errors follow:'), file=f)
             print(hline, file=f)
@@ -227,7 +227,7 @@ class ResultGenerator:
             failed_bad.sort(key=lambda x: x[1].short_id)
             print(table_format(
                 '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {output} | {error_description}',
-                self.create_stats(failed_bad),
+                cls.create_stats(failed_bad),
                 titles='auto'), file=f)
             print(file=f)
 
@@ -241,12 +241,18 @@ class ResultGenerator:
             failed_good.sort(key=lambda x: x[1].short_id)
             print(table_format(
                 '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {output} | {error_description}',
-               self.create_stats(failed_good),
+               cls.create_stats(failed_good),
                 titles='auto'), file=f)
             print(file=f)
 
-
-
+    @classmethod
+    def print_stats_testcase_result(cls,tc_result, tc, valgrind):
+        failed=[[tc_result,tc,valgrind]]
+        print(table_format(
+                '{id} | {valgrind} | {valgrind_rw} | {segfault} | {timeout} | {return} | {output} | {error_description}',
+               cls.create_stats(failed),
+                titles='auto'), file=sys.stdout)
+        print(file=sys.stdout)
 
     @classmethod
     def create_stats(cls,results):

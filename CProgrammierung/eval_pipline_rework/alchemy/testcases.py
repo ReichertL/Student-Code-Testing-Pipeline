@@ -53,6 +53,11 @@ class Testcase(Base):
         self.type=type
         
 
+    @classmethod    
+    def get_all(cls):
+        testcases=dbm.session.query(Testcase).all()
+        return testcases  
+
         
     @classmethod    
     def get_all_bad (cls):

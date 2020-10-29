@@ -347,6 +347,7 @@ class TestCaseExecutor:
             if self.args.verbose:
                 ResultGenerator.print_stats(run,sys.stdout)        
 
+
     def check_for_error(self, submission, run, test):
         """
         checks a submission for a bad input test case
@@ -368,8 +369,9 @@ class TestCaseExecutor:
         unlink_safe("test.stderr")
         unlink_safe("test.stdout")
         return testcase_result,valgrind_output
-
-    def check_output(self, submission, run, test, comparator):
+    
+    
+    def check_output(self, submission, run, test, comparator ):
         """
         Checks a testcase that should be successful
         :param test: test case to execute
@@ -378,12 +380,12 @@ class TestCaseExecutor:
         :param comparator: compares to results
         :return: a TestCaseResult object encapsulating the results
         """
-        testcase_result, valgrind_output = self.execute_testcase(test, submission,run)
+        testcase_result, valgrind_output = self.execute_testcase(test, submission,run )
         testcase_result.output_correct = comparator('test.stdout', os.path.join(test.path + '.stdout'))
         unlink_safe("test.stderr")
         unlink_safe("test.stdout")
-
         return testcase_result, valgrind_output
+    
     
     def check_for_error_or_output(self, submission, run, test,comparator):
         """
@@ -409,6 +411,7 @@ class TestCaseExecutor:
             unlink_safe("test.stdout")
         return testcase_result,valgrind_output
 
+
     def execute_testcase(self, testcase, submission,run):
         """
         tests a submission with a testcaseabtestat
@@ -426,9 +429,17 @@ class TestCaseExecutor:
                   f'{"".join(submission.submission_path.split("/")[-2:])} '
                   f'< {testcase.short_id} ---')
         tic = time.time()
+        
+
+        
         with NamedPipeOpen(f"{testcase.path}.stdin") as fin, \
                 open('test.stdout', 'bw') as fout, \
                 open('test.stderr', 'bw') as ferr:
+            out,err=fout,ferr
+            if self.args.output==True:
+                out=sys.stdout
+                err=sys.stderr
+                print("\nExecutable output:\n")
             args = ['./loesung']
             p = subprocess.Popen(
                 self.sudo
@@ -438,8 +449,8 @@ class TestCaseExecutor:
                    self.configuration["TIME_OUT_PATH"]]
                 + args,
                 stdin=fin,
-                stdout=fout,
-                stderr=ferr,
+                stdout=out,
+                stderr=err,
                 preexec_fn=self.set_limits(limits),
                 cwd='/tmp')
             try:
@@ -473,6 +484,7 @@ class TestCaseExecutor:
 
         valgrind_output=None
         if testcase.valgrind_needed and (not result.timeout) and (not result.segfault):
+            out, err=subprocess.DEVNULL,subprocess.DEVNULL
             if self.args.verbose:
                 print(f'--- executing valgrind '
                       f'{"".join(submission.submission_path.split("/")[-2:])} '
@@ -501,6 +513,12 @@ class TestCaseExecutor:
                     with open(self.configuration["VALGRIND_OUT_PATH"], 'br') as f:
                         valgrind_output=Valgrind_Output.create_or_get(result.id)
                         valgrind_output= parser.parse_valgrind_file(valgrind_output,f)
+                    if self.args.valgrind==True:
+                        with open(self.configuration["VALGRIND_OUT_PATH"], 'br') as f:
+                            print("\nValgrind output:\n")
+                            for line in f.readlines():
+                                print(line)
+                            print("\n")
                 except FileNotFoundError:
                     logging.error("Valgrind output file was not found.")
                     pass
@@ -508,7 +526,7 @@ class TestCaseExecutor:
                 print(f'--- finished valgrind '
                       f'{"".join(submission.submission_path.split("/")[-2:])} < '
                       f'{testcase.short_id} ---')
-            unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)
+            #unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)
         return result, valgrind_output
 
     def get_limits_time(self):
@@ -516,6 +534,8 @@ class TestCaseExecutor:
             return [self.configuration["RLIMIT_DATA"],self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]
         else: 
             return [self.configuration["RLIMIT_DATA_CARELESS"],self.configuration["RLIMIT_STACK_CARELESS"],self.configuration["RLIMIT_CPU_CARELESS"]]  
+    
+
     
     def set_limits(self, limits):
         """

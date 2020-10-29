@@ -15,7 +15,7 @@ SUDO_DOCKER = ['sudo', 'docker']
 
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
-logging.basicConfig(format=FORMAT,level=logging.DEBUG)
+logging.basicConfig(format=FORMAT,level=logging.warning)
 
 class DockerError(RuntimeError):
     pass
@@ -54,7 +54,7 @@ def native_gcc(gcc_args, src, dest):
              errors='ignore',
              cwd=directory, check=False)
     os.unlink(tmp_c_path)
-    logging.info('native_gcc "{}" -> {}'.format(src, cp.returncode))
+    #logging.info('native_gcc "{}" -> {}'.format(src, cp.returncode))
     return ' '.join(all_args), cp.returncode, cp.stderr
 
 
@@ -143,7 +143,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     # clean up copy of c file
     os.unlink(tmp_c_path)
     # directory should now be back in its original state, most likely empty
-    logging.info('docker_gcc "{}" -> {}'.format(src, gcc_returncode))
+    #logging.info('docker_gcc "{}" -> {}'.format(src, gcc_returncode))
     #cp = run(SUDO_DOCKER + ['stop', docker_container],stdout=DEVNULL)
     return commandline, gcc_returncode, gcc_stderr
 

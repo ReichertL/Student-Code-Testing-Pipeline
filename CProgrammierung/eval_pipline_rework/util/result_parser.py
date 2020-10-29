@@ -79,7 +79,6 @@ class ResultParser:
                     mo = re_vg_leak_details.match(next(it)[len(valgrind_head) + 1:])
                     assert key == mo.group(1).decode('ascii')
                     d[key] = parse_int_tuple(mo.groups()[1:])
-                logging.debug(d)
                 res.definitely_lost_bytes=d["definitely lost"][0]
                 res.indirectly_lost_bytes=d["indirectly lost"][0]
                 res.possibly_lost_bytes=d["possibly lost"][0]

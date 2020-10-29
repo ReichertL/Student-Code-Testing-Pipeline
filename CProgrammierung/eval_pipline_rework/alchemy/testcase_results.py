@@ -70,7 +70,7 @@ class Testcase_Result(Base):
             else: return False
         if testcase.type=="BAD_OR_OUTPUT":
             if self.return_code==0 and self.output_correct==True: return True
-            if self.return_code>0 and self.segfault!=True and error_msg_quality!="": return True
+            if self.return_code>0 and self.segfault!=True and self.error_msg_quality!="": return True
             else: return False
         return True
     

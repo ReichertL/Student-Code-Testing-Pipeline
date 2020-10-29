@@ -106,15 +106,21 @@ class MoodleReporter:
                 good_failed_desc = {}
                 bad_or_out_failed_desc ={}
 
-                for result,testcase in Testcase_Result.get_failed_output_bad(run):
-                    bad_failed_desc=self.get_failed_description( result,testcase,bad_failed_desc)
+                failed_bad=Testcase_Result.get_failed_bad(run)
+                failed_bad.sort(key=lambda x: x[1].short_id)
+                for result,testcase,valgrind in failed_bad:
+                    bad_failed_desc=self.get_failed_description( result,testcase, valgrind, bad_failed_desc)
                     logging.debug(bad_failed_desc)
 
-                for result,testcase in Testcase_Result.get_failed_output_good(run):
-                    good_failed_desc=self.get_failed_description( result,testcase,good_failed_desc)
+                failed_good=Testcase_Result.get_failed_good(run)
+                failed_good.sort(key=lambda x: x[1].short_id)
+                for result,testcase,valgrind in failed_good:
+                    good_failed_desc=self.get_failed_description( result,testcase,valgrind,good_failed_desc)
 
-                for result,testcase in Testcase_Result.get_failed_output_bad_or_output(run):
-                    bad_or_out_failed_desc=self.get_failed_description( result,testcase,bad_or_out_failed_desc)
+                failed_bad_or_out=Testcase_Result.get_failed_output_bad_or_output(run)
+                failed_bad_or_out.sort(key=lambda x: x[1].short_id)
+                for result,testcase in failed_bad_or_out:
+                    bad_or_out_failed_desc=self.get_failed_description( result,testcase,valgrind,bad_or_out_failed_desc)
                     
 
                 if len(bad_failed_desc) > 0:
@@ -181,7 +187,7 @@ class MoodleReporter:
         stats_path = 'stats'
         text_path = "text"
         with open(stats_path, 'w') as f:
-            run.print_stats(f)
+            ResultGenerator.print_stats(run,f)
         with open(text_path, 'w') as f:
             f.write(text)
 
@@ -328,7 +334,7 @@ class MoodleReporter:
             mail_log.write(str(datetime.now())+" Mail sent to "+str(student.name)+"for submission from the "+str(submission.submission_time)+". The sent mail was: \n"+str(text))
         
     
-    def get_failed_description(self,result,testcase, description=None):
+    def get_failed_description(self,result,testcase, valgrind, description=None):
 
         if description is None:
             description = {}
@@ -341,24 +347,23 @@ class MoodleReporter:
         if not result.returncode_correct(testcase=testcase):
             self.append_self(testcase,description, "return_code")
         
-        vg=result.valgrind_results
 
-        if result.valgrind_results is not None :
+        if valgrind is not None :
 
-            if vg.ok:
-                if vg.invalid_read_count > 0:
+            if not valgrind.ok:
+                if valgrind.invalid_read_count > 0:
                     self.append_self(testcase,description, "valgrind_read")
 
-                if vg.invalid_write_count > 0 :
+                if valgrind.invalid_write_count > 0 :
                     self.append_self(testcase,description, "valgrind_write")
 
-                if vg.definitely_lost_bytes!=(0 or None):
+                if valgrind.definitely_lost_bytes!=(0 or None):
                     self.append_self(testcase,description, "valgrind_leak")
-                elif vg.possibly_lost_bytes != (0 or None):
+                elif valgrind.possibly_lost_bytes != (0 or None):
                     self.append_self(testcase,description, "valgrind_leak")
-                elif vg.indirectly_lost_bytes!= (0 or None):
+                elif valgrind.indirectly_lost_bytes!= (0 or None):
                     self.append_self(testcase,description, "valgrind_leak")
-                elif vg.still_reachable_bytes != (0 or None):
+                elif valgrind.still_reachable_bytes != (0 or None):
                     self.append_self(testcase,description, "valgrind_leak")
 
         if testcase.type == "BAD":

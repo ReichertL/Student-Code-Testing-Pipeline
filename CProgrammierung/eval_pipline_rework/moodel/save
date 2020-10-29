@@ -1,5 +1,0 @@
-
-
-- run multiple submissions after oneanother
-- make sure that valgrind values are set properly in result_parser.py
--test with submissions that are correct but have leaks

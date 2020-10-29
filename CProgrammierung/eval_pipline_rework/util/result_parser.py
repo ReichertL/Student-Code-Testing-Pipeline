@@ -46,8 +46,7 @@ class ResultParser:
             break
 
     @staticmethod
-    def parse_valgrind_file(testcase_result_id,lines):
-        res=Valgrind_Output(testcase_result_id)
+    def parse_valgrind_file(res,lines):
         lines = list(lines)
         it = iter(lines)
         valgrind_head = re_pid.match(next(it)).group()
@@ -66,10 +65,12 @@ class ResultParser:
                 res.ok = None
                 continue
             if line == b'HEAP SUMMARY:\n':
-              #  res.in_use_at_exit = parse_int_tuple(                  #TODO
-                   # re_vg_heap_summary1.match(next(it)[len(valgrind_head) + 1:]).groups())
-              #  res.total_heap_usage = parse_int_tuple(
-                   # re_vg_heap_summary2.match(next(it)[len(valgrind_head) + 1:]).groups()) #TODO
+                in_use_at_exit_tupel = parse_int_tuple(re_vg_heap_summary1.match(next(it)[len(valgrind_head) + 1:]).groups())
+                res.in_use_at_exit_bytes=in_use_at_exit_tupel[0]
+                total_heap_usage = parse_int_tuple(re_vg_heap_summary2.match(next(it)[len(valgrind_head) + 1:]).groups())
+                res.total_heap_usage_allocs=total_heap_usage[0]
+                res.total_heap_usage_frees=total_heap_usage[1]   
+                res.total_heap_usage_bytes=total_heap_usage[2]
                 continue
             if line == b'LEAK SUMMARY:\n':
                 d = {}
@@ -78,11 +79,18 @@ class ResultParser:
                     mo = re_vg_leak_details.match(next(it)[len(valgrind_head) + 1:])
                     assert key == mo.group(1).decode('ascii')
                     d[key] = parse_int_tuple(mo.groups()[1:])
-                #res['leak_summary'] = d #TODO
+                logging.debug(d)
+                res.definitely_lost_bytes=d["definitely lost"][0]
+                res.indirectly_lost_bytes=d["indirectly lost"][0]
+                res.possibly_lost_bytes=d["possibly lost"][0]
+                res.still_reachable_bytes=d["still reachable"][0]
+                res.suppressed_bytes=d["suppressed"][0]
                 continue
             mo = re_vg_error_summary.match(line)
             if mo is not None:
-                #res['error_summary'] = parse_int_tuple(mo.groups()) # TODO
+                error_summary = parse_int_tuple(mo.groups()) 
+                res.summary_errors=error_summary[0]
+                res.summary_suppressed_errors=error_summary[2]
                 continue
             mo = re_vg_invalid_read.match(line)
             if mo is not None:

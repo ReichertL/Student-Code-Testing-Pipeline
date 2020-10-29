@@ -12,15 +12,14 @@ import time
 import logging
 
 from logic.performance_evaluator import PerformanceEvaluator
-#from models.compilation import Compilation
-#from models.test_case import TestCase
-#from models.test_case_result import TestCaseResult
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn, Passed, Failed
 from util.config_reader import ConfigReader
 from util.gcc import hybrid_gcc, native_gcc
 from util.named_pipe_open import NamedPipeOpen
 from util.result_parser import ResultParser
+from logic.result_generator import ResultGenerator
+
 
 
 from alchemy.testcases import Testcase
@@ -29,6 +28,7 @@ from alchemy.runs import Run
 from alchemy.testcase_results import Testcase_Result
 import alchemy.database_manager as dbm
 from alchemy.students import Student
+from alchemy.valgrind_outputs import Valgrind_Output
 
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
@@ -345,7 +345,7 @@ class TestCaseExecutor:
         else:
             Failed()
             if self.args.verbose:
-                run.print_stats(sys.stdout)        
+                ResultGenerator.print_stats(run,sys.stdout)        
 
     def check_for_error(self, submission, run, test):
         """
@@ -482,8 +482,10 @@ class TestCaseExecutor:
                                      + self.unshare
                                      + [self.configuration["VALGRIND_PATH"],
                                         '--log-file='
-                                        + self
-                                     .configuration["VALGRIND_OUT_PATH"]]
+                                        #+ "/tmp/valgrind"
+                                        #+testcase.short_id]
+                                        #+ args,
+                                     + self.configuration["VALGRIND_OUT_PATH"]]
                                      + args,
                                      stdin=fin,
                                      stdout=subprocess.DEVNULL,
@@ -497,7 +499,8 @@ class TestCaseExecutor:
             if p.returncode not in (-9, -15, None):
                 try:
                     with open(self.configuration["VALGRIND_OUT_PATH"], 'br') as f:
-                        valgrind_output= parser.parse_valgrind_file(result.id,f)
+                        valgrind_output=Valgrind_Output.create_or_get(result.id)
+                        valgrind_output= parser.parse_valgrind_file(valgrind_output,f)
                 except FileNotFoundError:
                     logging.error("Valgrind output file was not found.")
                     pass

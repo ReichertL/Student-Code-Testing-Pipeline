@@ -21,15 +21,32 @@ csv and also via the moodle grading api.
 
 ## How to Start
 ### Installation 
+Install Docker and Valgrind:
+
+  - `sudo apt install docker.io`
+  - `sudo apt install valgrind`
+
 Ensure that python3.8 is installed if not use the following command (works on Ubuntu 18.04):
 
 `$ sudo apt-get install python3.8 python3.8-dev python3.8-distutils python3.8-venv`
 
 Install required packet bs4 for python3.8 by using:
 
-`python3.8 -m pip install bs4`
+  - `python3.8 -m pip install bs4`
+  - `python3.8 -m pip install sqlalchemy`
+
 
 ### Setup
+
+
+
+#### Docker
+
+Build Docker File:
+  - `cd ds/CProgrammierung/dockerfiles`
+  - `./build.sh`
+
+#### Resources, Config Files and Templates
 
 There needs to be a resource directory inside the `eval_pipline directory`
 which contains:
@@ -43,16 +60,30 @@ which contains:
 These files are used to set relevant constants.
 There are example `.config` files included in the `resource.templates` directory that need to be adjusted appropriately.
 
-For convenience, put a symbolic link in `/usr/bin`:
-```
-sudo ln -s /path/to/eval_pipeline/__main__.py /usr/bin/check
-```
-
 If you want to use the automatic email functionality you might want to define a `mail_templates` directory,
 where you define all relevant error messages that can be part of an email to a student.
 It's worth to note, that these template massages can contain placeholder tokens,
-which can be replaced during runtime. These tokens should be follow the format `$placeholder_token$`.  
+which can be replaced during runtime. These tokens should be follow the format `$placeholder_token$`. 
 
+
+#### Moodel Course
+Set up a Moodel Course with an excercise where students can submit a `.c` file. 
+Set the maximal possible grade for this excersie to 2:
+The grading for the C project is as follows:
+
+   - 0=not passed
+   - 1=submission passed
+   - 2= abtestat passed
+
+Retrieve the course ID, submission ID and ID of the account that sould be used by the pipline for logging  into moodel.
+This can be done by opening the respective page in the web browser an copying the Id from the url. 
+With these values update the entries in `C Programmierprojekt/eval_pipline_rework/resources` the file named `config_submission_fetcher.config`.
+
+#### Shortcut
+For convenience, put a symbolic link in `/usr/bin` so that the pipline can be called by simply running `check [args]` in the terminal:
+```
+sudo ln -s /path/to/eval_pipeline/__main__.py /usr/bin/check
+```
 
 ### Usage
 Thanks to `__init__.py` and `__main__.py`
@@ -89,6 +120,14 @@ the [current features](#implemented-features).
     
     -a/--all:       Runs evaluation for all students. By default only if not already run.
     
+    -t [TEST [TEST ...]], --test [TEST [TEST ...]]
+                        Allows user to provide a student name and select a
+                        test to be run for their last submission.
+
+     -O, --output          Prints output from executed sumbissions.
+     
+     -V, --valgrind        Prints valgrind output from executed sumbissions.
+
     -u/--unpassed-students:
                     Runs evaluation only for students, that havn't passed. 
                     Only efficient in combination with -r/--rerun.
@@ -125,9 +164,8 @@ the [current features](#implemented-features).
 
 ### Implemented Structure:
 The image below represents the currently implemented structure of the evaluation pipeline. 
-![current structure](current_structure.jpg)
+![current structure](current_structure.svg)
 
-Further down below you can find a [target structure](#planned-structure)
 
 ### Implemented Features:  
   - Fetching submissions from moodle or a local dir 
@@ -144,24 +182,14 @@ Further down below you can find a [target structure](#planned-structure)
 ## Future Development
 In this section we'll describe planned future reworks and structural improvements for future work.
 
-### Planned Structure
-The planned structure is shown below in the diagram:
-
-![future stucture](future-structure.jpg)
-
-We advice to combine the adaptation of the presented structure while also integrating a 3rd party orm like SqlAlchemy 
 
 ### Planned Features
-- automated grading on moodle when ever a mail is send
-- allow optional correct output when executing malicious test cases, that aren't formally wrong  
-- execute single testcases for submissions 
+
 - separate operations with flag for students single, list, all and for submissions not_passed, latest, all 
 - rework format of -s/--stats 
 
 ### Planned Integration 
 
-- integrate 3rd party orm like SqlAlchemy
-- integrate the [planned structure](#planned-structure) 
 - pair-wise similarity analysis with j-plag
 - test coverage for eval pipeline
 

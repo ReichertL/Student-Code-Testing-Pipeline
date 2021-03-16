@@ -9,13 +9,20 @@ import os
 import re
 import shutil
 import subprocess
+from subprocess import DEVNULL
 import sys
+import logging
 
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn
 from util.config_reader import ConfigReader
-from util.moodle_session import MoodleSession
+from moodel.moodle_session import MoodleSession
 
+from alchemy.students import Student
+
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 def mkdir(path):
     """
@@ -48,7 +55,7 @@ class MoodleSubmissionFetcher:
             resolve_absolute_path(relative_submission_path)
         self.moodle_session = None
 
-    def run(self, database_manager):
+    def run(self):
         """
         runs fetching functionality
         :param database_manager:
@@ -59,11 +66,10 @@ class MoodleSubmissionFetcher:
         self.moodle_session = \
             MoodleSession(username,
                           session_state,
-                          self.configuration,
-                          database_manager)
-        self.moodle_session.update_teilnehmer(database_manager)
+                          self.configuration)
+        self.moodle_session.update_teilnehmer()
         mkdir(self.submission_base_dir)
-        self.fetch_abgaben(database_manager)
+        self.fetch_abgaben()
 
     def get_login_data(self, username=None):
         """Get the desired moodle username. This can be given either by the
@@ -95,7 +101,7 @@ class MoodleSubmissionFetcher:
             username = input('username: ')
         return username, d.get(username, {})
 
-    def fetch_abgaben(self, database_manager, dryrun=False, noimport=False):
+    def fetch_abgaben(self, dryrun=False, noimport=False):
         """
         collects all submissions from a
         specified source (moodle or local directory)
@@ -133,20 +139,20 @@ class MoodleSubmissionFetcher:
             os.mkdir(new_submissions_dir)
             subprocess.call(['unzip',
                              '-d', new_submissions_dir,
-                             new_submissions_zip])
+                             new_submissions_zip], stdout=DEVNULL)
             os.unlink(new_submissions_zip)
         if noimport:
             return new
         dir_listing = os.listdir(new_submissions_dir)
         for d in dir_listing:
-            student_id, student_name, _ = self. \
-                dirname_to_student(d, database_manager)
+            student= self. \
+                dirname_to_student(d)
             src_dir = os.path.join(new_submissions_dir, d)
             src = os.path.join(src_dir, 'loesung.c')
 
             if not os.path.exists(src):
-                Warn('Student "{}" ({}) did not submit a source file.'.format(
-                    student_name, student_id))
+                Warn('Student "{}" ({}) did not submit a source file./ The file was not named loesung.c.'.format(
+                    student.name, student.id))
                 continue
             dest_dir = os.path.join(all_submissions_dir, d)
             timestamp_extension = datetime \
@@ -160,11 +166,11 @@ class MoodleSubmissionFetcher:
                 os.mkdir(dest_dir)
 
             shutil.move(src, dest)
-            new.append((student_id, student_name))
+            new.append((student.name, student.id))
         return new
 
     @staticmethod
-    def dirname_to_student(d, database_manager):
+    def dirname_to_student(d):
         """
         Extracts the student name and
         the submission id from a directory name
@@ -177,6 +183,7 @@ class MoodleSubmissionFetcher:
         re_submission_dir = re.compile(r'(.+)_(\d+)_assignsubmission_file_')
         mo = re_submission_dir.match(d)
         student_name = mo.group(1)
-        student_id = database_manager.get_student_by_name(student_name).id
-        submission_id = mo.group(2)
-        return student_id, student_name, submission_id
+        moodle_id = mo.group(2)
+
+        student=Student.get_or_insert(student_name, moodle_id)
+        return student

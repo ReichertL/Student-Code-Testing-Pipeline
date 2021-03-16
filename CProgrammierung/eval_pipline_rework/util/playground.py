@@ -1,6 +1,5 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import relationship, backref, sessionmaker
-from alchemy.database_manager import DatabaseManager 
+
+
 
 class Playground:
     name: str
@@ -10,16 +9,15 @@ class Playground:
         self.name = "Playground"
 
 
-    @staticmethod
-    def functionality():
+    def functionality(self,):
         print("Debug env to test new functionality which can be implemented, called or composed here")
-        #db_manager=DatabaseManager()
-        #print(db_manager.is_empty())
-        #db_manager.functionality()
+
+                
 
 
-    def run(self):
+    def run(self,):
         self.functionality()
+
         
 
 

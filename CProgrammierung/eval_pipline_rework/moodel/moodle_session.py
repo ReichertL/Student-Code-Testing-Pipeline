@@ -7,13 +7,18 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-
 import requests
 from bs4 import BeautifulSoup
 import urllib.parse
+import logging
 
-from models.student import Student
 from util.absolute_path_resolver import resolve_absolute_path
+from alchemy.students import Student
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
+
+
 
 AJAX_HEADERS = {
     'X-Requested-With': 'XMLHttpRequest',
@@ -44,7 +49,7 @@ class MoodleScrapeError(Exception):
 
 
 class MoodleSession:
-    def __init__(self, username, session_state, configuration, database_manager, interactive=True):
+    def __init__(self, username, session_state, configuration, interactive=True):
         self.configuration = configuration
         self.full_name = '<unknown>'
         self.userid = ''
@@ -57,7 +62,7 @@ class MoodleSession:
         self.domain = configuration["MOODLE_DOMAIN"]
         DEFAULT_SESSION_HEADERS['Host'] = self.domain
         self.session.headers.update(DEFAULT_SESSION_HEADERS)
-        self.read_users_cached(database_manager)
+        self.read_users_cached()
         self.username = username
         self.session_state = session_state
         if session_state and session_state.get('logged_in'):
@@ -70,16 +75,16 @@ class MoodleSession:
         self._grader_contextid = None
         self._grader_assignmentid = None
 
-    def read_users_cached(self, database_manager):
+    def read_users_cached(self):
         """Read in the users list found in a cache file 'teilnehmer.json' in
         the current working directory."""
-        self.teilnehmer = database_manager.get_all_students()
+        self.teilnehmer = Student.get_students_all()
 
     @property
     def moodle_base_url(self):
         return 'https://' + self.domain
 
-    def update_teilnehmer(self, database_manager):
+    def update_teilnehmer(self):
         """Fetch moodle course user index and save names and user ids as json.
 
         course_id defaults to constants.MOODLE_COURSE_ID
@@ -87,13 +92,16 @@ class MoodleSession:
         """
         course_id = self.configuration["MOODLE_IDS"]["MOODLE_COURSE_ID"]
         re_teilnehmer = re.compile(
-            r'<a href="{}/user/view.php\?id=(\d+)&amp;course=(\d+)">'
+            r'<a href="{}/user/view.php\?id=(\d+)&amp;course=(\d+)" class="d-inline-block aabtn">'
             r'<img src="[^"]*"\s+class="[^"]*"[^>]*>([^<]+)</a>'.format(
                 re.escape(self.moodle_base_url)))
         res = {}
         url = self.moodle_base_url + '/user/index.php'
         r = self.session.get(url, params={'id': course_id, 'perpage': '5000'})
         self._last_request = r
+        #f=open("out.txt", 'w+')
+        #f.write(r.text)
+        #f.close()
         for line in r.text.splitlines():
             mo = re_teilnehmer.search(line)
             if mo:
@@ -105,10 +113,12 @@ class MoodleSession:
         # dump teilnehmer list as json
         if res:
             for i in res:
-                Student(i, res[i], database_manager) #Todo:was mach das hier?????
-        else:
-            with open('users.html', 'w') as f:
-                f.write(r.text)
+                Student.get_or_insert(i, res[i])
+                #print(i)
+
+        #else:
+        #    with open('users.html', 'w') as f:
+        #        f.write(r.text)
 
     def logged_in(self):
         """Just a shortcut to the session state.

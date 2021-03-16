@@ -12,20 +12,23 @@ import time
 import logging
 
 from logic.performance_evaluator import PerformanceEvaluator
-from models.compilation import Compilation
-from models.test_case import TestCase
-from models.test_case_result import TestCaseResult
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn, Passed, Failed
 from util.config_reader import ConfigReader
-from util.gcc import hybrid_gcc
+from util.gcc import hybrid_gcc, native_gcc
 from util.named_pipe_open import NamedPipeOpen
 from util.result_parser import ResultParser
+from logic.result_generator import ResultGenerator
+
 
 
 from alchemy.testcases import Testcase
 from alchemy.submissions import Submission
-from alchemy.database_manager import DatabaseManager
+from alchemy.runs import Run
+from alchemy.testcase_results import Testcase_Result
+import alchemy.database_manager as dbm
+from alchemy.students import Student
+from alchemy.valgrind_outputs import Valgrind_Output
 
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
@@ -119,49 +122,53 @@ class TestCaseExecutor:
         unshare_path = configuration["UNSHARE_PATH"]
         self.unshare = [unshare_path, '-r', '-n']
 
-    def run(self, database_manager):
+    def run(self):
         """
             runs specified test cases
         """
-        self.load_tests(database_manager)  #TODO: Mit flag versehen, so dass testcases nur eingelesen werden wenn es manuell gefordert wird
+        self.load_tests()  #TODO: Mit flag versehen, so dass testcases nur eingelesen werden wenn es manuell gefordert wird
 
-        pending_submissions = self.retrieve_pending_submissions(database_manager)
-        
-        logging.debug(database_manager.session.query(Submission).all())
-        logging.debug(pending_submissions)
-        for submission in pending_submissions:
-            student=database_manager.get_student_by_submissionID(submission)
-            run = self.compile_single_submission(submission)
-            database_manager.session.add(run)
-            database_manager.session.commit()    
+        pending_submissions = self.retrieve_pending_submissions()
+        if pending_submissions==None:
+            return
+        for submission, student in pending_submissions:
+            logging.info(f'Checking Submission of {student.name} from the {submission.submission_time}')
+            does_compile = self.compile_single_submission(submission)
+            run=Run.insert_run(does_compile)
                 
             if (not len(self.args.compile) > 0):
                 if run.compilation_return_code==0:
-                    testcase_results = self.check(database_manager, student,submission,run)
+                    testcase_results = self.check( student,submission,run)
                 else:
                     print(f'Submission of '
                         f'{student.name} submitted at '
                         f'{submission.submission_time} did not compile.')
             
-    def retrieve_pending_submissions(self, database_manager):
+    def retrieve_pending_submissions(self):
         """Extracts submissions that should be evaluated
         based on the commandline arguments
         :return: list of submissions
         """
-        submissions = {}
-        students = []
-        if self.args.check:
-            for name in self.args.check:
-                submissions_student=database_manager.get_submissions_not_checked_by_name(name)
-                submissions.append(submissions_student)
-                
+        submissions = []
 
+        if self.args.check and self.args.rerun:
+            for name in self.args.check:
+                submissions_student=Submission.get_last_for_name(name)
+                submissions.append(submissions_student)
+        elif self.args.check:
+            for name in self.args.check:
+                submissions_student=Submission.get_not_checked_for_name(name)
+                submissions.append(submissions_student)
+            
         if self.args.all:
-            submissions=database_manager.get_submissions_not_checked()
-                        
+            submissions=Submission.get_not_checked()   
 
         if self.args.unpassed:
-            students = database_manager.get_students_not_passed()
+            students = Student.get_students_not_passed()
+            logging.debug(students)
+            for student in students:
+                submissions_students=Submission.get_all_for_name(student.name)
+                submissions.extend(submissions_students)
         return submissions
 
 
@@ -176,6 +183,7 @@ class TestCaseExecutor:
         @:return Compilation object
                 (gcc_return_code, commandline call , gcc_stderr)
         """
+        careless_flag=False
 
         gcc_args = [self.configuration["GCC_PATH"]] + \
                    self.configuration["CFLAGS"]
@@ -183,26 +191,21 @@ class TestCaseExecutor:
         if self.args.final:
             gcc_args = [self.configuration["GCC_PATH"]] + \
                        self.configuration["CFLAGS_CARELESS"]
+            careless_flag=True
 
         if not strict:
             gcc_args.remove('-Werror')
         submission_executable_path = '/tmp/loesung'
-        # uncomment the following to enable compilation using the host's
-        # native gcc:
-        # commandline, return_code, gcc_stderr = native_gcc(
-        # gcc_args + self.configuration.get('CFLAGS_LOCAL', []),
-        # path,
-        # submission_executable_path)
-        commandline, return_code, gcc_stderr = hybrid_gcc(
+        commandline, return_code, gcc_stderr = hybrid_gcc(  
             gcc_args,
             path,
             submission_executable_path,
             self.configuration['DOCKER_IMAGE_GCC'],
             self.configuration['DOCKER_CONTAINER_GCC'],
             self.configuration['DOCKER_SHARED_DIRECTORY'])
-        return Run(submission.id, return_code, gcc_stderr)
+        return Run(submission.id,commandline, careless_flag, return_code, gcc_stderr)
 
-    def load_tests(self, database_manager):
+    def load_tests(self):
         """
         Loads the in the config file specified testcases for good bad and extra
         :return: dictionary of list test_case
@@ -229,6 +232,7 @@ class TestCaseExecutor:
                     if name.endswith(".stdin"):
                         short_id = name.replace(".stdin", "")
                         path=os.path.join(root, name).replace(".stdin", "")
+                        #logging.debug(short_id)
 
                         json_file=(root+"/"+name).replace(".stdin", ".json")
                         if(os.path.exists(json_file)):
@@ -237,10 +241,11 @@ class TestCaseExecutor:
                                 json_rep=json.load(description_file)
                                 description = json_rep["short_desc"]
                                 hint = json_rep["hint"]
-                                logging.debug(root)
+                                valgrind=json_rep["valgrind"]
+                                #logging.debug(root)
                                 type=json_rep["type"]
-                                testcase = Testcase(path, short_id, description, hint, type)
-                                database_manager.session.add(testcase)
+
+                                Testcase.create_or_update(path, short_id, description, hint, type, valgrind=valgrind)
                                 #logging.debug(testcase)
                         else: 
                             description= short_id
@@ -249,12 +254,10 @@ class TestCaseExecutor:
                             if extensions["GOOD"] in root: type="GOOD"
                             elif extensions["BAD"] in root: type="BAD"
                             elif extensions["EXTRA"] in root: type="EXTRA" #TODO:support for other types here?
-                            logging.debug(root)
-                            testcase = Testcase(path, short_id, description, hint, type)
-                            database_manager.session.add(testcase)
-        database_manager.session.commit()
+                            #logging.debug(root)
+                            Testcase.create_or_update(path, short_id, description, hint, type)
 
-    def check(self, database_manager, student,submission, run, force_performance=False):
+    def check(self,  student,submission, run, force_performance=False):
         """
         checks the submission of a student
         :param student: the student which is the author of this submission
@@ -282,23 +285,27 @@ class TestCaseExecutor:
 
 
         if compiled.compilation_return_code== 0:
-            for test in database_manager.get_testcases_bad():
+            for test in Testcase.get_all_bad():
+                logging.debug("Testcase "+str(test.short_id))
                 testcase_result, valgrind_output = self.check_for_error(submission,run, test)
-                database_manager.session.add(testcase_result)
-                if not valgrind_output == None: database_manager.session.add(valgrind_output)
+                dbm.session.add(testcase_result)
+                if not valgrind_output == None: dbm.session.add(valgrind_output)
                 
-            for test in database_manager.get_testcases_good():
+            for test in Testcase.get_all_good():
+                logging.debug("Testcase "+str(test.short_id))
+
                 testcase_result, valgrind_output =self.check_output(submission,run,test,sort_first_arg_and_diff)
-                database_manager.session.add(testcase_result)
-                if not valgrind_output == None: database_manager.session.add(valgrind_output)
+                dbm.session.add(testcase_result)
+                if not valgrind_output == None: dbm.session.add(valgrind_output)
                 
             #This deals with testcases that are allowed to fail gracefully, but if they don't they have to return the correct value
-            for test in database_manager.get_testcases_bad_or_output():
-                testcase_result, valgrind_output = self.check_for_error_or_output(submission,run, test)
-                database_manager.session.add(testcase_result)
-                if not valgrind_output == None: database_manager.session.add(valgrind_output)
+            for test in Testcase.get_all_bad_or_output():
+                logging.debug("Testcase "+str(test.short_id))
+                testcase_result, valgrind_output = self.check_for_error_or_output(submission,run, test, sort_first_arg_and_diff )
+                dbm.session.add(testcase_result)
+                if not valgrind_output == None: dbm.session.add(valgrind_output)
                             
-            database_manager.session.commit()
+            dbm.session.commit()
         else:
             Warn(f'Something went wrong! '
                      f'Submission by {student.name} submitted at {submission.submission_time}'
@@ -307,29 +314,39 @@ class TestCaseExecutor:
                      f', saved at {submission.submission_path}')
         
         submission.is_checked = True
+        dbm.session.commit()
         submission.timestamp = datetime.datetime.now()
 
-        passed = database_manager.run_is_passed(run)
+        passed = Run.is_passed(run)
         if passed:
+            run.passed=True
+            if student.grade !=2:
+                student.grade=1
+            dbm.session.commit()
             performance_evaluator = PerformanceEvaluator()
-            performance_evaluator.evaluate_performance(submission)
-        #if passed and (submission.is_fast or force_performance):
-        if passed and  force_performance:
-            print('fast submission; running performance tests')                
-            for test in database_manager.get_testcases_performace():  
+            performance_evaluator.evaluate_performance(submission,run)
+        else: 
+            run.passed=False
+            dbm.session.commit()
+        if passed and (submission.is_fast or force_performance):
+        #if passed and  force_performance:
+            logging.info('fast submission; running performance tests')                
+            for test in Testcase.get_all_performance():  
                 testcase_result, valgrind_output =self.check_output(submission,run,test,sort_first_arg_and_diff)
-                database_manager.session.add(testcase_result)
-                if not valgrind_output == None: database_manager.session.add(valgrind_output)
+                dbm.session.add(testcase_result)
+                if not valgrind_output == None: dbm.session.add(valgrind_output)
 
-        if run.passed and submission.is_fast:
+        if passed and submission.is_fast:
             #performance_evaluator \     #TODO Wozu ist das hier??
              #   .average_euclidean_cpu_time_competition(submission)
             Passed()
-
+        elif passed:
+            Passed()
         else:
             Failed()
             if self.args.verbose:
-                run.print_stats()        
+                ResultGenerator.print_stats(run,sys.stdout)        
+
 
     def check_for_error(self, submission, run, test):
         """
@@ -352,8 +369,9 @@ class TestCaseExecutor:
         unlink_safe("test.stderr")
         unlink_safe("test.stdout")
         return testcase_result,valgrind_output
-
-    def check_output(self, submission, run, test, comparator):
+    
+    
+    def check_output(self, submission, run, test, comparator ):
         """
         Checks a testcase that should be successful
         :param test: test case to execute
@@ -362,14 +380,14 @@ class TestCaseExecutor:
         :param comparator: compares to results
         :return: a TestCaseResult object encapsulating the results
         """
-        testcase_result, valgrind_output = self.execute_testcase(test, submission,run)
+        testcase_result, valgrind_output = self.execute_testcase(test, submission,run )
         testcase_result.output_correct = comparator('test.stdout', os.path.join(test.path + '.stdout'))
         unlink_safe("test.stderr")
         unlink_safe("test.stdout")
-
         return testcase_result, valgrind_output
     
-    def check_for_error_or_output(self, submission, run, test):
+    
+    def check_for_error_or_output(self, submission, run, test,comparator):
         """
         checks a submission for a bad input test case
         :param submission: the submission to test
@@ -379,7 +397,7 @@ class TestCaseExecutor:
         """
         testcase_result, valgrind_output = self.execute_testcase(test, submission,run)
         testcase_result.output_correct = comparator('test.stdout', os.path.join(test.path + '.stdout'))
-        if testcase.output_correct==False:
+        if testcase_result.output_correct==False:
             testcase_result.error_line = ''
             testcase_result.output_correct = True
             parser = ResultParser()
@@ -393,6 +411,7 @@ class TestCaseExecutor:
             unlink_safe("test.stdout")
         return testcase_result,valgrind_output
 
+
     def execute_testcase(self, testcase, submission,run):
         """
         tests a submission with a testcaseabtestat
@@ -404,15 +423,23 @@ class TestCaseExecutor:
         """
         limits=self.get_limits_time()
         parser = ResultParser()
-        result = Testcase_Result(run.id,testcase.id)
+        result = Testcase_Result.create_or_update(run.id,testcase.id)
         if self.args.verbose:
             print(f'--- executing '
                   f'{"".join(submission.submission_path.split("/")[-2:])} '
                   f'< {testcase.short_id} ---')
         tic = time.time()
+        
+
+        
         with NamedPipeOpen(f"{testcase.path}.stdin") as fin, \
                 open('test.stdout', 'bw') as fout, \
                 open('test.stderr', 'bw') as ferr:
+            out,err=fout,ferr
+            if self.args.output==True:
+                out=sys.stdout
+                err=sys.stderr
+                print("\nExecutable output:\n")
             args = ['./loesung']
             p = subprocess.Popen(
                 self.sudo
@@ -422,9 +449,9 @@ class TestCaseExecutor:
                    self.configuration["TIME_OUT_PATH"]]
                 + args,
                 stdin=fin,
-                stdout=fout,
-                stderr=ferr,
-                preexec_fn=self.set_limits_time(limits),
+                stdout=out,
+                stderr=err,
+                preexec_fn=self.set_limits(limits),
                 cwd='/tmp')
             try:
                 p.wait(150)
@@ -447,6 +474,7 @@ class TestCaseExecutor:
             result.rlimit_data=limits[0]
             result.rlimit_stack=limits[1]
             result.rlimit_cpu=limits[2]
+            result.num_executions=1
             fin.close()
 
             if self.args.verbose:
@@ -456,22 +484,25 @@ class TestCaseExecutor:
 
         valgrind_output=None
         if testcase.valgrind_needed and (not result.timeout) and (not result.segfault):
+            out, err=subprocess.DEVNULL,subprocess.DEVNULL
             if self.args.verbose:
                 print(f'--- executing valgrind '
                       f'{"".join(submission.submission_path.split("/")[-2:])} '
                       f'< {testcase.short_id} ---')
-            with NamedPipeOpen(f"{testcase.submission_path}.stdin") as fin:
+            with NamedPipeOpen(f"{testcase.path}.stdin") as fin:
                 p = subprocess.Popen(self.sudo
                                      + self.unshare
                                      + [self.configuration["VALGRIND_PATH"],
                                         '--log-file='
-                                        + self
-                                     .configuration["VALGRIND_OUT_PATH"]]
+                                        #+ "/tmp/valgrind"
+                                        #+testcase.short_id]
+                                        #+ args,
+                                     + self.configuration["VALGRIND_OUT_PATH"]]
                                      + args,
                                      stdin=fin,
                                      stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL,
-                                     preexec_fn=self.set_limits_valgrind(limits),
+                                     preexec_fn=self.set_limits(limits),
                                      cwd='/tmp')
                 try:
                     p.wait(300)
@@ -480,14 +511,22 @@ class TestCaseExecutor:
             if p.returncode not in (-9, -15, None):
                 try:
                     with open(self.configuration["VALGRIND_OUT_PATH"], 'br') as f:
-                        valgrind_output= parser.parse_valgrind_file(testcase.id,f)
+                        valgrind_output=Valgrind_Output.create_or_get(result.id)
+                        valgrind_output= parser.parse_valgrind_file(valgrind_output,f)
+                    if self.args.valgrind==True:
+                        with open(self.configuration["VALGRIND_OUT_PATH"], 'br') as f:
+                            print("\nValgrind output:\n")
+                            for line in f.readlines():
+                                print(line)
+                            print("\n")
                 except FileNotFoundError:
+                    logging.error("Valgrind output file was not found.")
                     pass
             if self.args.verbose:
                 print(f'--- finished valgrind '
                       f'{"".join(submission.submission_path.split("/")[-2:])} < '
                       f'{testcase.short_id} ---')
-            unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)
+            #unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)
         return result, valgrind_output
 
     def get_limits_time(self):
@@ -496,7 +535,9 @@ class TestCaseExecutor:
         else: 
             return [self.configuration["RLIMIT_DATA_CARELESS"],self.configuration["RLIMIT_STACK_CARELESS"],self.configuration["RLIMIT_CPU_CARELESS"]]  
     
-    def set_limits_time(self, limits):
+
+    
+    def set_limits(self, limits):
         """
         Sets runtime ressources depending on the possible
         final flag

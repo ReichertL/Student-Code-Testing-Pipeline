@@ -5,6 +5,7 @@ The host's native gcc can be used as less as a gcc inside a docker container.
 """
 import os
 import shutil
+import logging
 from pwd import getpwnam
 from subprocess import run, DEVNULL, PIPE
 
@@ -12,6 +13,9 @@ OWN_PW = getpwnam(os.environ['USER'])
 OWN_UID_GID = f'{OWN_PW.pw_uid:d}.{OWN_PW.pw_gid:d}'
 SUDO_DOCKER = ['sudo', 'docker']
 
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.warning)
 
 class DockerError(RuntimeError):
     pass
@@ -50,7 +54,7 @@ def native_gcc(gcc_args, src, dest):
              errors='ignore',
              cwd=directory, check=False)
     os.unlink(tmp_c_path)
-    print('native_gcc "{}" -> {}'.format(src, cp.returncode))
+    #logging.info('native_gcc "{}" -> {}'.format(src, cp.returncode))
     return ' '.join(all_args), cp.returncode, cp.stderr
 
 
@@ -91,6 +95,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         pass
     if os.listdir(directory):
         raise OSError(f"Directory not empty: '{directory}'")
+    
     # create docker container, if it does not exist already
     run(SUDO_DOCKER + ['create',
                        '--name', docker_container,
@@ -98,7 +103,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
                        docker_image],
         stdout=DEVNULL,
         stderr=DEVNULL)
-    # start docker container if required
+    # start docker container if required#
     cp = run(SUDO_DOCKER + ['start', docker_container],
              stdout=DEVNULL)
     if cp.returncode != 0:
@@ -138,10 +143,12 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     # clean up copy of c file
     os.unlink(tmp_c_path)
     # directory should now be back in its original state, most likely empty
-    print('docker_gcc "{}" -> {}'.format(src, gcc_returncode))
+    #logging.info('docker_gcc "{}" -> {}'.format(src, gcc_returncode))
+    #cp = run(SUDO_DOCKER + ['stop', docker_container],stdout=DEVNULL)
     return commandline, gcc_returncode, gcc_stderr
 
 def hybrid_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
+    #print(gcc_args)
     commandline, gcc_returncode, gcc_stderr = docker_gcc(
         gcc_args, src, dest, docker_image, docker_container, directory)
     if gcc_returncode == 0:

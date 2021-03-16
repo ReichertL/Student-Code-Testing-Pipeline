@@ -1,4 +1,10 @@
 import re
+import logging
+
+from alchemy.valgrind_outputs import Valgrind_Output
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 re_pid = re.compile(rb'==\d+==')
 re_error = re.compile(rb'(?i)error|warn|unknown|not|wrong|invalid|fehler|unbekannt|kein|nicht|falsch')
@@ -36,12 +42,11 @@ class ResultParser:
             testcase_result.cpu_time = float(ls[0]) + float(ls[1])
             testcase_result.mrss = 1024 * int(ls[2])
             testcase_result.return_code = int(ls[3])
-            #test_case_result.realtime = float(ls[4])
+            realtime = float(ls[4])
             break
 
     @staticmethod
-    def parse_valgrind_file(testcase_id,lines):
-        res=Valgrind_Output(testcase_id)
+    def parse_valgrind_file(res,lines):
         lines = list(lines)
         it = iter(lines)
         valgrind_head = re_pid.match(next(it)).group()
@@ -60,10 +65,12 @@ class ResultParser:
                 res.ok = None
                 continue
             if line == b'HEAP SUMMARY:\n':
-              #  res.in_use_at_exit = parse_int_tuple(                  #TODO
-                   # re_vg_heap_summary1.match(next(it)[len(valgrind_head) + 1:]).groups())
-              #  res.total_heap_usage = parse_int_tuple(
-                   # re_vg_heap_summary2.match(next(it)[len(valgrind_head) + 1:]).groups()) #TODO
+                in_use_at_exit_tupel = parse_int_tuple(re_vg_heap_summary1.match(next(it)[len(valgrind_head) + 1:]).groups())
+                res.in_use_at_exit_bytes=in_use_at_exit_tupel[0]
+                total_heap_usage = parse_int_tuple(re_vg_heap_summary2.match(next(it)[len(valgrind_head) + 1:]).groups())
+                res.total_heap_usage_allocs=total_heap_usage[0]
+                res.total_heap_usage_frees=total_heap_usage[1]   
+                res.total_heap_usage_bytes=total_heap_usage[2]
                 continue
             if line == b'LEAK SUMMARY:\n':
                 d = {}
@@ -72,11 +79,17 @@ class ResultParser:
                     mo = re_vg_leak_details.match(next(it)[len(valgrind_head) + 1:])
                     assert key == mo.group(1).decode('ascii')
                     d[key] = parse_int_tuple(mo.groups()[1:])
-                #res['leak_summary'] = d #TODO
+                res.definitely_lost_bytes=d["definitely lost"][0]
+                res.indirectly_lost_bytes=d["indirectly lost"][0]
+                res.possibly_lost_bytes=d["possibly lost"][0]
+                res.still_reachable_bytes=d["still reachable"][0]
+                res.suppressed_bytes=d["suppressed"][0]
                 continue
             mo = re_vg_error_summary.match(line)
             if mo is not None:
-                #res['error_summary'] = parse_int_tuple(mo.groups()) # TODO
+                error_summary = parse_int_tuple(mo.groups()) 
+                res.summary_errors=error_summary[0]
+                res.summary_suppressed_errors=error_summary[2]
                 continue
             mo = re_vg_invalid_read.match(line)
             if mo is not None:

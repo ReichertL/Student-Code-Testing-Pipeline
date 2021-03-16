@@ -53,6 +53,26 @@ class ArgumentExtractor:
                           help='run tests for all submissions')
         self \
             .parser \
+            .add_argument('-t', '--test',
+                          dest='test',
+                          nargs='*',
+                          type=str,
+                          default=[],
+                          help='Allows user to provide a student name and select a test to be run for their last submission.')
+        self \
+            .parser \
+            .add_argument('-O', '--output',
+                          dest="output",
+                          action='store_true',
+                          help='Prints output from executed sumbissions.')
+        self \
+            .parser \
+            .add_argument('-V', '--valgrind',
+                          dest="valgrind",
+                          action='store_true',
+                          help='Prints valgrind output from executed sumbissions.')
+        self \
+            .parser \
             .add_argument('-C', '--compile',
                           dest='compile',
                           type=str,

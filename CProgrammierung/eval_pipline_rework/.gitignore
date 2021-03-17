@@ -2,7 +2,8 @@
 gcc.return
 gcc.stderr
 /venv/
-/resources/
+resources/*
+resources/moodelsessions
 /util/constants.py
 /.idea/
 test.*

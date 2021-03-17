@@ -1,4 +1,6 @@
 # Project exclude paths
+gcc.return
+gcc.stderr
 /venv/
 /resources/
 /util/constants.py

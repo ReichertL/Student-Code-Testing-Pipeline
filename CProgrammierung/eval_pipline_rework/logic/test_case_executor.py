@@ -134,8 +134,10 @@ class TestCaseExecutor:
         for submission, student in pending_submissions:
             logging.info(f'Checking Submission of {student.name} from the {submission.submission_time}')
             does_compile = self.compile_single_submission(submission)
+
             run=Run.insert_run(does_compile)
-                
+          
+ 
             if (not len(self.args.compile) > 0):
                 if run.compilation_return_code==0:
                     testcase_results = self.check( student,submission,run)
@@ -280,11 +282,11 @@ class TestCaseExecutor:
               f'{student.name} submitted at '
               f'{submission.submission_time}')
         sys.stdout.flush()
-        compiled= self.compile_single_submission(submission)
+        #compiled= self.compile_single_submission(submission)
 
 
-
-        if compiled.compilation_return_code== 0:
+        if True: 
+        #if compiled.compilation_return_code== 0:
             for test in Testcase.get_all_bad():
                 logging.debug("Testcase "+str(test.short_id))
                 testcase_result, valgrind_output = self.check_for_error(submission,run, test)
@@ -292,11 +294,11 @@ class TestCaseExecutor:
                 if not valgrind_output == None: dbm.session.add(valgrind_output)
                 
             for test in Testcase.get_all_good():
-                logging.debug("Testcase "+str(test.short_id))
+                 logging.debug("Testcase "+str(test.short_id))
 
-                testcase_result, valgrind_output =self.check_output(submission,run,test,sort_first_arg_and_diff)
-                dbm.session.add(testcase_result)
-                if not valgrind_output == None: dbm.session.add(valgrind_output)
+                 testcase_result, valgrind_output =self.check_output(submission,run,test,sort_first_arg_and_diff)
+                 dbm.session.add(testcase_result)
+                 if not valgrind_output == None: dbm.session.add(valgrind_output)
                 
             #This deals with testcases that are allowed to fail gracefully, but if they don't they have to return the correct value
             for test in Testcase.get_all_bad_or_output():
@@ -304,7 +306,7 @@ class TestCaseExecutor:
                 testcase_result, valgrind_output = self.check_for_error_or_output(submission,run, test, sort_first_arg_and_diff )
                 dbm.session.add(testcase_result)
                 if not valgrind_output == None: dbm.session.add(valgrind_output)
-                            
+                           
             dbm.session.commit()
         else:
             Warn(f'Something went wrong! '
@@ -361,8 +363,10 @@ class TestCaseExecutor:
         testcase_result.output_correct = True
         parser = ResultParser()
         parser.parse_error_file(testcase_result)
-        if testcase_result.return_code > 0 and \
-                testcase_result.error_msg_quality > 0:
+        logging.debug(type(testcase_result.return_code))
+        logging.debug(testcase_result.return_code)
+        if int(testcase_result.return_code) > 0 and \
+               testcase_result.error_msg_quality != None:
             testcase_result.output_correct = True
         else:
             testcase_result.output_correct = False
@@ -407,8 +411,8 @@ class TestCaseExecutor:
                 testcase_result.output_correct = True
             else:
                 testcase_result.output_correct = False
-            unlink_safe("test.stderr")
-            unlink_safe("test.stdout")
+        unlink_safe("test.stderr")
+        unlink_safe("test.stdout")
         return testcase_result,valgrind_output
 
 
@@ -421,7 +425,7 @@ class TestCaseExecutor:
         :param verbose: enables verbose output
         :return: returns a test_case_result object
         """
-        limits=self.get_limits_time()
+ 
         parser = ResultParser()
         result = Testcase_Result.create_or_update(run.id,testcase.id)
         if self.args.verbose:
@@ -451,7 +455,7 @@ class TestCaseExecutor:
                 stdin=fin,
                 stdout=out,
                 stderr=err,
-                preexec_fn=self.set_limits(limits),
+                preexec_fn=self.set_limits,
                 cwd='/tmp')
             try:
                 p.wait(150)
@@ -470,7 +474,8 @@ class TestCaseExecutor:
                     parser.parse_time_file(result, file)
             if self.args.verbose and result.timeout:
                 print('-> TIMEOUT')
-            result.tictoc = duration            
+            result.tictoc = duration  
+            limits=self.get_limits_time()
             result.rlimit_data=limits[0]
             result.rlimit_stack=limits[1]
             result.rlimit_cpu=limits[2]
@@ -502,7 +507,7 @@ class TestCaseExecutor:
                                      stdin=fin,
                                      stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL,
-                                     preexec_fn=self.set_limits(limits),
+                                     preexec_fn=self.set_limits,
                                      cwd='/tmp')
                 try:
                     p.wait(300)
@@ -526,7 +531,8 @@ class TestCaseExecutor:
                 print(f'--- finished valgrind '
                       f'{"".join(submission.submission_path.split("/")[-2:])} < '
                       f'{testcase.short_id} ---')
-            #unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)
+            unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)
+
         return result, valgrind_output
 
     def get_limits_time(self):
@@ -537,12 +543,13 @@ class TestCaseExecutor:
     
 
     
-    def set_limits(self, limits):
+    def set_limits(self):
         """
         Sets runtime ressources depending on the possible
         final flag
         nothing
         """
+        limits=self.get_limits_time()
         resource.setrlimit(resource.RLIMIT_DATA,2 * (limits[0],))
         resource.setrlimit(resource.RLIMIT_STACK,2 * (limits[1],))
         resource.setrlimit(resource.RLIMIT_CPU,2 * (limits[2],))

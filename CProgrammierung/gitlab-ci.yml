@@ -48,4 +48,4 @@ test-programmieraufgabe-musterloesungen:
     - cd CProgrammierung/musterloesung/tests
     - bash ./setup.sh && cd auswertung
     - ./check.py -c
-    - ./check.py --exit-status -d Leonie Mark
+   # - ./check.py --exit-status -d Leonie Mark

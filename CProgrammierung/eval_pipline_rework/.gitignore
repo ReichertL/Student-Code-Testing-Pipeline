@@ -8,3 +8,4 @@ resources/moodelsessions
 /.idea/
 test.*
 *html
+*.swp

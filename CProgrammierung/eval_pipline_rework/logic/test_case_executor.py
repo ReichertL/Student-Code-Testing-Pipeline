@@ -18,6 +18,7 @@ from util.config_reader import ConfigReader
 from util.gcc import hybrid_gcc, native_gcc
 from util.named_pipe_open import NamedPipeOpen
 from util.result_parser import ResultParser
+from util.select_option import select_option_interactive
 from logic.result_generator import ResultGenerator
 
 
@@ -129,7 +130,8 @@ class TestCaseExecutor:
         self.load_tests()  #TODO: Mit flag versehen, so dass testcases nur eingelesen werden wenn es manuell gefordert wird
 
         pending_submissions = self.retrieve_pending_submissions()
-        if pending_submissions==None:
+        if pending_submissions in [None,[], [[]]]:
+            logging.info("No new submissions to check")
             return
         for submission, student in pending_submissions:
             logging.info(f'Checking Submission of {student.name} from the {submission.submission_time}')
@@ -156,7 +158,16 @@ class TestCaseExecutor:
         if self.args.check and self.args.rerun:
             for name in self.args.check:
                 submissions_student=Submission.get_last_for_name(name)
-                submissions.append(submissions_student)
+                if submissions_student!=None: 
+                    submissions.append(submissions_student)
+                else:
+                    students=Student.get_student_by_name(name)
+                    student=select_option_interactive(students)
+                    logging.debug(student)
+                    submissions_student=Submission.get_last_for_name(student.name)
+                    if submissions_student!=None: 
+                        submissions.append(submissions_student)
+  
         elif self.args.check:
             for name in self.args.check:
                 submissions_student=Submission.get_not_checked_for_name(name)

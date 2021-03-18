@@ -5,6 +5,7 @@ import alchemy.students as s
 import alchemy.submissions as sub
 import alchemy.runs as r
 import alchemy.database_manager as dbm
+from util.select_option import select_option_interactive
 
 from logic.performance_evaluator import PerformanceEvaluator
  
@@ -15,6 +16,8 @@ def marke_passed_manually(names):
         if student is None:
             print(f"No student with this name {name} found!")
             continue
+        elif len(student)>1:
+           student=select_option_interactive(student)
         submissions = student.submissions
         logging.debug(submissions)
         

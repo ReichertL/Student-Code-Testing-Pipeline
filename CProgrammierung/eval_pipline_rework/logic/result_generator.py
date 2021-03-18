@@ -15,6 +15,7 @@ from alchemy.testcases import Testcase
 
 from util.colored_massages import red, yellow, green
 from util.htable import table_format
+from util.select_option import select_option_interactive
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)
@@ -83,7 +84,7 @@ class ResultGenerator:
                 if submission.is_checked:
                     print(f"Submission from the {submission.submission_time}")
                     run=Run.get_last_for_submission(submission)
-                    self.print_small_stats(run, sys.stdout)
+                    ResultGenerator.print_small_stats(run, sys.stdout)
 
     def add_line(self, student):
         """
@@ -119,6 +120,9 @@ class ResultGenerator:
             if student is None:
                 print(f"No student with this name {name} found!")
                 continue
+            elif len(student)>1:
+                student=select_option_interactive(student)
+                name=student.name
             print(f"Printing details for {name}:")
             sub_stud = Submission.get_all_for_name(name)
             logging.debug(sub_stud)

@@ -70,10 +70,13 @@ class DatabaseIntegrator:
                         .__str__()
                     regex_timestamp = re.sub("-|:|\s", "_",
                                              timestamp_extension)
+                    #now=datetime.datetime.now()
+                    #ts_string=now.strftime("%Y-%m-%d_%H-%M-%S")
                     filename = f"loesung_{regex_timestamp}.c"
                     new_file = os.path.join(root, filename)
                     old_file = os.path.join(root, file)
                     shutil.move(old_file, new_file)
                 path=root + os.path.sep + filename
-                ts=datetime.datetime.fromtimestamp(os.path.getmtime(path))
+                time_from_filename=filename[8:-2]
+                ts=datetime.datetime.strptime(time_from_filename,"%Y_%m_%d_%H_%M_%S")
                 Submission.insert_submission(student, path, ts)

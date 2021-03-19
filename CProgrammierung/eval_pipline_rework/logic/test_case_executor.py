@@ -374,8 +374,6 @@ class TestCaseExecutor:
         testcase_result.output_correct = True
         parser = ResultParser()
         parser.parse_error_file(testcase_result)
-        logging.debug(type(testcase_result.return_code))
-        logging.debug(testcase_result.return_code)
         if int(testcase_result.return_code) > 0 and \
                testcase_result.error_msg_quality != None:
             testcase_result.output_correct = True

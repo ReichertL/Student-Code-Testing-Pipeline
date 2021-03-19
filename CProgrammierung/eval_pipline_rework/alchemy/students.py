@@ -47,13 +47,13 @@ class Student(Base):
     @classmethod
     def get_or_insert(cls,name,moodle_id):
         student=cls.get_student_by_name(name)
-        if student==None:
+        if student in [None, [],[[]]]:
             #Warn("Student with name "+str(name)+" did not exist. An database entrie is now created.")
             student_new=Student(name,moodle_id )
             dbm.session.add(student_new)
             dbm.session.commit()
             return student_new
-        if len(student)>1:
+        if type(student)==list:
             logging.error(f"Student was not found but there are students with similar names. Selecting {student[0].name}")   
             return student[0]
         return student
@@ -65,7 +65,7 @@ class Student(Base):
             needle="%{}%".format(student_name)
             result = dbm.session.query(Student).\
 			filter(Student.name.like(needle)).\
-			limit(5).all() 
+			limit(5).all()
         return result
 
     @classmethod

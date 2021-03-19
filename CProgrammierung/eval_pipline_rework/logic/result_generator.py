@@ -117,10 +117,11 @@ class ResultGenerator:
         """
         for name in details:
             student = Student.get_student_by_name(name)
+            print(type(student))
             if student is None:
                 print(f"No student with this name {name} found!")
                 continue
-            elif len(student)>1:
+            elif type(student)==list:
                 student=select_option_interactive(student)
                 name=student.name
             print(f"Printing details for {name}:")

@@ -16,7 +16,7 @@ def marke_passed_manually(names):
         if student is None:
             print(f"No student with this name {name} found!")
             continue
-        elif len(student)>1:
+        elif type(student)==list:
            student=select_option_interactive(student)
         submissions = student.submissions
         logging.debug(submissions)

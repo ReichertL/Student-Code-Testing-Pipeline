@@ -12,7 +12,7 @@ class Abtestat_Functions:
 
         for name in names:
             student=Student.get_student_by_name(name)
-            if len(student)>1:
+            if type(student)==list:
                 student=select_option_interactive(student)  
             if not Student.is_student_passed(name) :
                 print(f"{name} has not passed so far, mark abtestat as done anyways?(y/n)")
@@ -40,7 +40,7 @@ class Abtestat_Functions:
     def abtestat_revert( names):
         for name in names:
             student=Student.get_student_by_name(name)
-            if len(student)>1:
+            if type(student)==list:
                 student=select_option_interactive(student)   
             passed=Student.is_student_passed(name)
             if passed==True:

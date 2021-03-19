@@ -111,7 +111,7 @@ class MoodleSubmissionFetcher:
         :return: list of new submission
         """
 
-        new = []
+        #new = []
         new_submissions_dir = self.configuration["SUBMISSION_NEW_DIR"]
         new_submissions_zip = self.configuration["SUBMISSION_NEW_ZIP"]
         submission_base_dir = self.configuration["SUBMISSION_BASE_DIR"]
@@ -142,7 +142,8 @@ class MoodleSubmissionFetcher:
                              new_submissions_zip], stdout=DEVNULL)
             os.unlink(new_submissions_zip)
         if noimport:
-            return new
+            return
+            #return new
         dir_listing = os.listdir(new_submissions_dir)
         for d in dir_listing:
             student= self. \
@@ -160,14 +161,17 @@ class MoodleSubmissionFetcher:
                 .fromtimestamp(os.path.getmtime(src)) \
                 .__str__()
             regex_timestamp = re.sub("-|:|\s", "_", timestamp_extension)
+            #the following can not be used as the pipline uses the mtime to distinct between 
+            #now=datetime.datetime.now()
+            #ts_string=now.strftime("%Y-%m-%d_%H-%M-%S")
 
             dest = os.path.join(dest_dir, f'loesung_{regex_timestamp}.c')
             if not os.path.isdir(dest_dir):
                 os.mkdir(dest_dir)
 
             shutil.move(src, dest)
-            new.append((student.name, student.id))
-        return new
+            #new.append((student.name, student.id))
+        #return new
 
     @staticmethod
     def dirname_to_student(d):

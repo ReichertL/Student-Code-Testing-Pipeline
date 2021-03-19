@@ -1,10 +1,10 @@
 import sys
 import logging
 
-from alchemy.testcases import Testcase
-from alchemy.submissions import Submission
-from alchemy.runs import Run
-import alchemy.database_manager as dbm
+from database.testcases import Testcase
+from database.submissions import Submission
+from database.runs import Run
+import database.database_manager as dbm
 
 from logic.result_generator import ResultGenerator
 from logic.test_case_executor import TestCaseExecutor

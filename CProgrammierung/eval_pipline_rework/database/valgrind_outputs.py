@@ -1,9 +1,9 @@
 from sqlalchemy import *
-from alchemy.base import Base
+from database.base import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
 
-import alchemy.database_manager as dbm
+import database.database_manager as dbm
 
 class Valgrind_Output(Base):
     __tablename__ = 'Valgrind_Output'

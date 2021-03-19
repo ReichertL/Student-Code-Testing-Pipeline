@@ -9,9 +9,9 @@ import shutil
 import logging
 
 #from models.submission import Submission
-from alchemy.submissions import Submission
-from alchemy.students import Student
-from alchemy.database_manager import DatabaseManager 
+from database.submissions import Submission
+from database.students import Student
+from database.database_manager import DatabaseManager 
 
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader

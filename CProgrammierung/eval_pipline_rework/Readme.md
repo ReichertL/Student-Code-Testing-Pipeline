@@ -164,7 +164,7 @@ the [current features](#implemented-features).
 
 ### Implemented Structure:
 The image below represents the currently implemented structure of the evaluation pipeline. 
-![current structure](current_structure.svg)
+![current structure](Database_Schema.svg)
 
 
 ### Implemented Features:  
@@ -176,7 +176,7 @@ The image below represents the currently implemented structure of the evaluation
   - Send evaluation feedback to the students after running tests
   - evaluate performance (time and space) to evaluate possible competitions
   - dump relevant grading lists via csv and Moodle Grader API
-  
+  - Guessing a students name based on input
   
 
 ## Future Development

@@ -1,12 +1,12 @@
 import logging
 
 from sqlalchemy import *
-from alchemy.base import Base
+from database.base import Base
 from sqlalchemy.orm import relationship
 
-from alchemy.testcases import Testcase
-from alchemy.valgrind_outputs import Valgrind_Output
-import alchemy.database_manager as dbm
+from database.testcases import Testcase
+from database.valgrind_outputs import Valgrind_Output
+import database.database_manager as dbm
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)

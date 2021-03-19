@@ -1,12 +1,12 @@
 import logging
 from sqlalchemy import *
-from alchemy.base import Base 
+from database.base import Base 
 from sqlalchemy.orm import relationship
 from util.colored_massages import Warn
 
-import alchemy.runs as r
-import alchemy.submissions as sub
-import alchemy.database_manager as dbm
+import database.runs as r
+import database.submissions as sub
+import database.database_manager as dbm
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)

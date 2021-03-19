@@ -1,11 +1,11 @@
 import logging
 
 from sqlalchemy import *
-from alchemy.base import Base 
+from database.base import Base 
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
 
-import alchemy.database_manager as dbm
+import database.database_manager as dbm
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)

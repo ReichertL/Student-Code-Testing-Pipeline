@@ -1,13 +1,13 @@
 import logging
 
 from sqlalchemy import *
-from alchemy.base import Base
+from database.base import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression, or_
 
 
-import alchemy.database_manager as dbm
-from alchemy.students import Student
+import database.database_manager as dbm
+from database.students import Student
 
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"

@@ -1,10 +1,10 @@
 import sys
 import logging
 
-import alchemy.students as s
-import alchemy.submissions as sub
-import alchemy.runs as r
-import alchemy.database_manager as dbm
+import database.students as s
+import database.submissions as sub
+import database.runs as r
+import database.database_manager as dbm
 from util.select_option import select_option_interactive
 
 from logic.performance_evaluator import PerformanceEvaluator

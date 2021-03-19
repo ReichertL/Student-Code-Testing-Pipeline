@@ -18,7 +18,7 @@ from util.colored_massages import Warn
 from util.config_reader import ConfigReader
 from moodel.moodle_session import MoodleSession
 
-from alchemy.students import Student
+from database.students import Student
 
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"

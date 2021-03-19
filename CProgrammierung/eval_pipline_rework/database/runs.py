@@ -2,16 +2,16 @@ import logging
 from functools import cmp_to_key
 
 from sqlalchemy import *
-from alchemy.base import Base
+from database.base import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
 
 
-import alchemy.database_manager as dbm
-from alchemy.testcase_results import Testcase_Result
-from alchemy.valgrind_outputs import Valgrind_Output
-from alchemy.testcases import Testcase
-import alchemy.submissions as sub
+import database.database_manager as dbm
+from database.testcase_results import Testcase_Result
+from database.valgrind_outputs import Valgrind_Output
+from database.testcases import Testcase
+import database.submissions as sub
 
 
 

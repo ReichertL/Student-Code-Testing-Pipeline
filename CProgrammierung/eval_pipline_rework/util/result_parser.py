@@ -1,7 +1,7 @@
 import re
 import logging
 
-from alchemy.valgrind_outputs import Valgrind_Output
+from database.valgrind_outputs import Valgrind_Output
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)

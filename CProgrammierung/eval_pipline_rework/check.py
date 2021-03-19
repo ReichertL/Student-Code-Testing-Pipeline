@@ -20,7 +20,7 @@ from logic.abtestat_functions import Abtestat_Functions
 from util.argument_extractor import ArgumentExtractor
 from util.lockfile import LockFile
 from util.playground import Playground
-from alchemy.database_manager import DatabaseManager 
+from database.database_manager import DatabaseManager 
 from logic.mark_manual import marke_passed_manually
 from logic.execute_single import execute_singel_testcase
 

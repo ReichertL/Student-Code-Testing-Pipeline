@@ -7,11 +7,11 @@ import datetime
 import sys
 import logging
 
-from alchemy.students import Student
-from alchemy.submissions import Submission
-from alchemy.runs   import Run
-from alchemy.testcase_results import Testcase_Result
-from alchemy.testcases import Testcase
+from database.students import Student
+from database.submissions import Submission
+from database.runs   import Run
+from database.testcase_results import Testcase_Result
+from database.testcases import Testcase
 
 from util.colored_massages import red, yellow, green
 from util.htable import table_format

@@ -5,10 +5,10 @@ performance statistics
 import os
 import logging
 
-from alchemy.testcase_results import Testcase_Result
-import alchemy.database_manager as dbm
-from alchemy.students import Student
-from alchemy.runs import Run
+from database.testcase_results import Testcase_Result
+import database.database_manager as dbm
+from database.students import Student
+from database.runs import Run
 
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader

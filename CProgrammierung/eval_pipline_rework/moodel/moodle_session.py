@@ -13,7 +13,7 @@ import urllib.parse
 import logging
 
 from util.absolute_path_resolver import resolve_absolute_path
-from alchemy.students import Student
+from database.students import Student
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)

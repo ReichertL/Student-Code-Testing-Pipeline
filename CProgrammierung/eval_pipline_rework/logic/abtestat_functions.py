@@ -1,8 +1,8 @@
 from datetime import  datetime
 import sys
 
-import alchemy.database_manager as dbm
-from alchemy.students import Student
+import database.database_manager as dbm
+from database.students import Student
 from util.select_option import select_option_interactive
 
 class Abtestat_Functions:

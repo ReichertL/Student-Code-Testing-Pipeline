@@ -15,12 +15,12 @@ from util.config_reader import ConfigReader
 from moodel.moodle_session import MoodleSession
 
 
-from alchemy.submissions import Submission
-from alchemy.students import Student
-from alchemy.runs import Run
-from alchemy.testcase_results import Testcase_Result
+from database.submissions import Submission
+from database.students import Student
+from database.runs import Run
+from database.testcase_results import Testcase_Result
 
-import alchemy.database_manager as dbm
+import database.database_manager as dbm
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)

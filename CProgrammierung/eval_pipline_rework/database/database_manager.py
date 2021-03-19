@@ -9,13 +9,13 @@ from util.colored_massages import Warn
 from sqlalchemy import create_engine, and_, or_
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, backref, sessionmaker
-from alchemy.base import Base 
-import alchemy.students as s
-import alchemy.submissions as sub
-import alchemy.runs as r
-import alchemy.testcases as tc
-from alchemy.testcase_results import Testcase_Result
-from alchemy.valgrind_outputs import Valgrind_Output
+from database.base import Base 
+import database.students as s
+import database.submissions as sub
+import database.runs as r
+import database.testcases as tc
+from database.testcase_results import Testcase_Result
+from database.valgrind_outputs import Valgrind_Output
 
 session=None
 

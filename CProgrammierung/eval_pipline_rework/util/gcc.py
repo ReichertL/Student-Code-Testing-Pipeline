@@ -8,6 +8,7 @@ import shutil
 import logging
 from pwd import getpwnam
 from subprocess import run, DEVNULL, PIPE
+import sys
 
 OWN_PW = getpwnam(os.environ['USER'])
 OWN_UID_GID = f'{OWN_PW.pw_uid:d}.{OWN_PW.pw_gid:d}'
@@ -103,10 +104,11 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
                        docker_image],
         stdout=DEVNULL,
         stderr=DEVNULL)
+   
     # start docker container if required#
-    cp = run(SUDO_DOCKER + ['start', docker_container],
-             stdout=DEVNULL)
+    cp = run(SUDO_DOCKER + ['start', docker_container], stdout=DEVNULL, stderr=sys.stderr)
     if cp.returncode != 0:
+        logging.info(cp)
         raise DockerError(f'Unable to start docker container {docker_container} based on docker image {docker_image}.')
     # copy c file
     tmp_c_basename = os.path.basename(dest) + '.c'
@@ -116,7 +118,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     all_args = gcc_args + ['-o', os.path.basename(dest),
                            os.path.basename(dest) + '.c']
     commandline = ' '.join(all_args)
-    run(SUDO_DOCKER +
+    cp=run(SUDO_DOCKER +
         ['exec',
          '-w', '/host',
          docker_container,
@@ -144,7 +146,11 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     os.unlink(tmp_c_path)
     # directory should now be back in its original state, most likely empty
     #logging.info('docker_gcc "{}" -> {}'.format(src, gcc_returncode))
-    #cp = run(SUDO_DOCKER + ['stop', docker_container],stdout=DEVNULL)
+    
+    #cp = run(SUDO_DOCKER + ['stop', docker_container],stdout=sys.stdout, stderr=sys.stderr)
+    #if cp.returncode!=0:
+    #   	logging.error(cp)
+    #    logging.error(f'Unable to stop docker container {docker_container} based on docker image {docker_image}.')
     return commandline, gcc_returncode, gcc_stderr
 
 def hybrid_gcc(gcc_args, src, dest, docker_image, docker_container, directory):

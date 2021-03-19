@@ -30,13 +30,13 @@ class ArgumentExtractor:
             .add_argument('-f', '--fetch',
                           dest='fetch',
                           action='store_true',
-                          help='fetch new submissions')
+                          help='Fetch new submissions')
         self \
             .parser \
             .add_argument('--fetch-only',
                           dest='fetch_only',
                           action='store_true',
-                          help='fetch new submissions')
+                          help='Fetch new submissions and exits afterwards.')
         self \
             .parser \
             .add_argument('-c', '--check',
@@ -44,13 +44,14 @@ class ArgumentExtractor:
                           type=str,
                           default=[],
                           action="append",
-                          help='run tests for the submissions'
-                               ' of the given student')
+                          help='Run tests for the submissions'
+                               ' of the given student'
+                               ' Usage: check -c "Firstname Lastname"' )
         self \
             .parser \
             .add_argument('-a', '--all',
                           action='store_true',
-                          help='run tests for all submissions')
+                          help='Run tests for all submissions')
         self \
             .parser \
             .add_argument('-t', '--test',
@@ -58,26 +59,30 @@ class ArgumentExtractor:
                           nargs='*',
                           type=str,
                           default=[],
-                          help='Allows user to provide a student name and select a test to be run for their last submission.')
+                          help='Allows user to provide a student name'
+                              ' and select a test to be run for their last submission.'
+                              ' Usage: check -t "Firstname Lastname"')
         self \
             .parser \
             .add_argument('-O', '--output',
                           dest="output",
                           action='store_true',
-                          help='Prints output from executed sumbissions.')
+                          help='Prints output from executed sumbission' 
+                               ' Usage for exaple:  check -Ot "Firstname Lastname" OR  check -fav')
         self \
             .parser \
             .add_argument('-V', '--valgrind',
                           dest="valgrind",
                           action='store_true',
-                          help='Prints valgrind output from executed sumbissions.')
+                          help='Prints valgrind output from executed sumbissions.'
+                            'Usage for exaple: check -Vt "Firstname Lastname" or check -favV')
         self \
             .parser \
             .add_argument('-C', '--compile',
                           dest='compile',
                           type=str,
                           default='',
-                          help='just compile this configuration')
+                          help='Just compile this configuration')
         self \
             .parser \
             .add_argument('-e', '--extra',
@@ -85,21 +90,21 @@ class ArgumentExtractor:
                           dest='extra_sources',
                           type=str,
                           default=[],
-                          help='run extra tests for each submission'
+                          help='Run extra tests for each submission'
                                'that has not been tested so far')
         self \
             .parser \
             .add_argument('-s', '--stats',
                           dest='stats',
                           action='store_true',
-                          help='print stats only, '
-                               'do test new configuration files')
+                          help='Print stats for all students. '
+                               'Do test new configuration files. Usage: check -s')
         self \
             .parser \
             .add_argument('-v', '--verbose',
                           dest='verbose',
                           action='store_true',
-                          help='print detailed test results'
+                          help='Print detailed test results'
                                ' for each test executed')
         self \
             .parser \
@@ -107,28 +112,30 @@ class ArgumentExtractor:
                           nargs='*',
                           dest='details',
                           type=str,
-                          default=[])
+                          default=[],
+                          help='Print details for single student. Usage: check -d "Firstnam Lastname"')
         self \
             .parser \
             .add_argument('-M', '--mail',
                           nargs='*',
                           dest='mailto',
                           type=str,
-                          default=[])
+                          default=[],
+                          help='Send Mail to single or a list of students. Usage check -M "Firstname Lastname"')
 
         self \
             .parser.add_argument('-m', '--mail-to-all',
                                  dest='mail_to_all',
                                  action='store_true',
-                                 help='send mail reports to everyone '
+                                 help='Send mail reports to everyone '
                                       'who has not received a report'
                                       ' for the current version yet')
         self \
             .parser. \
             add_argument('-B', '--best',
                          action='store_true',
-                         help='combined with -d,'
-                              ' show best submission'
+                         help='Combined with -d:'
+                              ' shows best submission'
                               ' instead of latest')
         self \
             .parser \
@@ -148,42 +155,45 @@ class ArgumentExtractor:
         self \
             .parser \
             .add_argument('-r', '--rerun',
-                          action='store_true')
+                          action='store_true',
+                          help='Rerun submissions that have already been checked.'
+                               ' Usage: check -rc "Firstname Lastname"'
+                          )
         self \
             .parser \
             .add_argument('-P', '--playground',
                           dest='playground',
                           action='store_true',
-                          help='playground')
+                          help='Playground')
         self \
             .parser \
             .add_argument('--sim',
                           action='store_true',
-                          help='perform all-to-all similarity check')
+                          help='Perform all-to-all similarity check')
         self \
             .parser \
             .add_argument('--exit-status',
                           action='store_true',
-                          help='if used together with '
+                          help='If used together with '
                                '--details, set exit status'
                                ' to 0 iff displayed abgabe passes')
         self \
             .parser \
             .add_argument('--debug',
                           action='store_true',
-                          help='enables sending mail only to '
+                          help='Enables sending mail only to '
                                '"C Programmierprojekt Team" moodle account')
         self \
             .parser \
             .add_argument('--force',
                           action='store_true',
-                          help='forces actions like resending emails')
+                          help='Gorces actions like resending emails')
         self \
             .parser \
             .add_argument('-g', '--generate',
                           dest="generate",
                           action='store_true',
-                          help='generates a full .csv file with grading for moodle'
+                          help='Generates a full .csv file with grading for moodle'
                                'and a separate .csv file for students '
                                'which passed the abtestat')
 
@@ -194,7 +204,8 @@ class ArgumentExtractor:
                           nargs='*',
                           type=str,
                           default=[],
-                          help='sets a list of students as abtestat done')
+                          help='Sets a list of students as abtestat done.'
+                                ' Usage: check -A "Firstname Lastname"' )
 
         self \
             .parser \
@@ -203,7 +214,8 @@ class ArgumentExtractor:
                           nargs='*',
                           type=str,
                           default=[],
-                          help='reverts abtestat state for the students given')
+                          help='Reverts abtestat state for the students given.' 
+                          ' Usage: check -R "Firstname Lastname"')
 
         self \
             .parser \
@@ -213,7 +225,7 @@ class ArgumentExtractor:
                           type=str,
                           default=[],
                           help='marks a students submission manually as passed '
-                               'if corrected manually')
+                               'if corrected manually. Usage: check -D "Firstname Lastname"')
 
         self \
             .parser \

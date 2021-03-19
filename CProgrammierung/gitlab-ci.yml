@@ -1,8 +1,8 @@
-build-programmieraufgabe-pdf:
-  stage: build
-  image: "gitlab.informatik.hu-berlin.de:4567/ti/software/docker-paperbuilder/ubuntu1804:144dc62463072b1070e14313304a903b38f3bd90"
-  script:
-    - env -C CProgrammierung/aufgabenstellung latexmk
+#build-programmieraufgabe-pdf:
+#  stage: build
+#  image: "gitlab.informatik.hu-berlin.de:4567/ti/software/docker-paperbuilder/ubuntu1804:144dc62463072b1070e14313304a903b38f3bd90"
+#  script:
+#    - env -C CProgrammierung/aufgabenstellung latexmk
 
   # # though using `only` would be correct here, gitlab is broken as of now,
   # # so artifact download url gives 404 if this is only built on change
@@ -11,41 +11,49 @@ build-programmieraufgabe-pdf:
   #     - CProgrammierung/aufgabenstellung/programmieraufgabe.tex
   #     - CProgrammierung/aufgabenstellung/.latexmkrc
 
-  artifacts:
-    paths:
-      - CProgrammierung/aufgabenstellung/programmieraufgabe.pdf
+#  artifacts:
+#    paths:
+#      - CProgrammierung/aufgabenstellung/programmieraufgabe.pdf
 
-pylint-programmieraufgabe:
+#pylint-programmieraufgabe:
+#  stage: test
+#  image: $CI_REGISTRY_IMAGE/cprojekt
+#  script:
+#    - . /venv_cprogrammierung/bin/activate
+#    - cd CProgrammierung/auswertung
+#    - pylint --exit-zero *.py | sed -n 's;Your code has been rated at \([0-9.]*\)/10.*$;\1;p' | tee pylint.score
+#    - anybadge --overwrite --label pylint --suffix ' / 10' --value $(cat pylint.score) --file pylint.svg 5=red 7=orange 8=yellow 9=brightyellow 9.5=lime 10=green
+#  artifacts:
+#    paths:
+#      - CProgrammierung/auswertung/pylint.svg
+
+#unittests-programmieraufgabe:
+#  stage: test
+#  image: $CI_REGISTRY_IMAGE/cprojekt
+#  script:
+#    - . /venv_cprogrammierung/bin/activate
+#    - cd CProgrammierung/auswertung
+#    - py.test --cov --cov-report=term --cov-report='xml:pytest-cov.xml' --junit-xml=pytest.xml
+#  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
+#  artifacts:
+#    reports:
+#      junit: CProgrammierung/auswertung/pytest.xml
+#      cobertura: CProgrammierung/auswertung/pytest-cov.xml
+
+test-eval-pipeline:
   stage: test
   image: $CI_REGISTRY_IMAGE/cprojekt
   script:
     - . /venv_cprogrammierung/bin/activate
-    - cd CProgrammierung/auswertung
-    - pylint --exit-zero *.py | sed -n 's;Your code has been rated at \([0-9.]*\)/10.*$;\1;p' | tee pylint.score
-    - anybadge --overwrite --label pylint --suffix ' / 10' --value $(cat pylint.score) --file pylint.svg 5=red 7=orange 8=yellow 9=brightyellow 9.5=lime 10=green
-  artifacts:
-    paths:
-      - CProgrammierung/auswertung/pylint.svg
-
-unittests-programmieraufgabe:
-  stage: test
-  image: $CI_REGISTRY_IMAGE/cprojekt
-  script:
-    - . /venv_cprogrammierung/bin/activate
-    - cd CProgrammierung/auswertung
-    - py.test --cov --cov-report=term --cov-report='xml:pytest-cov.xml' --junit-xml=pytest.xml
-  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
-  artifacts:
-    reports:
-      junit: CProgrammierung/auswertung/pytest.xml
-      cobertura: CProgrammierung/auswertung/pytest-cov.xml
+    - . mv CProgrammierung/resources-example/ CProgrammierung/resources/
+    - CProgrammierung/check -fav
 
 test-programmieraufgabe-musterloesungen:
   stage: test
   image: $CI_REGISTRY_IMAGE/cprojekt
   script:
     - . /venv_cprogrammierung/bin/activate
-    - cd CProgrammierung/musterloesung/tests
-    - bash ./setup.sh && cd auswertung
-    - ./check.py -c
+#    - cd CProgrammierung/musterloesung/tests
+#    - bash ./setup.sh && cd auswertung
+#    - ./check.py -c
    # - ./check.py --exit-status -d Leonie Mark

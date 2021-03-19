@@ -43,8 +43,7 @@ Install required packet bs4 for python3.8 by using:
 #### Docker
 
 Build Docker File:
-  - `cd ds/CProgrammierung/dockerfiles`
-  - `./build.sh`
+  - `./dockerfiles/build.sh`
 
 #### Resources, Config Files and Templates
 

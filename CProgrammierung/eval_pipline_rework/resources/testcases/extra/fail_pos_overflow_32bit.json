@@ -1,8 +1,0 @@
-{
-  "short_desc": "pos_overflow_32bit",
-  "hint": "wenn ein Stein bei Position 2^32 auftaucht",
-  "valgrind": true,
-  "rlimit": "10M",
-  "returncode": 1,
-  "type":"BAD_OR_OUTPUT"
-}

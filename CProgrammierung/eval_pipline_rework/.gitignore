@@ -9,3 +9,4 @@ resources/moodelsessions
 test.*
 *html
 *.swp
+*.pyc

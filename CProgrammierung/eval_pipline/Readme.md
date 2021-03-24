@@ -6,21 +6,14 @@ Further it is able to persist relevant information, send feedback e-mails and ge
 csv and also via the moodle grading api.   
 
 ## Content
-1. [How to Start](#how-to-start)
-    1. [Installation](#installation-and-setup)
-    * [Setup](#setup)
-    * [Usage](#usage)
-2. [Current State of the Rework](#current-state-of-the-rework)
-    1. [Stable Commandline Arguments](#stable-commandline-arguments) 
-    2. [Implemented Structure](#implemented-structure) 
-    3. [Implemented Features](#implemented-features)
-3. [Future Development](#future-development)
-    1. [Planned Structure](#planned-structure)
-    2. [Planned Features](#planned-structure)
-    3. [Planned Integration](#planned-integration)
+1. [Installation](#installation)
+2. [Usage](#usage)
+3. [Current State of the Eval Pipeline](#current-state-of-the-eval-pipline)
+4. [Future Development](#future-development)
 
-## How to Start
-### Installation 
+
+## 1. Installation
+### 1.1 Packages
 Install Docker and Valgrind:
 
   - `sudo apt install docker.io`
@@ -36,16 +29,14 @@ Install required packet bs4 for python3.8 by using:
   - `python3.8 -m pip install sqlalchemy`
 
 
-### Setup
 
 
-
-#### Docker
+### 1.2 Docker
 
 Build Docker File:
   - `./dockerfiles/build.sh`
 
-#### Resources, Config Files and Templates
+### 1.3 Resources, Config Files and Templates
 
 There needs to be a resource directory inside the `eval_pipline directory`
 which contains:
@@ -65,7 +56,7 @@ It's worth to note, that these template massages can contain placeholder tokens,
 which can be replaced during runtime. These tokens should be follow the format `$placeholder_token$`. 
 
 
-#### Moodel Course
+### 1.4 Moodel Course
 Set up a Moodel Course with an excercise where students can submit a `.c` file. 
 Set the maximal possible grade for this excersie to 2:
 The grading for the C project is as follows:
@@ -78,27 +69,27 @@ Retrieve the course ID, submission ID and ID of the account that sould be used b
 This can be done by opening the respective page in the web browser an copying the Id from the url. 
 With these values update the entries in `C Programmierprojekt/eval_pipline_rework/resources` the file named `config_submission_fetcher.config`.
 
-#### Shortcut
+### 1.5 Shortcut
 For convenience, put a symbolic link in `/usr/bin` so that the pipline can be called by simply running `check [args]` in the terminal:
 ```
 sudo ln -s /path/to/eval_pipeline/__main__.py /usr/bin/check
 ```
 
-### Usage
+## Usage
 Thanks to `__init__.py` and `__main__.py`
 it can be called by executing:
 
 `/path/to/eval_pipeline/__main__.py [args]`
 
 (For some reason this does not work when you are already in the directory `eval_pipeline`)
-Relevant switches and flags are listed in Section [Commandline arguments](#stable-commandline-arguments)
+Relevant switches and flags accessible with `check -h`
 
-For convenience it is possible to create an alias or symbolic link(see [Installation and Setup]).
+For convenience it is possible to create an alias or symbolic link(see [Installation]).
 It can then be called by:
 
 `check [args]`
 
-## Usefull Commands
+### Usefull Commands
 
 During the semester:
 

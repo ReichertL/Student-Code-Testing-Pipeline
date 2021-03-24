@@ -90,6 +90,7 @@ it can be called by executing:
 
 `/path/to/eval_pipeline/__main__.py [args]`
 
+(For some reason this does not work when you are already in the directory `eval_pipeline`)
 Relevant switches and flags are listed in Section [Commandline arguments](#stable-commandline-arguments)
 
 For convenience it is possible to create an alias or symbolic link(see [Installation and Setup]).
@@ -97,69 +98,35 @@ It can then be called by:
 
 `check [args]`
 
+## Usefull Commands
 
-## Current State of the Rework
+During the semester:
+
+* `check -f` : Fetches all (new) submission but does not execute them
+* `check -fa`: Fetches new submissions and checks them for correctness (will not notify student)
+* `check -m` : Sends mail to all students that have not yet received a mail for their last submission (semi-automatic, requires user interaction)
+* `check -c "Firstname Lastname"` : Will run a specific submission (which is selectable) for a specific student. If student name does not match completly, a student will be suggested.
+* `check -t "Firstname Lastname"` : Run a single (selectable) testcase for the named student.
+* `check -tOV "Firstname Lastname"` : Run single testcase for student but also print output and Valgrind result. 
+* `check -d "Firstname Lastname"`: Get information about the last submissions of a single student.
+* `check -D "Firstname Lastname"` : Manually mark a submission as correct. Student will be automatically marked as passed. The database records manual change in a corresponding flag. This can be done if there are errors with the pipline and student code was successfully run on gruenau.
+
+For Abtestate:
+* `check -db "Firstname Lastname"`: Get information about the best submissions of a single student.
+* `check -s` : List for all students that have submitted a solution if they have passed. Useful when reevaluating the bar for passing.
+* `check -F` : Reruns all submission while ignoring the compiler warnings (and maybe some other stuff too). 
+* `check -uF` : check all unpassed students (and all their submissions) while lowering the bar for passing.
+* `check -A "Firstname Lastname"` : Record a successful Abtestat for this student. Marks the student as passed if not passed in the database.
+* `check -R "Firstname Lastname"` : Revert the desicion on an Abtestat. Allows to remove the passed status of a student.
+* `check -g`: Generates .csv files of students that have passed for the Prüfungsbüro.  
+
+
+## Current State of the Eval Pipeline
 This section describes the current state of the eval pipeline. 
 We start with the currently usable switches and their behavior, [here](#stable-commandline-arguments). 
 Followed by a description of the [current structure](#implemented-structure) and finish with a short summary of 
 the [current features](#implemented-features).   
 
-### Stable Commandline Arguments:
-
-    -f/--fetch:     Fetches all submissions and students from moodle and stores them 
-                    in a submission dir and in the provided database.
-    
-    --fetch-only:   Fetches all submissions and students from moodle and stores them 
-                    in a submission dir and in the provided database. 
-                    No test are executed afterwards. 
-    
-    -c/--check ["name1", "name2",...]:     
-                    Runs evaluation for all students given in the list of strings.
-                    Usage e.g. check -rc "Vorname Nachname". Can be used in combination with -r, -d
-    
-    -a/--all:       Runs evaluation for all students. By default only if not already run.
-    
-    -t [TEST [TEST ...]], --test [TEST [TEST ...]]
-                        Allows user to provide a student name and select a
-                        test to be run for their last submission.
-
-     -O, --output          Prints output from executed sumbissions.
-     
-     -V, --valgrind        Prints valgrind output from executed sumbissions.
-
-    -u/--unpassed-students:
-                    Runs evaluation only for students, that havn't passed. 
-                    Only efficient in combination with -r/--rerun.
-    
-    -r/--rerun:     Reruns functionallity e.g. rerun tests, remail students.
-                    By default the functionality only runs if not done previously. 
-    
-    -v/--verbose:   Prints detailed information for all used functionallity.
-    
-    -d/--details ["name1","name2",...]:
-                    Prints detailed information for submissions for the specified students.
-                    If more than one submission is found the user is asked.
-                    To only get a single student: use incombination with -c
-    
-    -s/--stats:     Prints stats for all students.
-    
-    -g/--generate:  Generates needed CSV files with the grade and passed information.  
-    
-    -m/--mail-to-all: 
-                    Sends a feedback mail to every student who hasn't revieved a feedback mail yet.
-                                  
-    -A/--Abtestat ["name1",...]: 
-                    Marks a student or a list of students as "abtestat done" if the student hasn't passed 
-                    all test the user will be asked.
-    
-    -R/--Revert ["name1",...]:
-                    Reverts marking a student or a list of students as "abtestat done". 
-                    The user will also be ask whether to unset passed test cases.
-
-    -D/--mark_manual ["name1",...]:
-                    Marks a submission and a student as passed if corrected manually.
-                    
-    --force         Resends emails after confirmation (does the same -r)
 
 ### Implemented Structure:
 The image below represents the currently implemented structure of the evaluation pipeline. 

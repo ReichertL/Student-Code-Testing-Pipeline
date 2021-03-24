@@ -75,7 +75,7 @@ For convenience, put a symbolic link in `/usr/bin` so that the pipline can be ca
 sudo ln -s /path/to/eval_pipeline/__main__.py /usr/bin/check
 ```
 
-## Usage
+## 2 Usage
 Thanks to `__init__.py` and `__main__.py`
 it can be called by executing:
 
@@ -89,7 +89,7 @@ It can then be called by:
 
 `check [args]`
 
-### Usefull Commands
+### 2.1 Usefull Commands
 
 During the semester:
 
@@ -112,19 +112,19 @@ For Abtestate:
 * `check -g`: Generates .csv files of students that have passed for the Prüfungsbüro.  
 
 
-## Current State of the Eval Pipeline
+## 3 Current State of the Eval Pipeline
 This section describes the current state of the eval pipeline. 
 We start with the currently usable switches and their behavior, [here](#stable-commandline-arguments). 
 Followed by a description of the [current structure](#implemented-structure) and finish with a short summary of 
 the [current features](#implemented-features).   
 
 
-### Implemented Structure:
+### 3.1 Implemented Structure:
 The image below represents the currently implemented structure of the evaluation pipeline. 
 ![current structure](Database_Schema.svg)
 
 
-### Implemented Features:  
+### 3.2 Implemented Features:  
   - Fetching submissions from moodle or a local dir 
   - Persist student data and submission information in a sqlite database 
   - Run a specific set of Testcases, consisting of input and output, for all submissions 
@@ -136,18 +136,17 @@ The image below represents the currently implemented structure of the evaluation
   - Guessing a students name based on input
   
 
-## Future Development
+## 4 Future Development
 In this section we'll describe planned future reworks and structural improvements for future work.
 
 
-### Planned Features
+### 4.1 Planned Features
 
-- separate operations with flag for students single, list, all and for submissions not_passed, latest, all 
-- rework format of -s/--stats 
+- Rework format of -s/--stats 
 
-### Planned Integration 
+### 4.2 Planned Integration 
 
-- pair-wise similarity analysis with j-plag
-- test coverage for eval pipeline
+- Better pair-wise similarity analysis with j-plag
+- Test coverage for eval pipeline in the Gitlab CI
 
 

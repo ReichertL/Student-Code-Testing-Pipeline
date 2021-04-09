@@ -67,7 +67,9 @@ The grading for the C project is as follows:
 
 Retrieve the course ID, submission ID and ID of the account that sould be used by the pipline for logging  into moodel.
 This can be done by opening the respective page in the web browser an copying the Id from the url. 
-With these values update the entries in `C Programmierprojekt/eval_pipline_rework/resources` the file named `config_submission_fetcher.config`. For testing purposes, the settings for an example course can be found in `.resources-example/`. To use it, rename the folder to `resources\`.
+With these values update the entries in `C Programmierprojekt/eval_pipline_rework/resources` the file named `config_submission_fetcher.config`. For testing purposes, the settings for an example course can be found in `.resources-example/`. To use it, rename the folder to `resources/`.
+As account for logging into Moodle and having multiple people receive responses from students, the following mailing list was created: "informatik.cprogrammierprojekt@lists.hu-berlin.de". The account used by the eval-pipline should/can use this email for logging in. 
+Changes to the mailinglist can be made via  `https://sympa.cms.hu-berlin.de/sympa/info/informatik.cprogrammierprojekt`. This might be necessary in case a new person in responsible for the pipline.
 
 ### 1.5 Shortcut
 For convenience, put a symbolic link in `/usr/bin` so that the pipline can be called by simply running `check [args]` in the terminal:

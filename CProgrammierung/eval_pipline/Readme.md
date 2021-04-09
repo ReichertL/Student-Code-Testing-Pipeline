@@ -76,7 +76,7 @@ The grading for the C project is as follows:
 
 Retrieve the course ID, submission ID and ID of the account that sould be used by the pipline for logging  into moodel.
 This can be done by opening the respective page in the web browser an copying the Id from the url. 
-With these values update the entries in `C Programmierprojekt/eval_pipline_rework/resources` the file named `config_submission_fetcher.config`.
+With these values update the entries in `C Programmierprojekt/eval_pipline_rework/resources` the file named `config_submission_fetcher.config`. For testing purposes, the settings for an example course can be found in `.resources-example/`. To use it, rename the folder to `resources\`.
 
 #### Shortcut
 For convenience, put a symbolic link in `/usr/bin` so that the pipline can be called by simply running `check [args]` in the terminal:

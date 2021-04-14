@@ -157,7 +157,7 @@ class ArgumentExtractor:
 
         self \
             .parser \
-            .add_argument('-h', '--html',
+            .add_argument('-H', '--html',
                           dest='html_performance_output',
                           action='store_true')
         self \

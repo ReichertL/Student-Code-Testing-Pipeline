@@ -70,13 +70,13 @@ class TestCaseExecutor:
             runs specified test cases
         """
         
-        pending_submissions = self.retrieve_pending_submissions(self.args)
+        pending_submissions = retrieve_pending_submissions(self.args)
         if pending_submissions in [None,[], [[]]]:
             logging.info("No new submissions to check")
             return
         for submission, student in pending_submissions:
             logging.info(f'Checking Submission of {student.name} from the {submission.submission_time}')
-            does_compile = self.compile_single_submission(self.args,self.configuration,submission)
+            does_compile = compile_single_submission(self.args,self.configuration,submission)
 
             run=Run.insert_run(does_compile)
           
@@ -114,7 +114,7 @@ class TestCaseExecutor:
               f'{student.name} submitted at '
               f'{submission.submission_time}')
         sys.stdout.flush()
-        #compiled= self.compile_single_submission(submission)
+        #compiled= compile_single_submission(submission)
 
 
         if True: 

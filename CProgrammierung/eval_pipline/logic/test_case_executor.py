@@ -374,7 +374,7 @@ class TestCaseExecutor:
     
 
     
-    def set_limits(limits):
+    def set_limits(self):
         """
         Sets runtime ressources depending on the possible
         final flag

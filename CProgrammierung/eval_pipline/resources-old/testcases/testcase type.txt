@@ -1,3 +1,0 @@
-"GOOD"
-"BAD" 
-"FAIL_OR_CORRECT"

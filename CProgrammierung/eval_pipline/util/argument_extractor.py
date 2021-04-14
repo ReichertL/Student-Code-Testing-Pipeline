@@ -114,14 +114,7 @@ class ArgumentExtractor:
                           type=str,
                           default=[],
                           help='Print details for single student. Usage: check -d "Firstnam Lastname"')
-        self \
-            .parser \
-            .add_argument('-M', '--mail',
-                          nargs='*',
-                          dest='mailto',
-                          type=str,
-                          default=[],
-                          help='Send Mail to single or a list of students. Usage check -M "Firstname Lastname"')
+
 
         self \
             .parser.add_argument('-m', '--mail-to-all',
@@ -130,13 +123,23 @@ class ArgumentExtractor:
                                  help='Send mail reports to everyone '
                                       'who has not received a report'
                                       ' for the current version yet')
+
         self \
-            .parser.add_argument('--mail-manual',
+            .parser \
+            .add_argument('-M', '--mail',
+                          nargs='*',
+                          dest='mailto',
+                          type=str,
+                          default=[],
+                          help='Send Mail to single or a list of students. Usage check -M "Firstname Lastname"')
+        self \
+            .parser.add_argument('--mailmanual',
                                  dest='mail_manual',
                                  action='store_true',
                                  help='Send mail reports to everyone '
                                       'who has not received a report'
                                       ' for the current version yet. Requires manual verification.')
+
 
 
         self \
@@ -186,17 +189,13 @@ class ArgumentExtractor:
                           help='If used together with '
                                '--details, set exit status'
                                ' to 0 iff displayed abgabe passes')
-        self \
-            .parser \
-            .add_argument('--debug',
-                          action='store_true',
-                          help='Enables sending mail only to '
-                               '"C Programmierprojekt Team" moodle account')
-        self \
-            .parser \
-            .add_argument('--force',
-                          action='store_true',
-                          help='Gorces actions like resending emails')
+#        self \
+#            .parser \
+#            .add_argument('--debug',
+#                          action='store_true',
+#                          help='Enables sending mail only to '
+#                               '"C Programmierprojekt Team" moodle account')
+        
         self \
             .parser \
             .add_argument('-g', '--generate',

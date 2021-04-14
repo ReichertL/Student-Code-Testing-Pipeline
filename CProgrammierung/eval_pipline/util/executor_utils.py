@@ -4,7 +4,7 @@ This module manages all test case execution and evaluation
 import os
 import tempfile
 import logging
-
+import subprocess
 
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"

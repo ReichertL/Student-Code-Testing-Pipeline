@@ -3,7 +3,10 @@ gcc.return
 gcc.stderr
 /venv/
 resources/*
-resources/moodelsessions
+*/moodelsessions
+*/mail_log
+*.db
+*/submissions/
 /util/constants.py
 /.idea/
 test.*
@@ -11,3 +14,5 @@ test.*
 *.swp
 *.pyc
 *.db
+moodle_success_mailed_dump.csv
+*.csv

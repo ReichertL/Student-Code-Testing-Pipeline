@@ -11,7 +11,6 @@ import tempfile
 import time
 import logging
 
-from logic.performance_evaluator import PerformanceEvaluator
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn, Passed, Failed
 from util.config_reader import ConfigReader
@@ -19,8 +18,12 @@ from util.gcc import hybrid_gcc, native_gcc
 from util.named_pipe_open import NamedPipeOpen
 from util.result_parser import ResultParser
 from util.select_option import select_option_interactive
-from logic.result_generator import ResultGenerator
+from util.executor_utils import unlink_safe,unlink_as_cpr,getmtime,sort_first_arg_and_diff,sudokill
 
+from logic.performance_evaluator import PerformanceEvaluator
+from logic.result_generator import ResultGenerator
+from logic.load_tests import load_tests
+from logic.retrieve_and_compile import retrieve_pending_submissions, compile_single_submission
 
 
 from database.testcases import Testcase
@@ -36,63 +39,6 @@ FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 
-
-def unlink_safe(path):
-    """
-    Removes a file
-    :param path: file to remove
-    """
-    try:
-        os.unlink(path)
-    except FileNotFoundError:
-        pass
-
-
-def unlink_as_cpr(path, sudo):
-    """
-    Removes a file as sudo
-    :param path: the file to remove
-    :param sudo: call params as sudo
-    """
-    if os.path.exists(path):
-        subprocess.call(sudo + ['rm', path])
-
-
-def getmtime(path):
-    """
-    returns the mtime for a file
-    :param path: the configuration to the file
-    :return: the mtime
-    """
-    return int(os.path.getmtime(path))
-
-
-def sort_first_arg_and_diff(f1, f2):
-    """
-    Sorts and compares two files
-    :param f1: file 1
-    :param f2: file 2
-    :return: whether the content is equal or not
-    """
-    f1_sorted = tempfile.mktemp()
-    f2_sorted = tempfile.mktemp()
-    subprocess.run(['sort', f1, '-o', f1_sorted])
-    subprocess.run(['sort', f2, '-o', f2_sorted])
-    res = (subprocess.run(['diff', '-q', f1_sorted, f2_sorted],
-                          stdout=subprocess.DEVNULL,
-                          stderr=subprocess.DEVNULL).returncode == 0)
-    unlink_safe(f1_sorted)
-    unlink_safe(f2_sorted)
-    return res
-
-
-def sudokill(process):
-    """
-    Calls kill on a process as sudo
-    :param process: the process to kill
-    """
-    subprocess.call(['sudo', 'kill', str(process.pid)],
-                    stderr=subprocess.DEVNULL)
 
 
 class TestCaseExecutor:
@@ -122,20 +68,20 @@ class TestCaseExecutor:
 
         unshare_path = configuration["UNSHARE_PATH"]
         self.unshare = [unshare_path, '-r', '-n']
+        load_tests(self.configuration) 
 
     def run(self):
         """
             runs specified test cases
         """
-        self.load_tests()  #TODO: Mit flag versehen, so dass testcases nur eingelesen werden wenn es manuell gefordert wird
-
-        pending_submissions = self.retrieve_pending_submissions()
+        
+        pending_submissions = self.retrieve_pending_submissions(self.args)
         if pending_submissions in [None,[], [[]]]:
             logging.info("No new submissions to check")
             return
         for submission, student in pending_submissions:
             logging.info(f'Checking Submission of {student.name} from the {submission.submission_time}')
-            does_compile = self.compile_single_submission(submission)
+            does_compile = self.compile_single_submission(self.args,self.configuration,submission)
 
             run=Run.insert_run(does_compile)
           
@@ -148,127 +94,7 @@ class TestCaseExecutor:
                         f'{student.name} submitted at '
                         f'{submission.submission_time} did not compile.')
             
-    def retrieve_pending_submissions(self):
-        """Extracts submissions that should be evaluated
-        based on the commandline arguments
-        :return: list of submissions
-        """
-        submissions = []
 
-        if self.args.check and self.args.rerun:
-            for name in self.args.check:
-                submissions_student=Submission.get_last_for_name(name)
-                if submissions_student!=None: 
-                    submissions.append(submissions_student)
-                else:
-                    students=Student.get_student_by_name(name)
-                    student=select_option_interactive(students)
-                    logging.debug(student)
-                    submissions_student=Submission.get_last_for_name(student.name)
-                    if submissions_student!=None: 
-                        submissions.append(submissions_student)
-  
-        elif self.args.check:
-            for name in self.args.check:
-                submissions_student=Submission.get_not_checked_for_name(name)
-                submissions.append(submissions_student)
-            
-        if self.args.all:
-            submissions=Submission.get_not_checked()   
-
-        if self.args.unpassed:
-            students = Student.get_students_not_passed()
-            logging.debug(students)
-            for student in students:
-                submissions_students=Submission.get_all_for_name(student.name)
-                submissions.extend(submissions_students)
-        return submissions
-
-
-    def compile_single_submission(self, submission, strict=True):
-        path=submission.submission_path
-        """Tries to compile a c file at configuration
-        @:param configuration string describing
-        the configuration of the configuration c file
-        @:param strict
-                boolean describing whether
-                -Werror' should be used as gcc flag
-        @:return Compilation object
-                (gcc_return_code, commandline call , gcc_stderr)
-        """
-        careless_flag=False
-
-        gcc_args = [self.configuration["GCC_PATH"]] + \
-                   self.configuration["CFLAGS"]
-
-        if self.args.final:
-            gcc_args = [self.configuration["GCC_PATH"]] + \
-                       self.configuration["CFLAGS_CARELESS"]
-            careless_flag=True
-
-        if not strict:
-            gcc_args.remove('-Werror')
-        submission_executable_path = '/tmp/loesung'
-        commandline, return_code, gcc_stderr = hybrid_gcc(  
-            gcc_args,
-            path,
-            submission_executable_path,
-            self.configuration['DOCKER_IMAGE_GCC'],
-            self.configuration['DOCKER_CONTAINER_GCC'],
-            self.configuration['DOCKER_SHARED_DIRECTORY'])
-        return Run(submission.id,commandline, careless_flag, return_code, gcc_stderr)
-
-    def load_tests(self):
-        """
-        Loads the in the config file specified testcases for good bad and extra
-        :return: dictionary of list test_case
-        test_case_type -> [test_cases]
-        """
-        test_cases = {}
-        extensions = {"BAD": self.configuration["TESTS_BAD_EXTENSION"],
-                      "GOOD": self.configuration["TESTS_GOOD_EXTENSION"],
-                      "EXTRA": self.configuration["TESTS_EXTRA_EXTENSION"]}
-        test_case_id = 0
-        json_descriptions = {}
-
-        for key in extensions:
-
-            test_case_input = []
-            path_prefix = os.path.join(resolve_absolute_path(self.configuration["TESTS_BASE_DIR"]),
-                                       extensions[key])
-            for root, _, files in os.walk(
-                    path_prefix
-                    ,
-                    topdown=False):
-                for name in files:
-
-                    if name.endswith(".stdin"):
-                        short_id = name.replace(".stdin", "")
-                        path=os.path.join(root, name).replace(".stdin", "")
-                        #logging.debug(short_id)
-
-                        json_file=(root+"/"+name).replace(".stdin", ".json")
-                        if(os.path.exists(json_file)):
-                            with open(json_file) \
-                                    as description_file:
-                                json_rep=json.load(description_file)
-                                description = json_rep["short_desc"]
-                                hint = json_rep["hint"]
-                                valgrind=json_rep["valgrind"]
-                                #logging.debug(root)
-                                type=json_rep["type"]
-
-                                Testcase.create_or_update(path, short_id, description, hint, type, valgrind=valgrind)
-                                #logging.debug(testcase)
-                        else: 
-                            description= short_id
-                            hint = f"bei {short_id}"
-                            type="UNSPEZIFIED"
-                            if extensions["GOOD"] in root: type="GOOD"
-                            elif extensions["BAD"] in root: type="BAD"
-                            elif extensions["EXTRA"] in root: type="EXTRA" #TODO:support for other types here?
-                            #logging.debug(root)
-                            Testcase.create_or_update(path, short_id, description, hint, type)
 
     def check(self,  student,submission, run, force_performance=False):
         """
@@ -543,7 +369,7 @@ class TestCaseExecutor:
             unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)
 
         return result, valgrind_output
-
+    
     def get_limits_time(self):
         if not self.args.final:
             return [self.configuration["RLIMIT_DATA"],self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]
@@ -552,7 +378,7 @@ class TestCaseExecutor:
     
 
     
-    def set_limits(self):
+    def set_limits(limits):
         """
         Sets runtime ressources depending on the possible
         final flag
@@ -562,5 +388,4 @@ class TestCaseExecutor:
         resource.setrlimit(resource.RLIMIT_DATA,2 * (limits[0],))
         resource.setrlimit(resource.RLIMIT_STACK,2 * (limits[1],))
         resource.setrlimit(resource.RLIMIT_CPU,2 * (limits[2],))
-
 

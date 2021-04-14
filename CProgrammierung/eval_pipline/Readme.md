@@ -121,7 +121,8 @@ For Abtestate:
 
 ### 2.2 Automation
 
-To automate the
+To automate the the checking of student code, create a cronjob for the following command:
+`check -favm >> ~/log_cpp 2>&1`
 
 ## 3 Current State of the Eval Pipeline
 This section describes the current state of the eval pipeline. 

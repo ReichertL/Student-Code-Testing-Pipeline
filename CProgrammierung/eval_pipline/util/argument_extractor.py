@@ -162,7 +162,7 @@ class ArgumentExtractor:
                           action='store_true')
         self \
             .parser \
-            .add_argument('-f', '--final',
+            .add_argument('-F', '--final',
                           action='store_true')
         self \
             .parser \

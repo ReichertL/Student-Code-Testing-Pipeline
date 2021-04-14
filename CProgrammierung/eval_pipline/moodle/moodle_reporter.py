@@ -45,7 +45,7 @@ class MoodleReporter:
         self.moodle_session = None
 
     @staticmethod
-    #def get_fail_information_snippet(failed_description, mail_templates):
+    def get_fail_information_snippet(failed_description, mail_templates):
         """
         Generates an email part which gives information about
         the failed properties of the submission in HTML

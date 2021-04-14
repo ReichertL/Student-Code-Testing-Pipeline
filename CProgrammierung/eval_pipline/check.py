@@ -10,9 +10,9 @@ import traceback
 import logging
 from signal import SIGABRT, SIGTERM, SIGSEGV, SIGILL, signal, SIGINT
 
-from moodel.database_integrator import DatabaseIntegrator
-from moodel.moodle_reporter import MoodleReporter
-from moodel.moodle_submission_fetcher import MoodleSubmissionFetcher
+from moodle.database_integrator import DatabaseIntegrator
+from moodle.moodle_reporter import MoodleReporter
+from moodle.moodle_submission_fetcher import MoodleSubmissionFetcher
 from logic.performance_evaluator import PerformanceEvaluator
 from logic.result_generator import ResultGenerator
 from logic.test_case_executor import TestCaseExecutor

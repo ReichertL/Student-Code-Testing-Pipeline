@@ -16,7 +16,7 @@ import logging
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn
 from util.config_reader import ConfigReader
-from moodel.moodle_session import MoodleSession
+from moodle.moodle_session import MoodleSession
 
 from database.students import Student
 

@@ -8,11 +8,11 @@ import sys
 from datetime import datetime
 import logging
 
-from moodel.moodle_submission_fetcher import MoodleSubmissionFetcher
+from moodle.moodle_submission_fetcher import MoodleSubmissionFetcher
 from logic.result_generator import ResultGenerator
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
-from moodel.moodle_session import MoodleSession
+from moodle.moodle_session import MoodleSession
 
 
 from database.submissions import Submission

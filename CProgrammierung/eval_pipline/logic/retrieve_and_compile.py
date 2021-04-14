@@ -52,7 +52,7 @@ def retrieve_pending_submissions(args):
         return submissions
 
 
-def compile_single_submission(configuration,args, submission, strict=True):
+def compile_single_submission(args,configuration, submission, strict=True):
         path=submission.submission_path
         """Tries to compile a c file at configuration
         @:param configuration string describing

@@ -131,6 +131,15 @@ class ArgumentExtractor:
                                       'who has not received a report'
                                       ' for the current version yet')
         self \
+            .parser.add_argument('--mail-manual',
+                                 dest='mail_manual',
+                                 action='store_true',
+                                 help='Send mail reports to everyone '
+                                      'who has not received a report'
+                                      ' for the current version yet. Requires manual verification.')
+
+
+        self \
             .parser. \
             add_argument('-B', '--best',
                          action='store_true',

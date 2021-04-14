@@ -190,73 +190,88 @@ class MoodleReporter:
             ResultGenerator.print_stats(run,f)
         with open(text_path, 'w') as f:
             f.write(text)
-
-        editor = ""
-        try:
-            editor = self.configuration["EDITOR_PATH"]
-        except KeyError:
-            editor = ""
-
-        try:
-            if len(os.environ["EDITOR"]) > 0:
-                editor = os.environ["EDITOR"]
-        except KeyError:
-            pass
-        if len(editor) == 0:
-            print("No editor specified")
-        while True:
-            subprocess.call(f'/bin/cat "{text_path}" "{stats_path}" | less -R',
-                            shell=True)
-            print(
-                f'To {student.name}  '
-                'send this mail? (y/n/m/e/v/o/q) '
-                'y=send; '
-                'n=do not send; '
-                'm=mark as mailed anyways'
-                'e=edit mail; '
-                'v=view source code; '
-                'o = open conversation in browser; '
-                'q = quit ',
-                end='', flush=True)
-
-            answer = sys.stdin.readline()[0]
-            if answer == 'e':
-                if not len(editor) == 0:
-                    subprocess.call([editor, text_path])
-            elif answer == 'v':
-                if not len(editor) == 0:
-                    subprocess.call([editor, submission.path])
-            elif answer == 'o':
-                self.moodle_session.open_conversation_in_ff(student.moodle_id)
-            elif answer == 'm':
-                success = True
-                break
-            elif answer == 'q':
-                os.unlink(text_path)
-                os.unlink(stats_path)
-                sys.exit(0)
-            elif answer == 'y':
-                with open(text_path) as f:
-                    msg = f.read()
+            
+        
+        if not self.args.mail_manual:
+            with open(text_path) as f:
+                msg = f.read()
                 success = self.moodle_session. \
-                    send_instant_message(student.moodle_id, msg)
+                        send_instant_message(student.moodle_id, msg)
                 if success:
-                    if grade is None:
-                        gr = input('set grade in moodle? (0/1/2) ')
-                        if gr in ('0', '1', '2'):
-                            grade = int(gr)
                     if grade is not None:
                         self.moodle_session \
-                            .update_grading(student.moodle_id, grade)
-                        print('INFO: updated moodle grade to {}'.format(grade))
+                                .update_grading(student.moodle_id, grade)
                         student.grade=grade
                         dbm.session.commit()
 
-                break
-            elif answer == 'n':
-                break
-            else:
-                continue
+
+        else:
+            editor = ""
+            try:
+                editor = self.configuration["EDITOR_PATH"]
+            except KeyError:
+                editor = ""
+
+            try:
+                if len(os.environ["EDITOR"]) > 0:
+                    editor = os.environ["EDITOR"]
+            except KeyError:
+                pass
+            if len(editor) == 0:
+                print("No editor specified")
+            while True:
+                subprocess.call(f'/bin/cat "{text_path}" "{stats_path}" | less -R',
+                                shell=True)
+                print(
+                    f'To {student.name}  '
+                    'send this mail? (y/n/m/e/v/o/q) '
+                    'y=send; '
+                    'n=do not send; '
+                    'm=mark as mailed anyways'
+                    'e=edit mail; '
+                    'v=view source code; '
+                    'o = open conversation in browser; '
+                    'q = quit ',
+                    end='', flush=True)
+
+                answer = sys.stdin.readline()[0]
+                if answer == 'e':
+                    if not len(editor) == 0:
+                        subprocess.call([editor, text_path])
+                elif answer == 'v':
+                    if not len(editor) == 0:
+                        subprocess.call([editor, submission.path])
+                elif answer == 'o':
+                    self.moodle_session.open_conversation_in_ff(student.moodle_id)
+                elif answer == 'm':
+                    success = True
+                    break
+                elif answer == 'q':
+                    os.unlink(text_path)
+                    os.unlink(stats_path)
+                    sys.exit(0)
+                elif answer == 'y':
+                    with open(text_path) as f:
+                        msg = f.read()
+                    success = self.moodle_session. \
+                        send_instant_message(student.moodle_id, msg)
+                    if success:
+                        if grade is None:
+                            gr = input('set grade in moodle? (0/1/2) ')
+                            if gr in ('0', '1', '2'):
+                                grade = int(gr)
+                        if grade is not None:
+                            self.moodle_session \
+                                .update_grading(student.moodle_id, grade)
+                            print('INFO: updated moodle grade to {}'.format(grade))
+                            student.grade=grade
+                            dbm.session.commit()
+
+                    break
+                elif answer == 'n':
+                    break
+                else:
+                    continue
 
         os.unlink(text_path)
         os.unlink(stats_path)

@@ -125,7 +125,7 @@ class ArgumentExtractor:
                           default=[],
                           help='Send Mail to single or a list of students. Usage check -M "Firstname Lastname"')
         self \
-            .parser.add_argument('--mailmanual',
+            .parser.add_argument('-U',
                                  dest='mail_manual',
                                  action='store_true',
                                  help='Send mail reports to everyone '

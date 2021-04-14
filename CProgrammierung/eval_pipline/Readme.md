@@ -65,7 +65,7 @@ The grading for the C project is as follows:
    - 1=submission passed
    - 2= abtestat passed
 
-Retrieve the course ID, submission ID and ID of the account that sould be used by the pipline for logging  into moodel.
+Retrieve the course ID, submission ID and ID of the account that sould be used by the pipline for logging  into Moodle.
 This can be done by opening the respective page in the web browser an copying the Id from the url. 
 With these values update the entries in `C Programmierprojekt/eval_pipline_rework/resources` the file named `config_submission_fetcher.config`. For testing purposes, the settings for an example course can be found in `.resources-example/`. To use it, rename the folder to `resources/`.
 As account for logging into Moodle and having multiple people receive responses from students, the following mailing list was created: "informatik.cprogrammierprojekt@lists.hu-berlin.de". The account used by the eval-pipline should/can use this email for logging in. 
@@ -76,6 +76,8 @@ For convenience, put a symbolic link in `/usr/bin` so that the pipline can be ca
 ```
 sudo ln -s /path/to/eval_pipeline/__main__.py /usr/bin/check
 ```
+
+
 
 ## 2 Usage
 Thanks to `__init__.py` and `__main__.py`
@@ -97,7 +99,10 @@ During the semester:
 
 * `check -f` : Fetches all (new) submission but does not execute them
 * `check -fa`: Fetches new submissions and checks them for correctness (will not notify student)
-* `check -m` : Sends mail to all students that have not yet received a mail for their last submission (semi-automatic, requires user interaction)
+
+* `check -favm` : Fetches new submissions, checks them and automatically sends mail to all students that have not yet received a mail for their last submission (semi-automatic, requires user interaction). Option "v" gives verbose Output.
+* `check -rUM "Firstname Lastname"`: Send mail to named student and review mail before sending.
+
 * `check -c "Firstname Lastname"` : Will run a specific submission (which is selectable) for a specific student. If student name does not match completly, a student will be suggested.
 * `check -t "Firstname Lastname"` : Run a single (selectable) testcase for the named student.
 * `check -tOV "Firstname Lastname"` : Run single testcase for student but also print output and Valgrind result. 
@@ -113,6 +118,10 @@ For Abtestate:
 * `check -R "Firstname Lastname"` : Revert the desicion on an Abtestat. Allows to remove the passed status of a student.
 * `check -g`: Generates .csv files of students that have passed for the Prüfungsbüro.  
 
+
+### 2.2 Automation
+
+To automate the
 
 ## 3 Current State of the Eval Pipeline
 This section describes the current state of the eval pipeline. 

@@ -173,7 +173,7 @@ class ArgumentExtractor:
                           )
         self \
             .parser \
-            .add_argument('-p', '--playground',
+            .add_argument('-P', '--playground',
                           dest='playground',
                           action='store_true',
                           help='Playground')

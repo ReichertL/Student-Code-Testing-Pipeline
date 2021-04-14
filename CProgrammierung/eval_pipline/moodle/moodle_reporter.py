@@ -45,7 +45,7 @@ class MoodleReporter:
         self.moodle_session = None
 
     @staticmethod
-    def get_fail_information_snippet(failed_description, mail_templates):
+    #def get_fail_information_snippet(failed_description, mail_templates):
         """
         Generates an email part which gives information about
         the failed properties of the submission in HTML
@@ -317,7 +317,7 @@ class MoodleReporter:
         
         for student,submission in sorted_to_mail:
                 
-            if submission.student_notified==True and (self.args.rerun or self.args.force):
+            if submission.student_notified==True and self.args.rerun:
                 print(f"Already send a mail to {student.name} "
                         f"at {submission.notification_time}")
                 print('Send anyway? (y/n) ', end='', flush=True)

@@ -117,14 +117,6 @@ class ArgumentExtractor:
 
 
         self \
-            .parser.add_argument('-m', '--mail-to-all',
-                                 dest='mail_to_all',
-                                 action='store_true',
-                                 help='Send mail reports to everyone '
-                                      'who has not received a report'
-                                      ' for the current version yet')
-
-        self \
             .parser \
             .add_argument('-M', '--mail',
                           nargs='*',
@@ -141,10 +133,18 @@ class ArgumentExtractor:
                                       ' for the current version yet. Requires manual verification.')
 
 
+        self \
+            .parser.add_argument('-m', '--mailtoall',
+                                 dest='mail_to_all',
+                                 action='store_true',
+                                 help='Send mail reports to everyone '
+                                      'who has not received a report'
+                                      ' for the current version yet')
+
 
         self \
             .parser. \
-            add_argument('-B', '--best',
+            add_argument('-b', '--best',
                          action='store_true',
                          help='Combined with -d:'
                               ' shows best submission'
@@ -157,12 +157,12 @@ class ArgumentExtractor:
 
         self \
             .parser \
-            .add_argument('-H', '--html',
+            .add_argument('-h', '--html',
                           dest='html_performance_output',
                           action='store_true')
         self \
             .parser \
-            .add_argument('-F', '--final',
+            .add_argument('-f', '--final',
                           action='store_true')
         self \
             .parser \
@@ -173,7 +173,7 @@ class ArgumentExtractor:
                           )
         self \
             .parser \
-            .add_argument('-P', '--playground',
+            .add_argument('-p', '--playground',
                           dest='playground',
                           action='store_true',
                           help='Playground')

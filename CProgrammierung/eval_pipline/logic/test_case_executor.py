@@ -7,6 +7,7 @@ import resource
 import subprocess
 import sys
 import logging
+import time
 
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn, Passed, Failed

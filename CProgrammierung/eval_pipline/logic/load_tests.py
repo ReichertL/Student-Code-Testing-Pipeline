@@ -1,27 +1,16 @@
+"""
+This module manages all test case execution and evaluation
+"""
+import json
 import os
-import traceback
 import logging
-from signal import SIGABRT, SIGTERM, SIGSEGV, SIGILL, signal, SIGINT
 
-from moodel.database_integrator import DatabaseIntegrator
-from moodel.moodle_reporter import MoodleReporter
-from moodel.moodle_submission_fetcher import MoodleSubmissionFetcher
-from logic.performance_evaluator import PerformanceEvaluator
-from logic.result_generator import ResultGenerator
-from logic.test_case_executor import TestCaseExecutor
-from logic.abtestat_functions import Abtestat_Functions
-from util.argument_extractor import ArgumentExtractor
-from util.lockfile import LockFile
-from util.playground import Playground
-from database.database_manager import DatabaseManager 
-from logic.mark_manual import marke_passed_manually
-from logic.execute_single import execute_singel_testcase
+from util.absolute_path_resolver import resolve_absolute_path
+from database.testcases import Testcase
 
-LOCK_FILE_PATH = '/run/lock/check.lock'
+
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)
-
-
 
 
 

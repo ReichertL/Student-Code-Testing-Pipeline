@@ -53,10 +53,10 @@ def load_tests(configuration):
                                  if extensions["GOOD"] in root: type="GOOD"
                                  elif extensions["BAD"] in root: type="BAD" 
                             rlimit_json=json_rep["rlimit"]
-                            if "MB" in rlimit:  
+                            if "MB" in rlimit_json:  
                                 rlimit=int(float(rlimit_json[:-2])*1000000)
                         
-                            elif "M" in rlimit: 
+                            elif "M" in rlimit_json: 
                                 rlimit=int(float(rlimit_json[:-1])*1000000)
                             else:
                                 logging.error(f"Unknown unit in file {name} for rlimit. Using 1MB.")

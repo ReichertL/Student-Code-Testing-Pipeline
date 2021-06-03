@@ -278,6 +278,7 @@ class TestCaseExecutor:
             args = ['./loesung']
             global limits
             limits=self.get_limits(testcase)
+            print(f"limits {limits}")
             p = subprocess.Popen(
                 self.sudo
                 + self.unshare
@@ -308,8 +309,6 @@ class TestCaseExecutor:
             if self.args.verbose and result.timeout:
                 print('-> TIMEOUT')
             result.tictoc = duration  
-            limits=self.get_limits_time(testcase)
-            print(f"limits {limits}")
             result.rlimit_data=limits[0]
             result.rlimit_stack=limits[1]
             result.rlimit_cpu=limits[2]

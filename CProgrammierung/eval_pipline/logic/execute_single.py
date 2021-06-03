@@ -39,6 +39,7 @@ def execute_singel_testcase(args):
         testcases=Testcase.get_all()
         print(f"\nUsing Submission from the {submission.submission_time}. Please select Testcase!")
         testcase=select_option_interactive(testcases)
+        print(f"\nTestcase {testcase.short_id} selected")
 
         result, valgrind = None,None
         executor = TestCaseExecutor(args)

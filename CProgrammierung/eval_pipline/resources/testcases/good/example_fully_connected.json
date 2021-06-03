@@ -1,0 +1,7 @@
+{
+  "short_desc": "example_fully_connected",
+  "hint": "bei example_fully_connected",
+  "valgrind": true,
+  "rlimit": "1M",
+  "returncode": 0
+}

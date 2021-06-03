@@ -1,0 +1,7 @@
+{
+  "short_desc": "self_edges",
+  "hint": "wenn ein Knoten eine Kante zu sich selber besitzt",
+  "valgrind": true,
+  "rlimit": "10M",
+  "returncode": 1
+}

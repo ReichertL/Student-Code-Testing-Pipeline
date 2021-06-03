@@ -1,0 +1,7 @@
+{
+  "short_desc": "mark_overflow_64bit",
+  "hint": "wenn eine Markierung der Farbe 2^64 auftaucht",
+  "valgrind": true,
+  "rlimit": "10M",
+  "returncode": 1
+}

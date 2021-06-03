@@ -1,0 +1,7 @@
+{
+  "short_desc": "multiple_edges",
+  "hint": "wenn zwischen zwei Knoten mehrere Kanten existieren.",
+  "valgrind": true,
+  "rlimit": "10M",
+  "returncode": 1
+}

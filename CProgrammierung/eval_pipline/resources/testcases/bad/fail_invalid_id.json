@@ -1,0 +1,7 @@
+{
+  "short_desc": "invalid_id",
+  "hint": "wenn die ID eines Knoten ungültige Zeichen beinhaltet.",
+  "valgrind": true,
+  "rlimit": "10M",
+  "returncode": 1
+}

@@ -1,0 +1,7 @@
+{
+  "short_desc": "empty_graph",
+  "hint": "wenn der Graph keine Knoten beinhaltet ist",
+  "valgrind": true,
+  "rlimit": "10M",
+  "returncode": 1
+}

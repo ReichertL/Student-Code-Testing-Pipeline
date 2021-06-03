@@ -1,0 +1,11 @@
+o6:r0,rw,rc
+r0:rw,rc-415
+j7:r0,rw,o6,rc
+rc:rw-895
+b5:rc,r0,j7,rw,f7
+3i:b5,4i,j7,rw,rc,f7,o6
+4i:f7,rw,rc,b5,o6,r0
+o6:rc,o6,r0,j7
+0a:f7,o6,b5,3i,4i,r0,j7,rw
+A:3i
+I:58

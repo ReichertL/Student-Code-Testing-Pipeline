@@ -1,0 +1,7 @@
+{
+  "short_desc": "example_random_large",
+  "hint": "bei example_random_large",
+  "valgrind": true,
+  "rlimit": "1M",
+  "returncode": 0
+}

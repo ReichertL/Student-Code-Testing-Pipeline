@@ -1,0 +1,7 @@
+{
+  "short_desc": "example_zero_steps",
+  "hint": "bei example_zero_steps",
+  "valgrind": true,
+  "rlimit": "1M",
+  "returncode": 0
+}

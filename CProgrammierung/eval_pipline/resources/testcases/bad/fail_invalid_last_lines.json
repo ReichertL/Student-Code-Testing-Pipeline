@@ -1,0 +1,7 @@
+{
+  "short_desc": "invalid_last_lines",
+  "hint": "wenn das Format der letzen beiden Zeilen nicht valide ist.",
+  "valgrind": true,
+  "rlimit": "10M",
+  "returncode": 1
+}

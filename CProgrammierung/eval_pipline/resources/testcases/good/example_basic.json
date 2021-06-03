@@ -1,0 +1,7 @@
+{
+  "short_desc": "example_basic",
+  "hint": "bei example_basic",
+  "valgrind": true,
+  "rlimit": "1M",
+  "returncode": 0
+}

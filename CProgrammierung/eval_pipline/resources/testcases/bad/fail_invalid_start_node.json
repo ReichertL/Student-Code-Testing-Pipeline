@@ -1,0 +1,7 @@
+{
+  "short_desc": "invalid_start_node",
+  "hint": "wenn der Startknoten nicht im Graphen enthalten ist.",
+  "valgrind": true,
+  "rlimit": "10M",
+  "returncode": 1
+}

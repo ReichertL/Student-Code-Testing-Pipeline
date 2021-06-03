@@ -1,0 +1,7 @@
+{
+  "short_desc": "empty_line",
+  "hint": "wenn eine leere Zeile in der Eingabe vorkommt",
+  "valgrind": true,
+  "rlimit": "10M",
+  "returncode": 1
+}

@@ -1,0 +1,7 @@
+{
+  "short_desc": "example_line_with_mark",
+  "hint": "bei example_line_with_mark",
+  "valgrind": true,
+  "rlimit": "1M",
+  "returncode": 0
+}

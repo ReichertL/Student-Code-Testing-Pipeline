@@ -38,12 +38,13 @@ class Testcase(Base):
 
     def __repr__(self):
         return ("(Testcase: " + str(self.id) + ","+
-                                str(self.path) + "," + 
                                 str(self.short_id) + ","+ 
                                 str(self.description) + "," +
                                 str(self.hint) + ","+
                                 str(self.rlimit) + ","+
-                                str(self.type)+")")
+                                str(self.type)+ ","+
+                                str(self.path) +  
+                                ")")
     
 
     def update( self,path, short_id, description, hint, type, valgrind_needed, rlimit):

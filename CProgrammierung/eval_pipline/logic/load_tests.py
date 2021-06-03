@@ -61,7 +61,7 @@ def load_tests(configuration):
                             else:
                                 logging.error(f"Unknown unit in file {name} for rlimit. Using 1MB.")
                                 rlimit=1000000
-                            print(f"limit {rlimit}( {rlimit/1000000}M), json file said {rlimit_json}")
+                            #print(f"limit {rlimit}( {rlimit/1000000}M), json file said {rlimit_json}")
                             Testcase.create_or_update(path, short_id, description, hint, type, valgrind=valgrind,rlimit=rlimit)
                             #logging.debug(testcase)
                     else: 

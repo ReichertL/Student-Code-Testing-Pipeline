@@ -8,7 +8,7 @@ def select_option_interactive(options):
      answer_accepted = False
      answer = 0
      while not answer_accepted:       
-        answer = sys.stdin.readline()[0]
+        answer = sys.stdin.readline()[:-1]
         try:
             answer = int(answer) - 1
             if len(options) > answer >= 0:

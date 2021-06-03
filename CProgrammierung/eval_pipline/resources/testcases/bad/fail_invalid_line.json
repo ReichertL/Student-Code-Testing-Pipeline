@@ -1,7 +1,0 @@
-{
-  "short_desc": "fail_invalid_line",
-  "hint": "wenn in einer Zeile nur die Knoten ID steht und sonst nichts",
-  "valgrind": true,
-  "rlimit": "10M",
-  "returncode": 1
-}

@@ -1,7 +1,0 @@
-{
-  "short_desc": "empty_input",
-  "hint": "wenn die Eingabe leer ist",
-  "valgrind": true,
-  "rlimit": "10M",
-  "returncode": 1
-}

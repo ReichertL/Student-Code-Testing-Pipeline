@@ -1,7 +1,0 @@
-{
-  "short_desc": "example_many_neighbours",
-  "hint": "bei example_many_neighbours",
-  "valgrind": true,
-  "rlimit": "1M",
-  "returncode": 0
-}

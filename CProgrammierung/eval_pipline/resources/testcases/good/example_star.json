@@ -1,7 +1,0 @@
-{
-  "short_desc": "example_star",
-  "hint": "bei example_star",
-  "valgrind": true,
-  "rlimit": "1M",
-  "returncode": 0
-}

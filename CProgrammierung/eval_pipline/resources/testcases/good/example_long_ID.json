@@ -1,7 +1,0 @@
-{
-  "short_desc": "example_long_ID",
-  "hint": "bei example_long_ID",
-  "valgrind": true,
-  "rlimit": "1M",
-  "returncode": 0
-}

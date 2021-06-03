@@ -1,7 +1,0 @@
-{
-  "short_desc": "nonunique_IDs",
-  "hint": "wenn es mehrere Knoten mit gleicher ID gibt.",
-  "valgrind": true,
-  "rlimit": "10M",
-  "returncode": 1
-}

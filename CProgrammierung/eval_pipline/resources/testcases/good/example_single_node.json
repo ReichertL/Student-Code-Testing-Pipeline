@@ -1,7 +1,0 @@
-{
-  "short_desc": "example_single_node",
-  "hint": "bei example_single_node",
-  "valgrind": true,
-  "rlimit": "1M",
-  "returncode": 0
-}

@@ -1,7 +1,0 @@
-{
-  "short_desc": "example_fully_connected_large",
-  "hint": "bei example_fully_connected_large",
-  "valgrind": true,
-  "rlimit": "1M",
-  "returncode": 0
-}

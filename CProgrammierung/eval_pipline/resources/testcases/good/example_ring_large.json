@@ -1,7 +1,0 @@
-{
-  "short_desc": "example_ring_large",
-  "hint": "bei example_ring_large",
-  "valgrind": true,
-  "rlimit": "1M",
-  "returncode": 0
-}

@@ -1,7 +1,0 @@
-{
-  "short_desc": "example_marking_wraparound",
-  "hint": "bei example_marking_wraparound",
-  "valgrind": true,
-  "rlimit": "1M",
-  "returncode": 0
-}

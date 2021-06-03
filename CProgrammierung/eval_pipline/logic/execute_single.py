@@ -24,7 +24,7 @@ def execute_singel_testcase(args):
     print("Debug env to test new functionality which can be implemented, called or composed here")
     for name in args.test:
         submissions=Submission.get_last_for_name(name)
-        if submission==None:
+        if submissions==None:
             students=Student.get_student_by_name(name)
             student=select_option_interactive(students)
             logging.debug(student)

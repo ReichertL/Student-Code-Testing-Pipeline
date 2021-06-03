@@ -57,7 +57,7 @@ def run():
             executor = TestCaseExecutor(args)
             executor.run()
         # Send Moodle feedback to students if needed determined by args
-        if args.mail_to_all or len(args.mailto) > 0 or args.debug:
+        if args.mail_to_all or len(args.mailto) > 0:
             reporter = MoodleReporter(args)
             reporter.run()
 

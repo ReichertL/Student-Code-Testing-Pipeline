@@ -23,7 +23,7 @@ class Testcase(Base):
     description = Column(String,nullable=False)
     hint = Column(String,nullable=False)
     type = Column(String,nullable=False)
-  
+    rlimit=Column(Integer)  
     test_case_results = relationship("Testcase_Result")
    
     def __init__(self, path, short_id, description, hint, type, rlimit):   

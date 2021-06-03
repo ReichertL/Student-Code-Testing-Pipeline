@@ -47,13 +47,21 @@ def load_tests(configuration):
                             hint = json_rep["hint"]
                             valgrind=json_rep["valgrind"]
                             #logging.debug(root)
-                            type=json_rep["type"]
+                            try:
+                                type=json_rep["type"]
+                            except KeyError:
+                                 if extensions["GOOD"] in root: type="GOOD"
+                                 elif extensions["BAD"] in root: type="BAD" 
                             rlimit=json_rep["rlimit"]
-                            if "MB" is in rlimit:
-                                rlimit=float(rlimit[:-2])*1000000
+                            if "MB" in rlimit:  
+                                rlimit=int(float(rlimit[:-2])*1000000)
+                        
+                            elif "M" in rlimit: 
+                                rlimit=int(float(rlimit[:-1])*1000000)
                             else:
                                 logging.error(f"Unknown unit in file {name} for rlimit. Using 1MB.")
-                                rlimt=1000000
+                                rlimit=1000000
+                            #print(f"rlimit {rlimit}")
                             Testcase.create_or_update(path, short_id, description, hint, type, valgrind=valgrind,rlimit=rlimit)
                             #logging.debug(testcase)
                     else: 

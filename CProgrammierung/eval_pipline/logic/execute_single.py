@@ -42,7 +42,7 @@ def execute_singel_testcase(args):
 
         result, valgrind = None,None
         executor = TestCaseExecutor(args)
-        run= compile_single_submission(submission)
+        run= compile_single_submission(args,executor.configuration,submission)
         dbm.session.add(run)
         dbm.session.commit()
 

@@ -34,7 +34,7 @@ from database.valgrind_outputs import Valgrind_Output
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
-
+global limits
 
 
 class TestCaseExecutor:
@@ -276,6 +276,8 @@ class TestCaseExecutor:
                 err=sys.stderr
                 print("\nExecutable output:\n")
             args = ['./loesung']
+            global limits
+            limits=self.get_limits(testcase)
             p = subprocess.Popen(
                 self.sudo
                 + self.unshare
@@ -367,7 +369,7 @@ class TestCaseExecutor:
 
         return result, valgrind_output
     
-    def get_limits_time(self,testcase):
+    def get_limits(self,testcase):
         if not self.args.final:# and testcase.rlimit==None:
             return [self.configuration["RLIMIT_DATA"],self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]
         elif not self.args.final:
@@ -383,9 +385,9 @@ class TestCaseExecutor:
         final flag
         nothing
         """
-        limits=self.get_limits_time()
-        hard_lim_data=max(resource.RLIMIT_DATA,2 * (limits[0],))
-        resource.setrlimit(resource.RLIMIT_DATA,hard_lim_data)
+        global limits
+        #hard_lim_data=max(resource.RLIMIT_DATA,2 * (limits[0],))
+        resource.setrlimit(resource.RLIMIT_DATA,2 * (limits[0],))
         resource.setrlimit(resource.RLIMIT_STACK,2 * (limits[1],))
         resource.setrlimit(resource.RLIMIT_CPU,2 * (limits[2],))
 

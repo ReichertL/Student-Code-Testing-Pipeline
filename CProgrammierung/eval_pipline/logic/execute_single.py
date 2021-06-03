@@ -12,6 +12,7 @@ from logic.test_case_executor import TestCaseExecutor
 from logic.test_case_executor import sort_first_arg_and_diff
 from util.colored_massages import Warn, Passed, Failed
 from util.select_option import select_option_interactive
+from logic.retrieve_and_compile import compile_single_submission
 
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
@@ -37,22 +38,22 @@ def execute_singel_testcase(args):
         submission=submissions[0]
         testcases=Testcase.get_all()
         print(f"\nUsing Submission from the {submission.submission_time}. Please select Testcase!")
-        selected=select_option_interactive(testcases)
+        testcase=select_option_interactive(testcases)
 
         result, valgrind = None,None
         executor = TestCaseExecutor(args)
-        run= executor.compile_single_submission(submission)
+        run= compile_single_submission(submission)
         dbm.session.add(run)
         dbm.session.commit()
 
-        if selected.type=="BAD":
-            result, valgrind = executor.check_for_error(submission,run, selected)
-        elif selected.type=="BAD_OR_OUTPUT":
-            result, valgrind = executor.check_for_error_or_output(submission,run, selected,sort_first_arg_and_diff )
+        if testcase.type=="BAD":
+            result, valgrind = executor.check_for_error(submission,run, testcase)
+        elif testcase.type=="BAD_OR_OUTPUT":
+            result, valgrind = executor.check_for_error_or_output(submission,run, testcase,sort_first_arg_and_diff )
         else:
-            result, valgrind =executor.check_output(submission,run,selected,sort_first_arg_and_diff)
+            result, valgrind =executor.check_output(submission,run,testcase,sort_first_arg_and_diff)
 
-        ResultGenerator.print_stats_testcase_result(result, selected, valgrind)
+        ResultGenerator.print_stats_testcase_result(result, testcase, valgrind)
 
         dbm.session.delete(valgrind)
         dbm.session.commit()                

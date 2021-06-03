@@ -289,7 +289,7 @@ class TestCaseExecutor:
                 stdin=fin,
                 stdout=out,
                 stderr=err,
-                preexec_fn=self.set_limits,
+                #preexec_fn=self.set_limits,
                 cwd='/tmp')
             try:
                 p.wait(150)

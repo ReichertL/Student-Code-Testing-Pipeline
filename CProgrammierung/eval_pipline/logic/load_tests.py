@@ -48,8 +48,13 @@ def load_tests(configuration):
                             valgrind=json_rep["valgrind"]
                             #logging.debug(root)
                             type=json_rep["type"]
-                            
-                            Testcase.create_or_update(path, short_id, description, hint, type, valgrind=valgrind)
+                            rlimit=json_rep["rlimit"]
+                            if "MB" is in rlimit:
+                                rlimit=float(rlimit[:-2])*1000000
+                            else:
+                                logging.error(f"Unknown unit in file {name} for rlimit. Using 1MB.")
+                                rlimt=1000000
+                            Testcase.create_or_update(path, short_id, description, hint, type, valgrind=valgrind,rlimit=rlimit)
                             #logging.debug(testcase)
                     else: 
                         description= short_id

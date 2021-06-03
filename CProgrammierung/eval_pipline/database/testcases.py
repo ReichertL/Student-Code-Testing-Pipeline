@@ -26,13 +26,14 @@ class Testcase(Base):
   
     test_case_results = relationship("Testcase_Result")
    
-    def __init__(self, path, short_id, description, hint, type):   
+    def __init__(self, path, short_id, description, hint, type, rlimit):   
         if type not in self.type_options:
             raise TypeError("Type of Testcase does not have an allowed value. Was "+str(type)+" but only "+str(self.type_options)+ " are allowed." )
         self.path = path
         self.short_id = short_id
         self.description = description
         self.hint = hint
+        self.rlimit = rlimit
         self.type = type
 
     def __repr__(self):
@@ -41,16 +42,18 @@ class Testcase(Base):
                                 str(self.short_id) + ","+ 
                                 str(self.description) + "," +
                                 str(self.hint) + ","+
+                                str(self.rlimit) + ","+
                                 str(self.type)+")")
     
 
-    def update( self,path, short_id, description, hint, type, valgrind_needed):
+    def update( self,path, short_id, description, hint, type, valgrind_needed, rlimit):
         self.path=path
         self.valgrind_needed=valgrind_needed
         self.short_id=short_id
         self.description=description
         self.hint=hint
         self.type=type
+        self.rlimit=rlimit
         
 
     @classmethod    
@@ -81,16 +84,16 @@ class Testcase(Base):
         return testcases    
 
     @classmethod    
-    def create_or_update(cls,path, short_id, description, hint, type, valgrind=True):
+    def create_or_update(cls,path, short_id, description, hint, type, valgrind=True,rlimit=None):
         #logging.debug("create or update")
-        tc_exists=dbm.session.query(Testcase).filter(Testcase.short_id==short_id,Testcase.path==path, Testcase.valgrind_needed==valgrind, Testcase.description==description, Testcase.hint==hint, Testcase.type==type).count()
+        tc_exists=dbm.session.query(Testcase).filter(Testcase.short_id==short_id,Testcase.path==path, Testcase.valgrind_needed==valgrind, Testcase.description==description, Testcase.hint==hint, Testcase.type==type, Testcase.rlimit==rlimit).count()
         if tc_exists==0:
             similar=dbm.session.query(Testcase).filter(Testcase.short_id==short_id).first()
             if not (similar==None):
-                similar.update(path, short_id, description, hint, type, valgrind)
+                similar.update(path, short_id, description, hint, type, valgrind,rlimit)
                 dbm.session.commit()
             else:
-                new_testcase=Testcase(path, short_id, description, hint, type)
+                new_testcase=Testcase(path, short_id, description, hint, type, rlimit)
                 new_testcase.valgrind_needed=valgrind
                 dbm.session.add(new_testcase)
                 dbm.session.commit()            
@@ -105,3 +108,6 @@ class Testcase(Base):
     def get_by_shortID(short_id):
         testcase=dbm.session.query(Testcase).filter(Testcase.short_id==short_id).first()
         return testcases
+
+    
+    

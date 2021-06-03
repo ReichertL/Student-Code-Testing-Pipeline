@@ -306,7 +306,7 @@ class TestCaseExecutor:
             if self.args.verbose and result.timeout:
                 print('-> TIMEOUT')
             result.tictoc = duration  
-            limits=self.get_limits_time()
+            limits=self.get_limits_time(testcase)
             result.rlimit_data=limits[0]
             result.rlimit_stack=limits[1]
             result.rlimit_cpu=limits[2]
@@ -366,12 +366,14 @@ class TestCaseExecutor:
 
         return result, valgrind_output
     
-    def get_limits_time(self):
-        if not self.args.final:
+    def get_limits_time(self,testcase):
+        if not self.args.final and testcase.rlimit==None:
             return [self.configuration["RLIMIT_DATA"],self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]
+        elif not self.args.final:
+            return [testcase.rlimit,self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]
         else: 
             return [self.configuration["RLIMIT_DATA_CARELESS"],self.configuration["RLIMIT_STACK_CARELESS"],self.configuration["RLIMIT_CPU_CARELESS"]]  
-    
+            
 
     
     def set_limits(self):

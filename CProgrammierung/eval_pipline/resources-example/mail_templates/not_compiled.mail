@@ -1,0 +1,7 @@
+<p style="margin-top:2em;">
+    Leider konnten wir Ihr Programm nicht &uuml;bersetzen und daher keine weiteren Tests durchf&uuml;hren:
+</p>
+<pre style="line-height:75%; margin-top: .1em;">
+    nobody@gruenau5:~>$commandline$
+    $compilation_output$
+</pre>

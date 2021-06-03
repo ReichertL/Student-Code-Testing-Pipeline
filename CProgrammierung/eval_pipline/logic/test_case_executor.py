@@ -278,7 +278,7 @@ class TestCaseExecutor:
             args = ['./loesung']
             global limits
             limits=self.get_limits(testcase)
-            #print(f"limits {limits}")
+            logging.debug(f"limits {limits}")
             p = subprocess.Popen(
                 self.sudo
                 + self.unshare

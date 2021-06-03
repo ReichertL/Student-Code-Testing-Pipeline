@@ -3,6 +3,7 @@ import logging
 
 from database.testcases import Testcase
 from database.submissions import Submission
+from database.students import Student
 from database.runs import Run
 import database.database_manager as dbm
 

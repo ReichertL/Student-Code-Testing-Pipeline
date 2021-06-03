@@ -289,7 +289,7 @@ class TestCaseExecutor:
                 stdin=fin,
                 stdout=out,
                 stderr=err,
-                #preexec_fn=self.set_limits,
+                preexec_fn=self.set_limits,
                 cwd='/tmp')
             try:
                 p.wait(150)
@@ -369,10 +369,10 @@ class TestCaseExecutor:
         return result, valgrind_output
     
     def get_limits(self,testcase):
-        if not self.args.final and testcase.rlimit==None:
+        if not self.args.final: #and testcase.rlimit==None:
             return [self.configuration["RLIMIT_DATA"],self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]
-        elif not self.args.final:
-            return [testcase.rlimit,self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]
+        #elif not self.args.final:
+        #    return [testcase.rlimit,self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]
         else: 
             return [self.configuration["RLIMIT_DATA_CARELESS"],self.configuration["RLIMIT_STACK_CARELESS"],self.configuration["RLIMIT_CPU_CARELESS"]]  
             
@@ -385,7 +385,6 @@ class TestCaseExecutor:
         nothing
         """
         global limits
-        #hard_lim_data=max(resource.RLIMIT_DATA,2 * (limits[0],))
         resource.setrlimit(resource.RLIMIT_DATA,2 * (limits[0],))
         resource.setrlimit(resource.RLIMIT_STACK,2 * (limits[1],))
         resource.setrlimit(resource.RLIMIT_CPU,2 * (limits[2],))

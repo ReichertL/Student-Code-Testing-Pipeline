@@ -278,7 +278,7 @@ class TestCaseExecutor:
             args = ['./loesung']
             global limits
             limits=self.get_limits(testcase)
-            print(f"limits {limits}")
+            #print(f"limits {limits}")
             p = subprocess.Popen(
                 self.sudo
                 + self.unshare
@@ -340,7 +340,7 @@ class TestCaseExecutor:
                                      stdin=fin,
                                      stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL,
-                                     preexec_fn=self.set_limits,
+                                     #preexec_fn=self.set_limits,
                                      cwd='/tmp')
                 try:
                     p.wait(300)

@@ -369,7 +369,7 @@ class TestCaseExecutor:
         return result, valgrind_output
     
     def get_limits(self,testcase):
-        if not self.args.final:# and testcase.rlimit==None:
+        if not self.args.final and testcase.rlimit==None:
             return [self.configuration["RLIMIT_DATA"],self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]
         elif not self.args.final:
             return [testcase.rlimit,self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]

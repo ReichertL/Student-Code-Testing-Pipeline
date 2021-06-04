@@ -40,7 +40,7 @@ def run():
     """
     now=datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    print(f"Eval Pipline  (Current Time: {dt_string})"
+    print(f"Eval Pipline  (Current Time: {dt_string})")
     
     try:
 

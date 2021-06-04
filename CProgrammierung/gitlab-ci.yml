@@ -40,13 +40,13 @@
 #      junit: CProgrammierung/auswertung/pytest.xml
 #      cobertura: CProgrammierung/auswertung/pytest-cov.xml
 
-test-eval-pipeline:
-  stage: test
-  image: $CI_REGISTRY_IMAGE/cprojekt
-  script:
-    - . /venv_cprogrammierung/bin/activate
-    - mv CProgrammierung/eval_pipline/resources-example/ CProgrammierung/eval_pipline/resources
-    - python CProgrammierung/eval_pipline/__main__.py -fav
+#test-eval-pipeline:
+#  stage: test
+#  image: $CI_REGISTRY_IMAGE/cprojekt
+#  script:
+#    - . /venv_cprogrammierung/bin/activate
+#    - mv CProgrammierung/eval_pipline/resources-example/ CProgrammierung/eval_pipline/resources
+#    - python CProgrammierung/eval_pipline/__main__.py -fav
 
 test-programmieraufgabe-musterloesungen:
   stage: test
@@ -54,6 +54,7 @@ test-programmieraufgabe-musterloesungen:
   script:
     - . /venv_cprogrammierung/bin/activate
     - cd CProgrammierung/auswertung/data_2021/musterloesung/leonie-c
+    - pip install termcolor
     - python test.py
 #    - cd CProgrammierung/musterloesung/tests
 #    - bash ./setup.sh && cd auswertung

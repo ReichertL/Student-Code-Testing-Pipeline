@@ -46,14 +46,14 @@ test-eval-pipeline:
   script:
     - . /venv_cprogrammierung/bin/activate
     - mv CProgrammierung/eval_pipline/resources-example/ CProgrammierung/eval_pipline/resources
-    - CProgrammierung/check -fav
+    - python CProgrammierung/eval_pipline/__main__.py -fav
 
 test-programmieraufgabe-musterloesungen:
   stage: test
   image: $CI_REGISTRY_IMAGE/cprojekt
   script:
     - . /venv_cprogrammierung/bin/activate
-    - cd CProgrammierung/auswertung/data_2021/musterloesung/leonie_c
+    - cd CProgrammierung/auswertung/data_2021/musterloesung/leonie-c
     - python test.py
 #    - cd CProgrammierung/musterloesung/tests
 #    - bash ./setup.sh && cd auswertung

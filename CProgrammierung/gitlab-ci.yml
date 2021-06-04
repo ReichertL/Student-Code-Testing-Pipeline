@@ -45,7 +45,7 @@ test-eval-pipeline:
   image: $CI_REGISTRY_IMAGE/cprojekt
   script:
     - . /venv_cprogrammierung/bin/activate
-    - mv CProgrammierung/eval-pipline/resources-example/ CProgrammierung/eval-pipline/resources
+    - mv CProgrammierung/eval_pipline/resources-example/ CProgrammierung/eval_pipline/resources
     - CProgrammierung/check -fav
 
 test-programmieraufgabe-musterloesungen:

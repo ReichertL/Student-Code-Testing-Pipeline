@@ -45,7 +45,7 @@ test-eval-pipeline:
   image: $CI_REGISTRY_IMAGE/cprojekt
   script:
     - . /venv_cprogrammierung/bin/activate
-    - mv CProgrammierung/eval-pipline/resources-example/ CProgrammierung/eval-pipline/resources/
+    - mv CProgrammierung/eval-pipline/resources-example/ CProgrammierung/eval-pipline/resources
     - CProgrammierung/check -fav
 
 test-programmieraufgabe-musterloesungen:
@@ -53,6 +53,8 @@ test-programmieraufgabe-musterloesungen:
   image: $CI_REGISTRY_IMAGE/cprojekt
   script:
     - . /venv_cprogrammierung/bin/activate
+    - cd CProgrammierung/auswertung/data_2021/musterloesung/leonie_c
+    - python test.py
 #    - cd CProgrammierung/musterloesung/tests
 #    - bash ./setup.sh && cd auswertung
 #    - ./check.py -c

@@ -9,6 +9,7 @@ import os
 import traceback
 import logging
 from signal import SIGABRT, SIGTERM, SIGSEGV, SIGILL, signal, SIGINT
+from datetime import datetime
 
 from moodle.database_integrator import DatabaseIntegrator
 from moodle.moodle_reporter import MoodleReporter
@@ -37,6 +38,10 @@ def run():
     due to readability extracted to separate module and invokes
     in args specified functionality
     """
+    now=datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    print(f"Eval Pipline  (Current Time: {dt_string})"
+    
     try:
 
                 

@@ -45,11 +45,14 @@ class Student(Base):
         return result
         
     @classmethod
-    def get_or_insert(cls,name,moodle_id):
+    def get_or_insert(cls,name,mid):
         student=cls.get_student_by_name(name)
         if student in [None, [],[[]]]:
+            result = dbm.session.query(Student).filter_by(moodle_id=mid).order_by(Student.id).first()      
+            
+        if student in [None, [],[[]]]:
             #Warn("Student with name "+str(name)+" did not exist. An database entrie is now created.")
-            student_new=Student(name,moodle_id )
+            student_new=Student(name,mid )
             dbm.session.add(student_new)
             dbm.session.commit()
             return student_new

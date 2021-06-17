@@ -190,7 +190,7 @@ class MoodleReporter:
             ResultGenerator.print_stats(run,f)
         with open(text_path, 'w') as f:
             f.write(text)
-            
+            f.write("------------------------------------------------------------------------------------------------------------------------------------------")
         
         if not self.args.mail_manual:
             with open(text_path) as f:

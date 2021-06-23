@@ -14,8 +14,8 @@ class Abtestat_Functions:
             student=Student.get_student_by_name(name)
             if type(student)==list:
                 student=select_option_interactive(student)  
-            if not Student.is_student_passed(name) :
-                print(f"{name} has not passed so far, mark abtestat as done anyways?(y/n)")
+            if not Student.is_student_passed(student.name) :
+                print(f"{student.name} has not passed so far, mark abtestat as done anyways?(y/n)")
                 if 'y' != sys.stdin.readline()[:1]:
                     return
                 
@@ -42,7 +42,7 @@ class Abtestat_Functions:
             student=Student.get_student_by_name(name)
             if type(student)==list:
                 student=select_option_interactive(student)   
-            passed=Student.is_student_passed(name)
+            passed=Student.is_student_passed(student.name)
             if passed==True:
                 student.grade=1
             else:

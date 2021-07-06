@@ -201,6 +201,7 @@ class ResultGenerator:
     # use like: f=sys.stdout
     def print_stats(cls,run, f):
         if run.compilation_return_code!=0:
+            hline="------------------------------------------------------------------------"
             print(red('compilation failed; compiler errors follow:'), file=f)
             print(hline, file=f)
             print(run.compilation.commandline, file=f)

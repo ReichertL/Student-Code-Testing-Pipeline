@@ -89,6 +89,10 @@ class TestCaseExecutor:
                     print(f'Submission of '
                         f'{student.name} submitted at '
                         f'{submission.submission_time} did not compile.')
+                    submission.is_checked = True
+                    dbm.session.commit()
+
+
             
 
 

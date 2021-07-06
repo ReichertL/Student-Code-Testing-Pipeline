@@ -204,8 +204,8 @@ class ResultGenerator:
             hline="------------------------------------------------------------------------"
             print(red('compilation failed; compiler errors follow:'), file=f)
             print(hline, file=f)
-            print(run.compilation.commandline, file=f)
-            print(run.compilation.output, file=f)
+            print(run.command_line, file=f)
+            print(run.compiler_output, file=f)
             print(hline, file=f)
             return
         if len(run.compiler_output) > 0:

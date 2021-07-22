@@ -9,16 +9,15 @@ from moodle_submission_fetcher import MoodleSubmissionFetcher
 
 
 class AbtestatFunctions:
-    
-      def __init__(self, args):
+
+    def __init__(self, args):
         """
         Constructor creates a MoodleReporter instance
         based on given arguments which determine the behaviour
         :param args: given commandline arguments
         """
         self.args = args
-
-
+        
     def abtestat_mark_as_done(names):
 
         for name in names:

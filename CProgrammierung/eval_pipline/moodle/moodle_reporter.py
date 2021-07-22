@@ -353,7 +353,6 @@ class MoodleReporter:
         
     
     def get_failed_description(self,result,testcase, valgrind, description=None):
-
         if description is None:
             description = {}
         if result.timeout == True:
@@ -402,3 +401,11 @@ class MoodleReporter:
         else:
             update_list.append(f"bei {testcase.short_id}")
         description.update({key: update_list})
+
+    def update_grade_on_moodle(student, grade):
+        username, session_state = MoodleSubmissionFetcher(self.args).get_login_data()
+        self.moodle_session = MoodleSession(username,
+                                                session_state,
+                                                self.configuration)
+        self.moodle_session.update_grading(student.moodle_id, grade)
+        

@@ -4,8 +4,7 @@ import sys
 import database.database_manager as dbm
 from database.students import Student
 from util.select_option import select_option_interactive
-from moodle.moodle_session import MoodleSession
-from moodle.moodle_submission_fetcher import MoodleSubmissionFetcher
+from moodle.moodle_reporter import MoodleReporter
 
 
 class AbtestatFunctions:
@@ -43,12 +42,8 @@ class AbtestatFunctions:
             student.grade=2
             student.matrikel_nr=mat_nr
             student.abtestat_time= datetime.now()
-            username, session_state = MoodleSubmissionFetcher(self.args).get_login_data()
-            moodle_session = MoodleSession(username,
-                                                session_state,
-                                                self.configuration)
-
-            moodle_session.update_grading(student.moodle_id, grade)
+            reporter=MoodleReporter(args)
+            reporter.update_grade_on_moodle(student,student.grade)
             dbm.session.commit()
 
 

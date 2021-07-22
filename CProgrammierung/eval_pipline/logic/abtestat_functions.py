@@ -18,7 +18,7 @@ class AbtestatFunctions:
         """
         self.args = args
         
-    def abtestat_mark_as_done(names):
+    def abtestat_mark_as_done(self,names):
 
         for name in names:
             student=Student.get_student_by_name(name)
@@ -53,7 +53,7 @@ class AbtestatFunctions:
 
 
 
-    def abtestat_revert( names):
+    def abtestat_revert(self,names):
         for name in names:
             student=Student.get_student_by_name(name)
             if type(student)==list:

@@ -42,7 +42,7 @@ class AbtestatFunctions:
             student.grade=2
             student.matrikel_nr=mat_nr
             student.abtestat_time= datetime.now()
-            reporter=MoodleReporter(args)
+            reporter=MoodleReporter(self.args)
             reporter.update_grade_on_moodle(student,student.grade)
             dbm.session.commit()
 

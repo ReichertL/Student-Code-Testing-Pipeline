@@ -4,8 +4,19 @@ import sys
 import database.database_manager as dbm
 from database.students import Student
 from util.select_option import select_option_interactive
+from moodle_session import MoodleSession
+from moodle_submission_fetcher import MoodleSubmissionFetcher
 
-class Abtestat_Functions:
+
+class AbtestatFunctions:
+    
+      def __init__(self, args):
+        """
+        Constructor creates a MoodleReporter instance
+        based on given arguments which determine the behaviour
+        :param args: given commandline arguments
+        """
+        self.args = args
 
 
     def abtestat_mark_as_done(names):
@@ -33,6 +44,12 @@ class Abtestat_Functions:
             student.grade=2
             student.matrikel_nr=mat_nr
             student.abtestat_time= datetime.now()
+            username, session_state = MoodleSubmissionFetcher(self.args).get_login_data()
+            moodle_session = MoodleSession(username,
+                                                session_state,
+                                                self.configuration)
+
+            moodle_session.update_grading(student.moodle_id, grade)
             dbm.session.commit()
 
 

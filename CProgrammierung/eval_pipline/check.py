@@ -17,7 +17,7 @@ from moodle.moodle_submission_fetcher import MoodleSubmissionFetcher
 from logic.performance_evaluator import PerformanceEvaluator
 from logic.result_generator import ResultGenerator
 from logic.test_case_executor import TestCaseExecutor
-from logic.abtestat_functions import Abtestat_Functions
+from logic.abtestat_functions import AbtestatFunctions
 from util.argument_extractor import ArgumentExtractor
 from util.lockfile import LockFile
 from util.playground import Playground
@@ -68,10 +68,12 @@ def run():
 
         # marks students as abtestat done or reverts this operation
         if len(args.abtestat) > 0:
-           Abtestat_Functions.abtestat_mark_as_done(args.abtestat)
+            abtestat_func=AbtestatFunctions(args)
+            abtestat_func.abtestat_mark_as_done(args.abtestat)
             
         if len(args.revert) > 0:
-            Abtestat_Functions.abtestat_revert( args.revert)
+            abtestat_func=AbtestatFunctions(args)
+            abtestat_func.abtestat_revert( args.revert)
 
         if len(args.mark_manual) > 0:
             marke_passed_manually(args.mark_manual)

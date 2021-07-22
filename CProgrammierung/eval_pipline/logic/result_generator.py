@@ -126,7 +126,7 @@ class ResultGenerator:
                 name=student.name
             print(f"Printing details for {name}:")
             sub_stud = Submission.get_all_for_name(name)
-            logging.debug(sub_stud)
+            #logging.debug(sub_stud)
             if len(sub_stud) > 1:
                 print("More than one submission found. Please select!")
                 for index, pair in zip(range(0,len(sub_stud)),sub_stud):

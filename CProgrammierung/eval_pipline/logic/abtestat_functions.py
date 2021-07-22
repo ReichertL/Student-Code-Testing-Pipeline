@@ -4,8 +4,8 @@ import sys
 import database.database_manager as dbm
 from database.students import Student
 from util.select_option import select_option_interactive
-from moodle_session import MoodleSession
-from moodle_submission_fetcher import MoodleSubmissionFetcher
+from moodle.moodle_session import MoodleSession
+from moodle.moodle_submission_fetcher import MoodleSubmissionFetcher
 
 
 class AbtestatFunctions:

@@ -402,7 +402,7 @@ class MoodleReporter:
             update_list.append(f"bei {testcase.short_id}")
         description.update({key: update_list})
 
-    def update_grade_on_moodle(student, grade):
+    def update_grade_on_moodle(self,student, grade):
         username, session_state = MoodleSubmissionFetcher(self.args).get_login_data()
         self.moodle_session = MoodleSession(username,
                                                 session_state,

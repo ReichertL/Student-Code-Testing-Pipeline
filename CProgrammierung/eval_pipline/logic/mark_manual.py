@@ -27,7 +27,7 @@ class Manual:
                 print(f"No student with this name {name} found!")
                 continue
             elif type(student)==list:
-            student=select_option_interactive(student)
+                student=select_option_interactive(student)
             submissions = student.submissions
             logging.debug(submissions)
             

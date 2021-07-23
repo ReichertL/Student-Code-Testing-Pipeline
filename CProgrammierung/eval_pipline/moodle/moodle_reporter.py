@@ -23,7 +23,7 @@ from database.testcase_results import Testcase_Result
 import database.database_manager as dbm
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
-logging.basicConfig(format=FORMAT,level=logging.DEBUG)
+logging.basicConfig(format=FORMAT,level=logging.INFO)
 
 class MoodleReporter:
     """
@@ -198,7 +198,7 @@ class MoodleReporter:
                 success = self.moodle_session. \
                         send_instant_message(student.moodle_id, msg)
                 if success:
-                    logging.debug(f"successfully sent message to {student.name}")
+                    logging.info(f"successfully sent message to {student.name}")
                     if grade is not None:
                         self.moodle_session \
                                 .update_grading(student.moodle_id, grade)
@@ -307,8 +307,8 @@ class MoodleReporter:
         if len(self.args.mailto) > 0:
             for name in self.args.mailto:
                 sub, stud=Submission.get_last_for_name(name)
-                logging.info(stud)
-                logging.info(sub)
+                logging.debug(stud)
+                logging.debug(sub)
                 to_mail.append([stud,sub])
 
 

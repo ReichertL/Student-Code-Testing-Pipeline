@@ -198,14 +198,14 @@ class MoodleReporter:
                 success = self.moodle_session. \
                         send_instant_message(student.moodle_id, msg)
                 if success:
-                    logger.debug(f"successfully sent message to {student.name}")
+                    logging.debug(f"successfully sent message to {student.name}")
                     if grade is not None:
                         self.moodle_session \
                                 .update_grading(student.moodle_id, grade)
                         student.grade=grade
                         dbm.session.commit()
                 else:
-                    logger.error(f"Failed to send message to {student.name}")
+                    logging.error(f"Failed to send message to {student.name}")
 
 
         else:

@@ -6,7 +6,7 @@ import database.submissions as sub
 import database.runs as r
 import database.database_manager as dbm
 from util.select_option import select_option_interactive
-from moodle.moole_reporter import MoodleReporter
+from moodle.moodle_reporter import MoodleReporter
 
 from logic.performance_evaluator import PerformanceEvaluator
 

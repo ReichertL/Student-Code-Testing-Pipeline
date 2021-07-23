@@ -11,12 +11,13 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 import logging
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 from util.absolute_path_resolver import resolve_absolute_path
 from database.students import Student
 
-FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
-logging.basicConfig(format=FORMAT,level=logging.DEBUG)
+
 
 
 

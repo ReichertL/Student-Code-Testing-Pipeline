@@ -6,7 +6,11 @@ import os
 import subprocess
 import sys
 from datetime import datetime
+
 import logging
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.INFO)
+
 
 from moodle.moodle_submission_fetcher import MoodleSubmissionFetcher
 from logic.result_generator import ResultGenerator
@@ -22,8 +26,6 @@ from database.testcase_results import Testcase_Result
 
 import database.database_manager as dbm
 
-FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
-logging.basicConfig(format=FORMAT,level=logging.INFO)
 
 class MoodleReporter:
     """
@@ -151,7 +153,7 @@ class MoodleReporter:
                 if not self.args.final:
                     mail += mail_templates["not_compiled_hint"]
             else:
-                print(f"--{student.name}'s submission was not compiled "
+                logging.warning(f"--{student.name}'s submission was not compiled "
                           f"before mailing him--")
 
 
@@ -299,7 +301,7 @@ class MoodleReporter:
 
         if self.args.mail_to_all:
             if self.args.verbose:
-                print("Mailing everybody who hasn't "
+                logging.info("Mailing everybody who hasn't "
                       "received a mail for the latest submission yet")
             to_mail = Submission.get_sumbissions_for_notification()
                 

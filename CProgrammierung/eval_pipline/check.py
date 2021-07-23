@@ -14,23 +14,24 @@ from datetime import datetime
 from moodle.database_integrator import DatabaseIntegrator
 from moodle.moodle_reporter import MoodleReporter
 from moodle.moodle_submission_fetcher import MoodleSubmissionFetcher
+from database.database_manager import DatabaseManager 
 from logic.performance_evaluator import PerformanceEvaluator
 from logic.result_generator import ResultGenerator
 from logic.test_case_executor import TestCaseExecutor
 from logic.abtestat_functions import AbtestatFunctions
+from logic.mark_manual import Manual
+from logic.execute_single import execute_singel_testcase
 from util.argument_extractor import ArgumentExtractor
 from util.lockfile import LockFile
 from util.playground import Playground
-from database.database_manager import DatabaseManager 
-from logic.mark_manual import marke_passed_manually
-from logic.execute_single import execute_singel_testcase
+
 
 LOCK_FILE_PATH = '/run/lock/check.lock'
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 
-
+args=None
 
 def run():
     """
@@ -46,6 +47,7 @@ def run():
 
                 
         argument_extractor = ArgumentExtractor()
+        global args
         args = argument_extractor.get_arguments()
         database_manager=DatabaseManager()        
         ##database_manager = SQLiteDatabaseManager()
@@ -76,7 +78,8 @@ def run():
             abtestat_func.abtestat_revert( args.revert)
 
         if len(args.mark_manual) > 0:
-            marke_passed_manually(args.mark_manual)
+            man=Marnual(args)
+            man.mark_passed_manually(args.mark_manual)
 
         result_generator = ResultGenerator()
         # generates a csv dump for moodle grading

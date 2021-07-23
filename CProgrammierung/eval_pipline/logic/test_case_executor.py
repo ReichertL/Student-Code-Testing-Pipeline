@@ -1,13 +1,15 @@
 """
 This module manages all test case execution and evaluation
 """
+import time
 import datetime
 import os
 import resource
 import subprocess
 import sys
 import logging
-import time
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 from util.absolute_path_resolver import resolve_absolute_path
 from util.colored_massages import Warn, Passed, Failed
@@ -31,8 +33,7 @@ import database.database_manager as dbm
 from database.valgrind_outputs import Valgrind_Output
 
 
-FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
-logging.basicConfig(format=FORMAT,level=logging.DEBUG)
+
 
 global limits
 

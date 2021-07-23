@@ -7,6 +7,8 @@ import os
 import re
 import shutil
 import logging
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 #from models.submission import Submission
 from database.submissions import Submission
@@ -17,8 +19,7 @@ from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
 
 
-FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
-logging.basicConfig(format=FORMAT,level=logging.DEBUG)
+
 
 class DatabaseIntegrator:
     """

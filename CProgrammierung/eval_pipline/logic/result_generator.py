@@ -136,7 +136,7 @@ class ResultGenerator:
                 answer_accepted = False
                 answer = 0
                 while not answer_accepted:
-                    answer = sys.stdin.readline()[0]
+                    answer = sys.stdin.readline()
                     try:
                         answer = int(answer) - 1
                         if len(sub_stud) > answer >= 0:

@@ -154,11 +154,11 @@ class MoodleSubmissionFetcher:
 
             if not os.path.exists(src):
                 src_glob=glob.glob(f"{src_dir}/*.c")[0]
-                logger.debug(src_glob)
+                logging.debug(src_glob)
                 if os.path.exists(src_glob):
                     shutil.move(src_glob,src)
                 else:
-                    logger.info('Student "{}" ({}) did not submit a source file.'.format(
+                    logging.info('Student "{}" ({}) did not submit a source file.'.format(
                         student.name, student.id))
                     continue
             

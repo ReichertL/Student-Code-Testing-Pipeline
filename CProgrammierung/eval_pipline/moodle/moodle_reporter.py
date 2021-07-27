@@ -188,8 +188,9 @@ class MoodleReporter:
         success = False
         stats_path = 'stats'
         text_path = "text"
-        with open(stats_path, 'w') as f:
-            ResultGenerator.print_stats(run,f)
+        if run is not None:
+            with open(stats_path, 'w') as f:
+                ResultGenerator.print_stats(run,f)
         with open(text_path, 'w') as f:
             f.write(text)
             f.write("------------------------------------------------------------------------------------------------------------------------------------------")

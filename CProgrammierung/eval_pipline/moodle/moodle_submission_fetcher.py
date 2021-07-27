@@ -150,11 +150,27 @@ class MoodleSubmissionFetcher:
                 dirname_to_student(d)
             src_dir = os.path.join(new_submissions_dir, d)
             src = os.path.join(src_dir, 'loesung.c')
+            
 
             if not os.path.exists(src):
-                Warn('Student "{}" ({}) did not submit a source file./ The file was not named loesung.c.'.format(
-                    student.name, student.id))
-                continue
+                src_glob=glob.glob(f"{src_dir}/*.c")[0]
+                logger.debug(src_glob)
+                if os.path.exists(src_glob):
+                    shutil.move(src_glob,src)
+                else:
+                    logger.info('Student "{}" ({}) did not submit a source file.'.format(
+                        student.name, student.id))
+                    continue
+            
+            
+            #success = self.moodle_session.send_instant_message(student.moodle_id, msg)
+            #if success:
+            #    logging.info(f"successfully sent message to {student.name} because file had wrong name")
+            #else:
+            #    logging.error(f"Failed to send message to {student.name}")
+            
+            
+            
             dest_dir = os.path.join(all_submissions_dir, d)
             timestamp_extension = datetime \
                 .datetime \

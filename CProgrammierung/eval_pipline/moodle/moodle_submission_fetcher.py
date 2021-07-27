@@ -154,7 +154,7 @@ class MoodleSubmissionFetcher:
 
             if not os.path.exists(src):
                 src_glob=glob.glob(f"{src_dir}/*.c")[0]
-                logging.debug(src_glob)
+                #logging.debug(src_glob)
                 if os.path.exists(src_glob):
                     shutil.move(src_glob,src)
                 else:

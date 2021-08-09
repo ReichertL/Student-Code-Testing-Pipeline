@@ -11,7 +11,7 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 import logging
-import math
+from math import floor
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
@@ -327,7 +327,7 @@ class MoodleSession:
         if data.get('msgid', -1) == -1:
             error="Die Mitteilung ist länger als erlaubt."
             if data.get('errormessage')==error:
-                half=math.floor(len(text)/2)
+                half=floor(len(text)/2)
                 success1=self.send_instant_message(touserid, text[:half])
                 if success1!= True:
                     return False

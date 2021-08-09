@@ -316,8 +316,10 @@ class MoodleSession:
                 {"messages": [{"touserid": int(touserid), "text": text}]},
                 referer='/message/index.php')[0]
         except (MoodleAjaxError, IndexError):
+            logging.err("MoodleAjaxError or IndexError")
             return False
         if data.get('msgid', -1) > -1:
+            logger.debug(data.get('text'))
             return data.get('text', False)
         return False
 

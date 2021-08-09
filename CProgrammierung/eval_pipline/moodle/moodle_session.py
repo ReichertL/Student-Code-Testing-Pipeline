@@ -320,7 +320,9 @@ class MoodleSession:
             logging.error("MoodleAjaxError or IndexError")
             logging.debug(data)
             return False
+
         if data.get('msgid', -1) > -1:
+            logging.debug(data)
             return data.get('text', False)
         
         if data.get('msgid', -1) == -1:

@@ -329,6 +329,8 @@ class MoodleSession:
             if data.get('errormessage')==error:
                 logging.debug("Spliting Message and send in two parts.")
                 half=floor(len(text)/2)
+                logger.debug(text[:half])
+                logging.debug((len(text[:half]))
                 success1=self.send_instant_message(touserid, text[:half])
                 if success1!= True:
                     logging.debug("Sending first part failed")

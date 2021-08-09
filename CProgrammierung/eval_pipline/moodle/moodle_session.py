@@ -321,6 +321,7 @@ class MoodleSession:
         if data.get('msgid', -1) > -1:
             logger.debug(data.get('text'))
             return data.get('text', False)
+        logger.debug(data)
         return False
 
     def get_current_grading(self, userid, return_editor_itemid=False):

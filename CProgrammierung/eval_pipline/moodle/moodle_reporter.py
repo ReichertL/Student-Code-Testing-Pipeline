@@ -112,7 +112,7 @@ class MoodleReporter:
                 failed_bad.sort(key=lambda x: x[1].short_id)
                 for result,testcase,valgrind in failed_bad:
                     bad_failed_desc=self.get_failed_description( result,testcase, valgrind, bad_failed_desc)
-                    logging.debug(bad_failed_desc)
+                    #logging.debug(bad_failed_desc)
 
                 failed_good=Testcase_Result.get_failed_good(run)
                 failed_good.sort(key=lambda x: x[1].short_id)

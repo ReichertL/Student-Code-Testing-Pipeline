@@ -310,7 +310,7 @@ class MoodleSession:
         Returns the text actually sent. In case of failure, returns False.
         """
         try:
-            logging.debug(f"trouserid {tourserid}")
+            logging.debug(f"touserid {touserid}")
             data = self._ajax_call(
                 'core_message_send_instant_messages',
                 {"messages": [{"touserid": int(touserid), "text": text}]},

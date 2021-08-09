@@ -323,6 +323,7 @@ class MoodleSession:
 
         if data.get('msgid', -1) > -1:
             logging.debug(data)
+            logging.debug(data.get('text', False))
             return data.get('text', False)
         
         if data.get('msgid', -1) == -1:
@@ -334,11 +335,12 @@ class MoodleSession:
                 logging.debug(text[:half])
                 logging.debug(len(text[:half]))
                 success1=self.send_instant_message(touserid, text[:half])
-                if success1!= True:
+                if success1 ==False:
                     logging.debug("Sending first part failed")
                     return False
                 success2=self.send_instant_message(touserid, text[half-10:])
-                return success2
+                if success2!=False:
+                    return ("first message: "+success1+" second message:"+success2)
         logging.debug(data)
         return False
 

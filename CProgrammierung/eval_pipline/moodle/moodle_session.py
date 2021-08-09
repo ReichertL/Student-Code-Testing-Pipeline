@@ -319,9 +319,9 @@ class MoodleSession:
             logging.err("MoodleAjaxError or IndexError")
             return False
         if data.get('msgid', -1) > -1:
-            logger.debug(data.get('text'))
+            logging.debug(data.get('text'))
             return data.get('text', False)
-        logger.debug(data)
+        logging.debug(data)
         return False
 
     def get_current_grading(self, userid, return_editor_itemid=False):

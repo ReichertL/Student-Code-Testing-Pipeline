@@ -11,6 +11,7 @@ import requests
 from bs4 import BeautifulSoup
 import urllib.parse
 import logging
+import math
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 

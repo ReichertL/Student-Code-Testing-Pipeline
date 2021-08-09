@@ -324,7 +324,7 @@ class MoodleSession:
             return data.get('text', False)
         
         if data.get('msgid', -1) == -1:
-            logger.debug("Spliting Message and send in two parts.")
+            logging.debug("Spliting Message and send in two parts.")
             error="Die Mitteilung ist länger als erlaubt."
             if data.get('errormessage')==error:
                 half=floor(len(text)/2)

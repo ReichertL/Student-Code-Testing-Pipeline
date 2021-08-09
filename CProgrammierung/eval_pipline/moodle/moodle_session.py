@@ -317,14 +317,14 @@ class MoodleSession:
                 {"messages": [{"touserid": int(touserid), "text": text}]},
                 referer='/message/index.php')[0]
         except (MoodleAjaxError, IndexError):
-            logging.err("MoodleAjaxError or IndexError")
+            logging.error("MoodleAjaxError or IndexError")
             logging.debug(data)
             return False
         if data.get('msgid', -1) > -1:
-            logging.debug(data.get('text'))
             return data.get('text', False)
         
         if data.get('msgid', -1) == -1:
+            logger.debug("Spliting Message and send in two parts.")
             error="Die Mitteilung ist länger als erlaubt."
             if data.get('errormessage')==error:
                 half=floor(len(text)/2)

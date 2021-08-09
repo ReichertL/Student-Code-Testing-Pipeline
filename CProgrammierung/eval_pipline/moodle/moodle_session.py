@@ -331,12 +331,13 @@ class MoodleSession:
             error="Die Mitteilung ist länger als erlaubt."
             if data.get('errormessage')==error:
                 logging.debug("Spliting Message and send in two parts.")
+                
                 half=floor(len(text)/2)
                 success1=self.send_instant_message(touserid, text[:half])
                 if success1 ==False:
                     logging.debug("Sending first part failed")
                     return False
-                success2=self.send_instant_message(touserid, text[half-10:])
+                success2=self.send_instant_message(touserid, text[half-5:])
                 if success2!=False:
                     return ("first message: "+success1+" second message:"+success2)
         logging.debug(data)

@@ -323,12 +323,15 @@ class MoodleSession:
             logging.debug(data.get('text'))
             return data.get('text', False)
         
-        logging.debug(data.get('errormessage'))
-
         if data.get('msgid', -1) == -1:
             error="Die Mitteilung ist länger als erlaubt."
             if data.get('errormessage')==error:
-                logging.debug('Split and resend')
+                half=math.floor(len(text)/2)
+                success1=self.send_instant_message(touserid, text[:half])
+                if success1!= True:
+                    return False
+                success2=self.send_instant_message(touserid, text[half-10:])
+                return success2
         logging.debug(data)
         return False
 

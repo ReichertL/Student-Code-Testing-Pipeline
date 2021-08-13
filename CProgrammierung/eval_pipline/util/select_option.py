@@ -1,7 +1,7 @@
 import sys
 
 
-def select_option_interactive(options,index=False):
+def select_option_interactive(options,pos=False):
      print(f"\n Please select one of the following options!")
      for index, option in zip(range(0,len(options)),options):
         print(f"[{index + 1}]: {option}")
@@ -20,7 +20,7 @@ def select_option_interactive(options,index=False):
         except ValueError:
             print(f"{answer} is not a number,"
                               f"please select again!")
-        if index:
+        if pos:
             return answer
         return options[answer]
 

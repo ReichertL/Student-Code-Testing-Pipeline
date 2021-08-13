@@ -314,7 +314,7 @@ class MoodleReporter:
                 student=Student.get_student_by_name(name)
                 if type(student)==list:
                     student=select_option_interactive(student)  
-                
+                logging.debug(student)
                 sub, stud=Submission.get_last_for_name(student.name)
                 
                 #logging.debug(stud)

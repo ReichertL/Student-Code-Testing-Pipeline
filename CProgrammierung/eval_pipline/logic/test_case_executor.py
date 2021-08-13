@@ -88,7 +88,7 @@ class TestCaseExecutor:
                 if run.compilation_return_code==0:
                     testcase_results = self.check( student,submission,run)
                 else:
-                    print(f'Submission of '
+                    logging.warn(f'Submission of '
                         f'{student.name} submitted at '
                         f'{submission.submission_time} did not compile.')
                     submission.is_checked = True
@@ -287,7 +287,7 @@ class TestCaseExecutor:
             args = ['./loesung']
             global limits
             limits=self.get_limits(testcase)
-            logging.debug(f"limits {limits}")
+            #logging.debug(f"limits {limits}")
             p = subprocess.Popen(
                 self.sudo
                 + self.unshare

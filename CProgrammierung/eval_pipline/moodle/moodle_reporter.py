@@ -312,10 +312,10 @@ class MoodleReporter:
             for name in self.args.mailto:
                 
                 student=Student.get_student_by_name(name)
-                logging.debug(student)
                 if type(student)==list:
                     student=select_option_interactive(student)  
                 logging.debug(student)
+                logging.debug(type(student))
                 sub, stud=Submission.get_last_for_name(student.name)
                 
                 #logging.debug(stud)

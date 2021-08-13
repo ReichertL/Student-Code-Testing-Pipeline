@@ -16,6 +16,7 @@ from moodle.moodle_submission_fetcher import MoodleSubmissionFetcher
 from logic.result_generator import ResultGenerator
 from util.absolute_path_resolver import resolve_absolute_path
 from util.config_reader import ConfigReader
+from util.select_option import select_option_interactive
 from moodle.moodle_session import MoodleSession
 
 
@@ -309,9 +310,15 @@ class MoodleReporter:
         
         if len(self.args.mailto) > 0:
             for name in self.args.mailto:
+                
+                student=Student.get_student_by_name(name)
+                if type(student)==list:
+                    student=select_option_interactive(student)  
+                
                 sub, stud=Submission.get_last_for_name(name)
-                logging.debug(stud)
-                logging.debug(sub)
+                
+                #logging.debug(stud)
+                #logging.debug(sub)
                 to_mail.append([stud,sub])
 
 

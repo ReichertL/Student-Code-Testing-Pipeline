@@ -21,4 +21,4 @@ def select_option_interactive(options):
             print(f"{answer} is not a number,"
                               f"please select again!")
 
-        return options[answer]
+        return answer,options[answer]

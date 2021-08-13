@@ -95,9 +95,9 @@ class MoodleSubmissionFetcher:
                 username = list(self.configuration["MOODLE_OWN_USER_IDS"])[0]
         if not username:
             if d:
-                print('known users:')
+                logging.debug('known users:')
                 for k in d:
-                    print(k)
+                    logging.debug(k)
             username = input('username: ')
         return username, d.get(username, {})
 

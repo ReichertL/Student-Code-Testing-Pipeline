@@ -41,7 +41,8 @@ def run():
     """
     now=datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    print(f"Eval Pipline  (Current Time: {dt_string})")
+
+    logging.info(f"\n-----------------------------------------------------------\nEval Pipline  (Current Time: {dt_string})")
     
     try:
 

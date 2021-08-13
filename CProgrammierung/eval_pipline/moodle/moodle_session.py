@@ -110,7 +110,7 @@ class MoodleSession:
                 id_, course_id, name = mo.group(1, 2, 3)
                 res[name] = id_
 
-        print('Found {} Teilnehmer.'.format(len(res)))
+        logging.info('Found {} Teilnehmer.'.format(len(res)))
 
         # dump teilnehmer list as json
         if res:

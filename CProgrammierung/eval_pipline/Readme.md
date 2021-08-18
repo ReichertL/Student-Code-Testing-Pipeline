@@ -13,6 +13,8 @@ csv and also via the moodle grading api.
 
 
 ## 1. Installation
+### 1.0 Preparing VM
+
 ### 1.1 Packages
 Install Docker and Valgrind:
 

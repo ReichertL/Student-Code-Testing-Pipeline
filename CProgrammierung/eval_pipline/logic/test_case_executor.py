@@ -65,7 +65,8 @@ class TestCaseExecutor:
 
         unshare_path = configuration["UNSHARE_PATH"]
         self.unshare = [unshare_path, '-r', '-n']
-        load_tests(self.configuration) 
+        if args.load_tests:
+            load_tests(self.configuration) 
 
     def run(self):
         """

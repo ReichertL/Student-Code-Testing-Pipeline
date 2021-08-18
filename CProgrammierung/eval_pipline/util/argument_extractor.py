@@ -39,6 +39,12 @@ class ArgumentExtractor:
                           help='Fetch new submissions and exits afterwards.')
         self \
             .parser \
+            .add_argument('--load_tests',
+                          dest='load_tests',
+                          action='store_true',
+                          help='Load all testcases from resources/testcases.')
+        self \
+            .parser \
             .add_argument('-c', '--check',
                           dest='check',
                           type=str,

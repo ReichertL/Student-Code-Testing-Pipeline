@@ -209,7 +209,7 @@ class TestCaseExecutor:
             testcase_result.output_correct = True
         else:
             testcase_result.output_correct = False
-        logging.debug("FAIL  Testcase, check for error: output correct {testcase_result.output_correct}, return_code {testcase_result.return_code} {(int(testcase_result.return_code))}, error_msg_quality {testcase_result.error_msg_quality}")
+        logging.debug(f"FAIL  Testcase, check for error: output correct {testcase_result.output_correct}, return_code {testcase_result.return_code} {(int(testcase_result.return_code))}, error_msg_quality {testcase_result.error_msg_quality}")
         unlink_safe("test.stderr")
         unlink_safe("test.stdout")
         return testcase_result,valgrind_output

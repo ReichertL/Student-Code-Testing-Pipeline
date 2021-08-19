@@ -127,13 +127,13 @@ class TestCaseExecutor:
         if True: 
         #if compiled.compilation_return_code== 0:
             for test in Testcase.get_all_bad():
-                logging.debug("Testcase "+str(test.short_id))
+                logging.debug("Testcase BAD "+str(test.short_id))
                 testcase_result, valgrind_output = self.check_for_error(submission,run, test)
                 dbm.session.add(testcase_result)
                 if not valgrind_output == None: dbm.session.add(valgrind_output)
                 
             for test in Testcase.get_all_good():
-                 logging.debug("Testcase "+str(test.short_id))
+                 logging.debug("Testcase GOOD "+str(test.short_id))
 
                  testcase_result, valgrind_output =self.check_output(submission,run,test,sort_first_arg_and_diff)
                  dbm.session.add(testcase_result)
@@ -141,9 +141,11 @@ class TestCaseExecutor:
                 
             #This deals with testcases that are allowed to fail gracefully, but if they don't they have to return the correct value
             for test in Testcase.get_all_bad_or_output():
-                logging.debug("Testcase "+str(test.short_id))
+                logging.debug("Testcase BAD or OUTPUT "+str(test.short_id))
                 testcase_result, valgrind_output = self.check_for_error_or_output(submission,run, test, sort_first_arg_and_diff )
                 dbm.session.add(testcase_result)
+                #logging.debug("FAIL  Testcase, check for error: output correct {testcase_result.output_correct}, return_code {testcase_result.return_code} {(int(testcase_result.return_code))}, error_msg_quality {testcase_result.error_msg_quality}"
+
                 if not valgrind_output == None: dbm.session.add(valgrind_output)
                            
             dbm.session.commit()
@@ -207,6 +209,7 @@ class TestCaseExecutor:
             testcase_result.output_correct = True
         else:
             testcase_result.output_correct = False
+        logging.debug("FAIL  Testcase, check for error: output correct {testcase_result.output_correct}, return_code {testcase_result.return_code} {(int(testcase_result.return_code))}, error_msg_quality {testcase_result.error_msg_quality}"
         unlink_safe("test.stderr")
         unlink_safe("test.stdout")
         return testcase_result,valgrind_output

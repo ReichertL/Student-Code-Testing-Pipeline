@@ -117,7 +117,7 @@ class TestCaseExecutor:
                      f', saved at {submission.submission_path}')
             else:
                 return
-        print(f'running tests for '
+        logging.info(f'running tests for '
               f'{student.name} submitted at '
               f'{submission.submission_time}')
         sys.stdout.flush()
@@ -269,7 +269,7 @@ class TestCaseExecutor:
         parser = ResultParser()
         result = Testcase_Result.create_or_update(run.id,testcase.id)
         if self.args.verbose:
-            print(f'--- executing '
+            logging.info(f'--- executing '
                   f'{"".join(submission.submission_path.split("/")[-2:])} '
                   f'< {testcase.short_id} ---')
         tic = time.time()
@@ -283,7 +283,7 @@ class TestCaseExecutor:
             if self.args.output==True:
                 out=sys.stdout
                 err=sys.stderr
-                print("\nExecutable output:\n")
+                logging.info("\nExecutable output:\n")
             args = ['./loesung']
             global limits
             limits=self.get_limits(testcase)
@@ -316,7 +316,7 @@ class TestCaseExecutor:
                 with open(self.configuration["TIME_OUT_PATH"]) as file:
                     parser.parse_time_file(result, file)
             if self.args.verbose and result.timeout:
-                print('-> TIMEOUT')
+                logging.info('-> TIMEOUT')
             result.tictoc = duration  
             result.rlimit_data=limits[0]
             result.rlimit_stack=limits[1]
@@ -325,7 +325,7 @@ class TestCaseExecutor:
             fin.close()
 
             if self.args.verbose:
-                print(f'--- finished '
+                logging.info(f'--- finished '
                       f'{"".join(submission.submission_path.split("/")[-2:])} '
                       f'< {testcase.short_id} ---')
 
@@ -333,7 +333,7 @@ class TestCaseExecutor:
         if testcase.valgrind_needed and (not result.timeout) and (not result.segfault):
             out, err=subprocess.DEVNULL,subprocess.DEVNULL
             if self.args.verbose:
-                print(f'--- executing valgrind '
+                logging.info(f'--- executing valgrind '
                       f'{"".join(submission.submission_path.split("/")[-2:])} '
                       f'< {testcase.short_id} ---')
             with NamedPipeOpen(f"{testcase.path}.stdin") as fin:
@@ -362,15 +362,15 @@ class TestCaseExecutor:
                         valgrind_output= parser.parse_valgrind_file(valgrind_output,f)
                     if self.args.valgrind==True:
                         with open(self.configuration["VALGRIND_OUT_PATH"], 'br') as f:
-                            print("\nValgrind output:\n")
+                            logging.info("\nValgrind output:\n")
                             for line in f.readlines():
-                                print(line)
-                            print("\n")
+                                logging.info(line)
+                            #logging.info("\n")
                 except FileNotFoundError:
                     logging.error("Valgrind output file was not found.")
                     pass
             if self.args.verbose:
-                print(f'--- finished valgrind '
+                logging.info(f'--- finished valgrind '
                       f'{"".join(submission.submission_path.split("/")[-2:])} < '
                       f'{testcase.short_id} ---')
             unlink_as_cpr(self.configuration["VALGRIND_OUT_PATH"], self.sudo)

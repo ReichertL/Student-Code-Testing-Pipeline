@@ -55,9 +55,11 @@ def execute_singel_testcase(args):
             result, valgrind =executor.check_output(submission,run,testcase,sort_first_arg_and_diff)
 
         ResultGenerator.print_stats_testcase_result(result, testcase, valgrind)
-
-        dbm.session.delete(valgrind)
-        dbm.session.commit()                
+        logging.debug(valgrind)
+        logging.debug(result)
+        if valgrind is not None:
+            dbm.session.delete(valgrind)
+            dbm.session.commit()
         dbm.session.delete(result)
         dbm.session.commit()                
         dbm.session.delete(run)

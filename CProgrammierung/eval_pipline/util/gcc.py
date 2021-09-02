@@ -139,7 +139,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         gcc_returncode = int(next(f))
     os.unlink(os.path.join(directory, 'gcc.return'))
     # try to move the executable produced by gcc to `dest`
-    logger.debug(dest)
+    logging.debug(dest)
     if gcc_returncode == 0:
         try:
             shutil.move(os.path.join(directory, os.path.basename(dest)), dest)

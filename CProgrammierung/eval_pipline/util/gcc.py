@@ -9,6 +9,7 @@ import logging
 from pwd import getpwnam
 from subprocess import run, DEVNULL, PIPE
 import sys
+import shutil
 
 OWN_PW = getpwnam(os.environ['USER'])
 OWN_UID_GID = f'{OWN_PW.pw_uid:d}.{OWN_PW.pw_gid:d}'
@@ -91,9 +92,10 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     """
     # create shared directory, if it does not exist already:
     try:
-        os.mkdir(directory)
+        shutil.rmtree(directory)
     except FileExistsError:
         pass
+    os.mkdir(directory)
     if os.listdir(directory):
         raise OSError(f"Directory not empty: '{directory}'")
     

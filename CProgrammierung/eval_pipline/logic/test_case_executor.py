@@ -125,8 +125,6 @@ class TestCaseExecutor:
               f'{student.name} submitted at '
               f'{submission.submission_time}')
         sys.stdout.flush()
-        #compiled= compile_single_submission(submission)
-
 
         if True: 
         #if compiled.compilation_return_code== 0:

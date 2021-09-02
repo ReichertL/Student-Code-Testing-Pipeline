@@ -91,7 +91,6 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     (commandline : str, return_code : int, gcc_stderr : str)
     """
     # create shared directory, if it does not exist already:
-    logging.debug(directory)
     try:
         shutil.rmtree(directory)
     except:
@@ -142,7 +141,6 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         gcc_returncode = int(next(f))
     os.unlink(os.path.join(directory, 'gcc.return'))
     # try to move the executable produced by gcc to `dest`
-    logging.debug(dest)
     if gcc_returncode == 0:
         try:
             shutil.move(os.path.join(directory, os.path.basename(dest)), dest)

@@ -81,8 +81,6 @@ class TestCaseExecutor:
             logging.info(f'Checking Submission of {student.name} from the {submission.submission_time}')
             does_compile = compile_single_submission(self.args,self.configuration,submission)
 
-            logging.debug(does_compile)
-            exit(1)
             run=Run.insert_run(does_compile)
           
  
@@ -96,6 +94,7 @@ class TestCaseExecutor:
                     submission.is_checked = True
                     dbm.session.commit()
             else: 
+                logging.debug("Just compiled, no testcases tested")
                 logging.debug(f"Something seems to have gone wrong during compilation. {does_compile}")
                 exit(1)
 

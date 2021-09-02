@@ -95,6 +95,9 @@ class TestCaseExecutor:
                         f'{submission.submission_time} did not compile.')
                     submission.is_checked = True
                     dbm.session.commit()
+            else: 
+                logging.debug(f"Something seems to have gone wrong during compilation. {does_compile}")
+                exit(1)
 
 
             

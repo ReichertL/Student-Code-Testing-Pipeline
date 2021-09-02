@@ -99,8 +99,8 @@ class Student(Base):
         
     @classmethod
     def get_students_not_passed(cls):
-        passed=self.get_students_passed()
-        all=get_students_all()
+        passed=cls.get_students_passed()
+        all=cls.get_students_all()
         result=list(set(all) - set(passed))
         #results=dbm.session.query(Student).join(sub.Submission, sub.Submission.student_id==Student.id).join(r.Run, r.Run.submission_id==sub.Submission.id)\
         #.filter(r.Run.passed==False).group_by(Student.name).all()

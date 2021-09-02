@@ -143,10 +143,6 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     # try to move the executable produced by gcc to `dest`
     if gcc_returncode == 0:
         try:
-            try:
-                os.mkdir(dest)
-            except:
-                pass
             shutil.move(os.path.join(directory, os.path.basename(dest)), dest)
         except FileNotFoundError:
             pass

@@ -103,11 +103,11 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         pass
     
     if os.listdir(directory):
-        files= [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
-        for file in files:
-            os.remove(file)
-        logger.error(f"Directory not empty: '{directory}'")
-        #raise OSError(f"Directory not empty: '{directory}'")
+        #files= [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+        #for file in files:
+        #    os.remove(file)
+        #logger.error(f"Directory not empty: '{directory}'")
+        raise OSError(f"Directory not empty: '{directory}'")
     
     # create docker container, if it does not exist already
     run(SUDO_DOCKER + ['create',

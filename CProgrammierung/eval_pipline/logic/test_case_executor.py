@@ -384,7 +384,8 @@ class TestCaseExecutor:
             data_limit=max(testcase.rlimit,10000000)
             return [data_limit,self.configuration["RLIMIT_STACK"],self.configuration["RLIMIT_CPU"]]
         else: 
-            return [self.configuration["RLIMIT_DATA_CARELESS"],self.configuration["RLIMIT_STACK_CARELESS"],self.configuration["RLIMIT_CPU_CARELESS"]]  
+            data_limit=max(testcase.rlimit,10000000)
+            return [data_limit*self.configuration["RLIMIT_DATA_CARELESS_FACTOR"],self.configuration["RLIMIT_STACK_CARELESS"],self.configuration["RLIMIT_CPU_CARELESS"]]  
             
 
     

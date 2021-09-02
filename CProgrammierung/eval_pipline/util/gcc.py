@@ -103,7 +103,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         pass
     
     if os.listdir(directory):
-        files=os.path(directory)
+        files= [f for f in listdir(directory) if isfile(join(directory, f))]
         for file in files:
             os.remove(file)
         logger.error(f"Directory not empty: '{directory}'")

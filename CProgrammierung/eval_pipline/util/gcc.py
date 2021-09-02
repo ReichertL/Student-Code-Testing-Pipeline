@@ -125,8 +125,8 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
          'bash', '-c',
          f'{commandline} 2> gcc.stderr ; '
          'echo $? > gcc.return ;'
-         f'chown {OWN_UID_GID} gcc.stderr gcc.return {os.path.basename(dest)}']
-    logging.debug(command_full)
+         f'chown {OWN_UID_GID} gcc.stderr gcc.return']# {os.path.basename(dest)}']
+    #logging.debug(command_full)
     cp=run(command_full,
         stdout=DEVNULL,
         stderr=DEVNULL)
@@ -139,6 +139,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         gcc_returncode = int(next(f))
     os.unlink(os.path.join(directory, 'gcc.return'))
     # try to move the executable produced by gcc to `dest`
+    logger.debug(dest)
     if gcc_returncode == 0:
         try:
             shutil.move(os.path.join(directory, os.path.basename(dest)), dest)

@@ -91,9 +91,10 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     (commandline : str, return_code : int, gcc_stderr : str)
     """
     # create shared directory, if it does not exist already:
+    logging.debug(directory)
     try:
         shutil.rmtree(directory)
-    except FileExistsError:
+    except:
         pass
     os.mkdir(directory)
     if os.listdir(directory):

@@ -91,18 +91,23 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     (commandline : str, return_code : int, gcc_stderr : str)
     """
     # create shared directory, if it does not exist already:
-    try:
-        shutil.rmtree(directory)
-    except:
-        pass
+
     try:
          os.remove(dest)
     except:
         pass
     
-    os.mkdir(directory)
+    try:
+        os.mkdir(directory)
+    except:
+        pass
+    
     if os.listdir(directory):
-        raise OSError(f"Directory not empty: '{directory}'")
+        files=os.path(directory)
+        for file in files:
+            os.remove(file)
+        logger.error(f"Directory not empty: '{directory}'")
+        #raise OSError(f"Directory not empty: '{directory}'")
     
     # create docker container, if it does not exist already
     run(SUDO_DOCKER + ['create',

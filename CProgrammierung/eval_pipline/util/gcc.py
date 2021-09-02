@@ -119,8 +119,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
                            os.path.basename(dest) + '.c']
     commandline = ' '.join(all_args)
     
-    command_full= SUDO_DOCKER +
-        ['exec',
+    command_full= SUDO_DOCKER + ['exec',
          '-w', '/host',
          docker_container,
          'bash', '-c',

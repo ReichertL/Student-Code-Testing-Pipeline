@@ -127,7 +127,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
          'bash', '-c',
          f'{commandline} 2> gcc.stderr ; '
          'echo $? > gcc.return ;'
-         f'chown {OWN_UID_GID} gcc.stderr gcc.return']# {os.path.basename(dest)}']
+         f'chown {OWN_UID_GID} gcc.stderr gcc.return {os.path.basename(dest)}']
     #logging.debug(command_full)
     cp=run(command_full,
         stdout=DEVNULL,

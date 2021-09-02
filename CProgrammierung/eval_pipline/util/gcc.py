@@ -95,6 +95,11 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         shutil.rmtree(directory)
     except:
         pass
+    try:
+         os.remove(dest)
+    except:
+        pass
+    
     os.mkdir(directory)
     if os.listdir(directory):
         raise OSError(f"Directory not empty: '{directory}'")

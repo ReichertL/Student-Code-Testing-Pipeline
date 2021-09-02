@@ -94,10 +94,7 @@ class TestCaseExecutor:
                     submission.is_checked = True
                     dbm.session.commit()
             else: 
-                logging.debug("Just compiled, no testcases tested")
-                logging.debug(f"Something seems to have gone wrong during compilation. {does_compile}")
-                exit(1)
-            exit(1)
+                logging.debug(f"Just compiled, no testcases executed")
 
 
             
@@ -121,7 +118,9 @@ class TestCaseExecutor:
                      f'This is submission {submission.id}'
                      f', saved at {submission.submission_path}')
             else:
+                logging.info(f"Not running any testcases for {student.name} because the submission from the {submission.submission_time} has been checked already. Use -r to rerun the submission.")
                 return
+            
         logging.info(f'running tests for '
               f'{student.name} submitted at '
               f'{submission.submission_time}')

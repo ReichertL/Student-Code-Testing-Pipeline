@@ -97,6 +97,7 @@ class TestCaseExecutor:
                 logging.debug("Just compiled, no testcases tested")
                 logging.debug(f"Something seems to have gone wrong during compilation. {does_compile}")
                 exit(1)
+            exit(1)
 
 
             

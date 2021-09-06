@@ -320,6 +320,8 @@ class MoodleReporter:
                 else:  
                     subs = Submission.get_all_for_name(student.name)
                     sub=select_option_interactive(subs)
+                    logging.debug(sub)
+                    logging.debug(type(sub))
                 logging.debug(student)
 
                 

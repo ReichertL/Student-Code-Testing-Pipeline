@@ -60,10 +60,10 @@ def run():
             database_integrator = DatabaseIntegrator()
             database_integrator.integrate_submission_dir()
 
-        if not args.fetch_only:
-            # Execute test cases if needed determined by the provided args
-            executor = TestCaseExecutor(args)
-            executor.run()
+            if not args.fetch_only:
+                # Execute test cases if needed determined by the provided args
+                executor = TestCaseExecutor(args)
+                executor.run()
         # Send Moodle feedback to students if needed determined by args
         if args.mail_to_all or len(args.mailto) > 0:
             reporter = MoodleReporter(args)

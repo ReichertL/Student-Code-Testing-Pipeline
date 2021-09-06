@@ -75,8 +75,12 @@ class ResultGenerator:
         that provides student information
         :return: nothing
         """
-        all_students = Student.get_students_all()
-        for student in all_students:
+        if args.unpassed:
+            students = Student.get_students_not_passed()
+            logging.debug(students)
+        else: 
+            students = Student.get_students_all()
+        for student in students:
             sub_stud = Submission.get_all_for_name(student.name)
             if len(sub_stud) > 0:
                 print(f"Stats for {student.name}")

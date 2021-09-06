@@ -69,6 +69,6 @@ class Manual:
                     reporter.update_grade_on_moodle(student,student.grade)
                 run.passed=True
                 run.manual_overwrite_passed=True
-                performance_evaluator = PerformanceEvaluator()
-                performance_evaluator.evaluate_performance(selected,run)
+                #performance_evaluator = PerformanceEvaluator()
+                #performance_evaluator.evaluate_performance(selected,run)
                 dbm.session.commit()

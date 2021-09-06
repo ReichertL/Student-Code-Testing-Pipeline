@@ -3,6 +3,10 @@ import shutil
 import subprocess
 import logging
 
+from database.students import Student
+from database.submissions import Submission
+
+
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
@@ -23,9 +27,9 @@ class Playground:
         except:
             pass
         os.mkdir(self.dirname)
-        students=stud.get_students_passed()
+        students=Student.get_students_passed()
         for student in students:
-            submissions=sub.get_passed_for_name(student.name)
+            submissions=Submission.get_passed_for_name(student.name)
             last=submissions[0]
             src=last.submission_path
             string=student.name.replace(" ","_")

@@ -67,7 +67,7 @@ class ResultGenerator:
                     result_writer.writerow(row)
 
     @staticmethod
-    def print_summary_stats_small(self,args):
+    def print_summary_stats_small(args):
         """
         prints summarized stats for all stundents that have at least
         one submission which is checked

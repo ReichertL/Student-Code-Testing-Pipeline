@@ -319,7 +319,8 @@ class MoodleReporter:
                 #logging.debug(stud)
                 #logging.debug(sub)
                 to_mail.append([stud,sub])
-
+        else:
+            logging.info("No Mails to send")
 
         sorted_to_mail=sorted(to_mail, key= lambda pair:(pair[0].name, pair[1].submission_time))
         

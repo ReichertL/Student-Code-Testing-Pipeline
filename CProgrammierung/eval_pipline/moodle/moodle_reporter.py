@@ -318,16 +318,16 @@ class MoodleReporter:
                     sub, stud=Submission.get_last_for_name(student.name)
                     logging.debug(stud)
                 else:  
-                    subs = Submission.get_all_for_name(student.name)
-                    sub=select_option_interactive(subs)
+                    pairs = Submission.get_all_for_name(student.name)
+                    sub, stud=select_option_interactive(pairs)
                     logging.debug(sub)
                     logging.debug(type(sub))
-                logging.debug(student)
+                logging.debug(stud)
 
                 
                 #logging.debug(stud)
                 #logging.debug(sub)
-                to_mail.append([student,sub])
+                to_mail.append([stud,sub])
         else:
             logging.info("No Mails to send")
 

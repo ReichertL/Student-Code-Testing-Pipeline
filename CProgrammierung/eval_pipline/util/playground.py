@@ -1,6 +1,10 @@
 import os
 import shutil
 import subprocess
+import logging
+
+FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
+logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 class Playground:
     name: str
@@ -18,7 +22,7 @@ class Playground:
             shutil.rmtree(self.dirname)
         except:
             pass
-        ok.mkdir(self.dirname)
+        os.mkdir(self.dirname)
         students=stud.get_students_passed()
         for student in students:
             submissions=sub.get_passed_for_name(student.name)

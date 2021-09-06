@@ -8,6 +8,7 @@ from sqlalchemy.sql import expression, or_
 
 import database.database_manager as dbm
 from database.students import Student
+from database.runs import Run
 
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
@@ -71,6 +72,19 @@ class Submission(Base):
         results=dbm.session.query(Submission,Student).join(Student)\
             .filter(Submission.is_checked==True,Student.name==name).order_by(Submission.submission_time.desc()).first()
         return results
+
+    @classmethod            
+    def get_passed_for_name(cls,name):
+        results=dbm.session.query(Submission).join(Student).join(Run,Run.submission_id==Submission.id)\
+            .filter(Run.passed==True, Student.name=name).order_by(Submission.submission_time.desc())
+        return results
+    
+    @classmethod    
+    def is_passed(cls, sub):
+        results=dbm.session.query(Submission).join(Run, Run.submission_id==Submission.id).filter(Run.passed==True).count()
+        if results >0:
+            return True
+        return False
 
     @classmethod
     def get_sumbissions_for_notification(cls):

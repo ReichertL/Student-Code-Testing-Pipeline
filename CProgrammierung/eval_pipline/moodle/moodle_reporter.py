@@ -316,9 +316,11 @@ class MoodleReporter:
                     student=select_option_interactive(student)
                 if not self.args.mail_manual: 
                     sub, stud=Submission.get_last_for_name(student.name)
+                    logging.debug(stud)
                 else:  
                     subs = Submission.get_all_for_name(student.name)
                     sub=select_option_interactive(subs)
+                logging.debug(student)
 
                 
                 #logging.debug(stud)

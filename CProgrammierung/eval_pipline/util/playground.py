@@ -24,7 +24,8 @@ class Playground:
             submissions=sub.get_passed_for_name(student.name)
             last=submissions[0]
             src=last.submission_path
-            dest=f"{self.dirname}/{(student.name).replace(" ","_")}"
+            string=student.name.replace(" ","_")
+            dest=f"{self.dirname}/{string}"
             shutil.copy(src,dest)
             command=f"cd ..& java -jar jplag-2.12.1-SNAPSHOT-jar-with-dependencies.jar -l c/c++ -vd  -s {self.dirname}"
             subprocess.run(command,shell=True)

@@ -79,7 +79,7 @@ def run():
             abtestat_func.abtestat_revert( args.revert)
 
         if len(args.mark_manual) > 0:
-            man=Marnual(args)
+            man=Manual(args)
             man.mark_passed_manually(args.mark_manual)
 
         result_generator = ResultGenerator()

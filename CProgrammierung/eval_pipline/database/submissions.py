@@ -76,7 +76,7 @@ class Submission(Base):
     @classmethod            
     def get_passed_for_name(cls,name):
         results=dbm.session.query(Submission).join(Student).join(Run,Run.submission_id==Submission.id)\
-            .filter(Run.passed==True, Student.name=name).order_by(Submission.submission_time.desc())
+            .filter(Run.passed==True, Student.name==name).order_by(Submission.submission_time.desc())
         return results
     
     @classmethod    

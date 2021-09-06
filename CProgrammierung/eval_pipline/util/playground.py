@@ -33,11 +33,11 @@ class Playground:
             last=submissions[0]
             src=last.submission_path
             string=student.name.replace(" ","_")
-            dest=f"{self.dirname}/{string}"
+            dest=f"{self.dirname}/{string}.c"
             shutil.copy(src,dest)
-            command=f"cd ..& java -jar jplag-2.12.1-SNAPSHOT-jar-with-dependencies.jar -l c/c++ -vd  -s {self.dirname}"
-            subprocess.run(command,shell=True)
-            logging.info(f"Results written to {os.getcwd()}/../results")
+        command=f"cd ..& java -jar jplag-2.12.1-SNAPSHOT-jar-with-dependencies.jar -l c/c++ -vd  -s {self.dirname}"
+        subprocess.run(command,shell=True)
+        logging.info(f"Results written to {os.getcwd()}/../results")
 
                 
 

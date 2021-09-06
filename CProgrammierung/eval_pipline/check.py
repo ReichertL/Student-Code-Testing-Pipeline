@@ -88,7 +88,7 @@ def run():
             result_generator.generate_csv_dump()
         # prints short statistics for all submissions
         if args.stats:
-            result_generator.print_summary_stats_small()
+            result_generator.print_summary_stats_small(args)
 
         # prints detailed information about a specific student submission
         if len(args.details) > 0:

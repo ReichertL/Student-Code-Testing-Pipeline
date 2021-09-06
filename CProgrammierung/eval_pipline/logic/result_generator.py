@@ -254,6 +254,13 @@ class ResultGenerator:
                cls.create_stats(failed_good),
                 titles='auto'), file=f)
             print(file=f)
+        if run.passed and run.manual_overwrite_passed:
+            print(green("This run passed. It was marked manually."))
+        elif run.passed:
+            print(green("This run passed."))        
+        else: 
+            print(red("This run did not pass."))
+
 
     @classmethod
     def print_stats_testcase_result(cls,tc_result, tc, valgrind):

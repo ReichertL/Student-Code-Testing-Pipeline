@@ -313,12 +313,17 @@ class MoodleReporter:
                 
                 student=Student.get_student_by_name(name)
                 if type(student)==list:
-                    student=select_option_interactive(student)  
-                sub, stud=Submission.get_last_for_name(student.name)
+                    student=select_option_interactive(student)
+                if not self.args.mail_manual: 
+                    sub, stud=Submission.get_last_for_name(student.name)
+                else:  
+                    subs = Submission.get_all_for_name(student.name)
+                    sub=select_option_interactive(subs)
+
                 
                 #logging.debug(stud)
                 #logging.debug(sub)
-                to_mail.append([stud,sub])
+                to_mail.append([student,sub])
         else:
             logging.info("No Mails to send")
 
@@ -342,7 +347,7 @@ class MoodleReporter:
                               f"mailed at {datetime.now()}")
             elif(submission.student_notified==True):
                 continue
-                
+            
             run=Run.get_last_for_submission(submission)
             text = self.generate_mail_content(student, submission,run)
             success = self.send_mail(student, submission, run, text,student.grade )

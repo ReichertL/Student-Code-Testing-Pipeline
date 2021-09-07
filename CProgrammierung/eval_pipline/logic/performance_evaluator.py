@@ -83,6 +83,7 @@ class PerformanceEvaluator:
                         result[key]=testcase_result.tictoc
                     else: result[key]=""
                 performances.append(result)
+                logging.debug(result)
         #logging.debug(performances)
                 
     
@@ -130,7 +131,6 @@ class PerformanceEvaluator:
         sorting= sorted(ranking, key=lambda k: k[1])
         sorting_mrss= sorted(performances, key=lambda k: float(k['mrss']))
         
-        logging.debug(performance)
         mean_ranking=list()
         for nr,s in enumerate(sorting):
             name=s[0]

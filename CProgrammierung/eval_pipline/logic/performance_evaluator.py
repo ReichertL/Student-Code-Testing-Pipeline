@@ -97,7 +97,8 @@ class PerformanceEvaluator:
                                                   "PERFORMANCE_TEST_CASES_TIME"
                                               ]]
                                 + ['{mrss:.0f}'])
-        for i in range(1, len(key_list)):
+        key_list.append("mrss")
+        for i in range(0, len(key_list)):
             print(f"\nSorted by {key_list[i]}:\n")
             print(table_format(
                 # '{name} | {example10} | {example11} |'

@@ -97,13 +97,13 @@ class Run(Base):
             .filter(Run.passed==True)\
             .filter(sub.Submission.is_fast==True, stud.Student.name==name).all()
         performance=list()
-        logging.debug(results)
+        #logging.debug(results)
         for run,submission in results:
             time=Testcase_Result.get_avg_runtime_performance(run, keylist)
             space=Testcase_Result.get_avg_space_performance(run, keylist)
             if run.manual_overwrite_passed!=True:
                 performance.append([run, submission, time, space])
-        logging.debug(performance)
+        #logging.debug(performance)
         if len(performance)>0:
             fastest_run=performance[0]
             fastest_time=Testcase_Result.get_avg_runtime_performance(run, keylist)

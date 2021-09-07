@@ -98,6 +98,7 @@ class PerformanceEvaluator:
                                               ]]
                                 + ['{mrss:.0f}'])
         key_list.append("mrss")
+        
         for i in range(0, len(key_list)):
             print(f"\nSorted by {key_list[i]}:\n")
             print(table_format(
@@ -119,3 +120,8 @@ class PerformanceEvaluator:
                     html=True,
                     highlight=key_list[i]),
                       file=file)
+        
+        for i in range(0, len(key_list)):
+            sorting= sorted(performances, key=lambda k: float(k[key_list[i]]))
+            print(type(sorting))
+            print(sorting.keys().index("Toan Ta")

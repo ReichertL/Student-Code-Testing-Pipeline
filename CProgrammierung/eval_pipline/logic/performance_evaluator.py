@@ -141,7 +141,8 @@ class PerformanceEvaluator:
             mean=rank+nr/2
             mean_ranking.append([name,mean])
         
-        for nr,s in enumerate(mean_ranking):
+        sorting_ranking= sorted(mean_ranking, key=lambda k: float(k[1]))
+        for nr,s in enumerate(sorting_ranking):
             print(f"{nr}. {s}")
         #for i in range(0, len(key_list)):
         #    sorting= sorted(performances, key=lambda k: float(k[key_list[i]]))

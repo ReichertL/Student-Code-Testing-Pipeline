@@ -134,6 +134,7 @@ class PerformanceEvaluator:
             name=s[0]
             sum_rank=0
             for key in key_list:
+                print(key)
                 sort_perform= sorted(performances, key=lambda k: float(k[key_list[i]]))
                 for rank,dict in enumerate(sort_perform):
                     if dict['name']==name:

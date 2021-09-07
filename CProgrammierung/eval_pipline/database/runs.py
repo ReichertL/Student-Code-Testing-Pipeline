@@ -97,6 +97,7 @@ class Run(Base):
             time=Testcase_Result.get_avg_runtime_performance(run, keylist)
             space=Testcase_Result.get_avg_space_performance(run, keylist)
             performance.append([run, submission, time, space])
+        logger.debug(performance)
         if len(performance)>0:
             fastest_run=performance[0]
             fastest_time=Testcase_Result.get_avg_runtime_performance(run, keylist)

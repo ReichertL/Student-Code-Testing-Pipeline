@@ -316,13 +316,13 @@ class MoodleReporter:
                     student=select_option_interactive(student)
                 if not self.args.mail_manual: 
                     sub, stud=Submission.get_last_for_name(student.name)
-                    logging.debug(stud)
+                    #logging.debug(stud)
                 else:  
                     pairs = Submission.get_all_for_name(student.name)
                     sub, stud=select_option_interactive(pairs)
-                    logging.debug(sub)
-                    logging.debug(type(sub))
-                logging.debug(stud)
+                    #logging.debug(sub)
+                    #logging.debug(type(sub))
+                #logging.debug(stud)
 
                 
                 #logging.debug(stud)

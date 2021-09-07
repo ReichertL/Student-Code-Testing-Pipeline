@@ -129,16 +129,16 @@ class PerformanceEvaluator:
                 sum+=el[key]
             ranking.append([el['name'],sum])
         sorting= sorted(ranking, key=lambda k: k[1])
-        sorting_mrss= sorted(performances, key=lambda k: float(k['mrss']))
-        logging.debug(sorting_mrss)
         mean_ranking=list()
         for nr,s in enumerate(sorting):
             name=s[0]
-            logging.debug(name)
-            for rank,dict in enumerate(sorting_mrss):
-                if dict['name']==name:
-                    break
-            mean=rank+nr/2
+            sum_rank=0
+            for key in key_list:
+                sort_perform= sorted(performances, key=lambda k: float(k[key_list[i]]))
+                for rank,dict in enumerate(sort_perform):
+                    if dict['name']==name:
+                        sum_rank+=rank
+            mean=sum_rank/len(key_list)
             mean_ranking.append([name,mean])
         
         sorting_ranking= sorted(mean_ranking, key=lambda k: float(k[1]))

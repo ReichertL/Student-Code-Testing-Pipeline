@@ -130,12 +130,10 @@ class PerformanceEvaluator:
         sorting= sorted(ranking, key=lambda k: k[1])
         sorting_mrss= sorted(performances, key=lambda k: float(k['mrss']))
         
+        logging.debug(performance)
         mean_ranking=list()
         for nr,s in enumerate(sorting):
-            print(s)
             name=s[0]
-            print(sorting_mrss)
-            print(name)
             rank=sorting_mrss.index(name)
             mean=rank+nr/2
             mean_ranking.append([name,mean])

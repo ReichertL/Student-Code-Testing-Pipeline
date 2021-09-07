@@ -108,10 +108,10 @@ class PerformanceEvaluator:
         
         for i in range(0, len(key_list)):
             print(f"\nSorted by {key_list[i]}:\n")
-            #print(table_format(
-            #    row_format,
-            #    sorted(performances, key=lambda k: float(k[key_list[i]])),
-            #    titles='auto'))
+            print(table_format(
+                row_format,
+                sorted(performances, key=lambda k: float(k[key_list[i]])),
+                titles='auto'))
 
             with open(filename, "a+") as file:
                 print(f"\nSorted by {key_list[i]}:\n", file=file)

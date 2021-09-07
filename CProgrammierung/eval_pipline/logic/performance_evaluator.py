@@ -124,4 +124,5 @@ class PerformanceEvaluator:
         for i in range(0, len(key_list)):
             sorting= sorted(performances, key=lambda k: float(k[key_list[i]]))
             print(type(sorting))
-            print(sorting.keys().index("Toan Ta")
+            print(sorting.keys().index("Toan Ta"))
+

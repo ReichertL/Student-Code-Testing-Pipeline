@@ -101,7 +101,11 @@ class PerformanceEvaluator:
         key_list.append("mrss")
 
         filename="performances.html"
-        os.remove(filename)
+        try:
+            os.remove(filename)
+        except:
+            pass
+        
         for i in range(0, len(key_list)):
             print(f"\nSorted by {key_list[i]}:\n")
             #print(table_format(

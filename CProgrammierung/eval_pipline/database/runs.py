@@ -90,14 +90,17 @@ class Run(Base):
 
     @classmethod
     def get_fastest_run_for_student(self,name, keylist):
-        results=dbm.session.query(Run, sub.Submission).join(sub.Submission).filter(Run.passed==True, sub.Submission.is_fast==True).all()
+        logging.debug(name)
+        results=dbm.session.query(Run, sub.Submission)\
+            .join(sub.Submission).join(Student)\
+            .filter(Run.passed==True, sub.Submission.is_fast==True, Student.name=name).all()
         performance=list()
         logging.debug(results)
         for run,submission in results:
             time=Testcase_Result.get_avg_runtime_performance(run, keylist)
             space=Testcase_Result.get_avg_space_performance(run, keylist)
             performance.append([run, submission, time, space])
-        logger.debug(performance)
+        logging.debug(performance)
         if len(performance)>0:
             fastest_run=performance[0]
             fastest_time=Testcase_Result.get_avg_runtime_performance(run, keylist)

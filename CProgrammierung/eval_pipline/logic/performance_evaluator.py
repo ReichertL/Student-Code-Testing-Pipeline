@@ -121,6 +121,16 @@ class PerformanceEvaluator:
                     highlight=key_list[i]),
                       file=file)
         
+        ranking=list()
+        for el in performances:
+            print(el)
+            sum=0
+            for key in key_list:
+                sum+=el[key]
+            ranking.append([el['name'],sum])
+        print(ranking)
+        
+        
         for i in range(0, len(key_list)):
             sorting= sorted(performances, key=lambda k: float(k[key_list[i]]))
             print(type(sorting))

@@ -133,7 +133,7 @@ class PerformanceEvaluator:
         mean_ranking=list()
         for nr,s in enumerate(sorting):
             print(s)
-            name=s['name']
+            name=s[0]
             print(sorting_mrss)
             print(name)
             rank=sorting_mrss.index(name)

@@ -138,6 +138,8 @@ class PerformanceEvaluator:
                 for rank,dict in enumerate(sort_perform):
                     if dict['name']==name:
                         sum_rank+=rank
+                        print(rank)
+                        break
             logging.debug(f"{name} {sum_rank}/ {len(key_list)}")
             mean=sum_rank/len(key_list)
             mean_ranking.append([name,mean])

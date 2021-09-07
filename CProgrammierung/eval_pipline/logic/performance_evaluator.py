@@ -125,7 +125,7 @@ class PerformanceEvaluator:
         for el in performances:
             print(el)
             sum=0
-            for key in key_list[-1]:
+            for key in key_list[:-1]:
                 sum+=el[key]
             ranking.append([el['name'],sum])
         sorting= sorted(ranking, key=lambda k: k[1])

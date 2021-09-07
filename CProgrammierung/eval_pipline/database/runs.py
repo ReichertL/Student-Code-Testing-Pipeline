@@ -95,13 +95,13 @@ class Run(Base):
         results=dbm.session.query(Run, sub.Submission)\
             .join(sub.Submission).join(stud.Student)\
             .filter(Run.passed==True)\
-            .filter(Run.manual_overwrite_passed.is_(False))\
             .filter(sub.Submission.is_fast==True, stud.Student.name==name).all()
         performance=list()
         logging.debug(results)
         for run,submission in results:
             time=Testcase_Result.get_avg_runtime_performance(run, keylist)
             space=Testcase_Result.get_avg_space_performance(run, keylist)
+            logging.debug(run.manual_overwrite_passed)
             performance.append([run, submission, time, space])
         logging.debug(performance)
         if len(performance)>0:

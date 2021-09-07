@@ -83,7 +83,7 @@ class PerformanceEvaluator:
                         result[key]=testcase_result.tictoc
                     else: result[key]=""
                 performances.append(result)
-        logging.debug(performances)
+        #logging.debug(performances)
                 
     
         try:
@@ -123,16 +123,21 @@ class PerformanceEvaluator:
         
         ranking=list()
         for el in performances:
-            print(el)
             sum=0
             for key in key_list[:-1]:
                 sum+=el[key]
             ranking.append([el['name'],sum])
         sorting= sorted(ranking, key=lambda k: k[1])
+        sorting_mrss= sorted(performances, key=lambda k: float(k['mrss']))
+        
+        mean_ranking=list()
         for nr,s in enumerate(sorting):
+            rank=sorting_mrss.index(s['name'])
+            mean=rank+nr/2
+            mean_ranking.append([s['name'],mean]
+        
+        for nr,s in enumerate(mean_ranking):
             print(f"{nr}. {s}")
-        
-        
         #for i in range(0, len(key_list)):
         #    sorting= sorted(performances, key=lambda k: float(k[key_list[i]]))
         #    print(type(sorting))

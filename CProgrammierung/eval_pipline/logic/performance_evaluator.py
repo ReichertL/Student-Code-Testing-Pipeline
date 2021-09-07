@@ -102,14 +102,10 @@ class PerformanceEvaluator:
         
         for i in range(0, len(key_list)):
             print(f"\nSorted by {key_list[i]}:\n")
-            print(table_format(
-                # '{name} | {example10} | {example11} |'
-                # ' {example12} | {example2001} | {example2002} |'
-                # ' {example2003} | {example2004} | {example2005} | {mrss}',
-                
-                row_format,
-                sorted(performances, key=lambda k: float(k[key_list[i]])),
-                titles='auto'))
+            #print(table_format(
+            #    row_format,
+            #    sorted(performances, key=lambda k: float(k[key_list[i]])),
+            #    titles='auto'))
 
             with open("performances.html", "a+") as file:
                 print(f"\nSorted by {key_list[i]}:\n", file=file)

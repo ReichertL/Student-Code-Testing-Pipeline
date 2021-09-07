@@ -99,7 +99,9 @@ class PerformanceEvaluator:
                                               ]]
                                 + ['{mrss:.0f}'])
         key_list.append("mrss")
-        
+
+        filename="performances.html"
+        os.remove(filename)
         for i in range(0, len(key_list)):
             print(f"\nSorted by {key_list[i]}:\n")
             #print(table_format(
@@ -107,7 +109,7 @@ class PerformanceEvaluator:
             #    sorted(performances, key=lambda k: float(k[key_list[i]])),
             #    titles='auto'))
 
-            with open("performances.html", "a+") as file:
+            with open(filename, "a+") as file:
                 print(f"\nSorted by {key_list[i]}:\n", file=file)
                 print(table_format(
                     row_format,

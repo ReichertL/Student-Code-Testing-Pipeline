@@ -11,8 +11,8 @@ import database.database_manager as dbm
 from database.testcase_results import Testcase_Result
 from database.valgrind_outputs import Valgrind_Output
 from database.testcases import Testcase
-from database.students import Student
 import database.submissions as sub
+import database.students as stud
 
 
 
@@ -93,8 +93,8 @@ class Run(Base):
     def get_fastest_run_for_student(self,name, keylist):
         logging.debug(name)
         results=dbm.session.query(Run, sub.Submission)\
-            .join(sub.Submission).join(Student)\
-            .filter(Run.passed==True, sub.Submission.is_fast==True, Student.name==name).all()
+            .join(sub.Submission).join(stud.Student)\
+            .filter(Run.passed==True, sub.Submission.is_fast==True, stud.Student.name==name).all()
         performance=list()
         logging.debug(results)
         for run,submission in results:

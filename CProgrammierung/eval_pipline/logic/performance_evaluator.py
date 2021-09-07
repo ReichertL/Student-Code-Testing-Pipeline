@@ -135,14 +135,11 @@ class PerformanceEvaluator:
             name=s[0]
             sum_rank=0
             for i in range(0,len(key_list)):
-                print(key)
                 sort_perform= sorted(performances, key=lambda k: float(k[key_list[i]]))
                 for rank,dict in enumerate(sort_perform):
                     if dict['name']==name:
                         sum_rank+=rank
-                        print(rank)
                         break
-            logging.debug(f"{name} {sum_rank}/ {len(key_list)}")
             mean=sum_rank/len(key_list)
             mean_ranking.append([name,mean])
         

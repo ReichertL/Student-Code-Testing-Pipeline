@@ -101,8 +101,8 @@ class Run(Base):
         for run,submission in results:
             time=Testcase_Result.get_avg_runtime_performance(run, keylist)
             space=Testcase_Result.get_avg_space_performance(run, keylist)
-            logging.debug(run.manual_overwrite_passed)
-            performance.append([run, submission, time, space])
+            if run.manual_overwrite_passed!=True:
+                performance.append([run, submission, time, space])
         logging.debug(performance)
         if len(performance)>0:
             fastest_run=performance[0]

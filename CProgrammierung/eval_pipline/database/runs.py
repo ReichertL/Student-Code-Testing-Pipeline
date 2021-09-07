@@ -93,7 +93,7 @@ class Run(Base):
         logging.debug(name)
         results=dbm.session.query(Run, sub.Submission)\
             .join(sub.Submission).join(Student)\
-            .filter(Run.passed==True, sub.Submission.is_fast==True, Student.name=name).all()
+            .filter(Run.passed==True, sub.Submission.is_fast==True, Student.name==name).all()
         performance=list()
         logging.debug(results)
         for run,submission in results:

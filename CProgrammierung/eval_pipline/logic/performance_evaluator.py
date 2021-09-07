@@ -128,11 +128,13 @@ class PerformanceEvaluator:
             for key in key_list:
                 sum+=el[key]
             ranking.append([el['name'],sum])
-        print(ranking)
+        sorting= sorted(ranking, key=lambda k: k[1])
+        for nr,s in enumerate(sorting):
+            print(f"{nr}. {s}")
         
         
-        for i in range(0, len(key_list)):
-            sorting= sorted(performances, key=lambda k: float(k[key_list[i]]))
-            print(type(sorting))
-            print(sorting.keys().index("Toan Ta"))
+        #for i in range(0, len(key_list)):
+        #    sorting= sorted(performances, key=lambda k: float(k[key_list[i]]))
+        #    print(type(sorting))
+        #    print(sorting.keys().index("Toan Ta"))
 

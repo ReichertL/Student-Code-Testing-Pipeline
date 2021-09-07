@@ -135,7 +135,9 @@ class PerformanceEvaluator:
         for nr,s in enumerate(sorting):
             name=s[0]
             logging.debug(name)
-            rank=sorting_mrss.index(name)
+            for rank,dict in sorting_mrss:
+                if dict['name']==name:
+                    break
             mean=rank+nr/2
             mean_ranking.append([name,mean])
         

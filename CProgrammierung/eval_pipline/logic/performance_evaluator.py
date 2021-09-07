@@ -83,7 +83,7 @@ class PerformanceEvaluator:
                         result[key]=testcase_result.tictoc
                     else: result[key]=""
                 performances.append(result)
-                logging.debug(result)
+                #logging.debug(result)
         #logging.debug(performances)
                 
     
@@ -135,7 +135,7 @@ class PerformanceEvaluator:
         for nr,s in enumerate(sorting):
             name=s[0]
             logging.debug(name)
-            for rank,dict in sorting_mrss:
+            for rank,dict in enumerate(sorting_mrss):
                 if dict['name']==name:
                     break
             mean=rank+nr/2

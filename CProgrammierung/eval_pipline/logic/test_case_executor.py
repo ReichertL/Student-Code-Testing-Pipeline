@@ -314,9 +314,9 @@ class TestCaseExecutor:
                     result.return_code = -15
                 duration = -1
             else:
-                #sets timeout, segfault, signal,mrss, cpu_time
+                #sets timeout, segfault, signal,mrss in Bytes, cpu_time in seconds 
                 with open(self.configuration["TIME_OUT_PATH"]) as file:
-                    parser.parse_time_file(result, file)
+                    parser.parse_time_file(result, file) 
             if self.args.verbose and result.timeout:
                 logging.info('-> TIMEOUT')
             result.tictoc = duration  

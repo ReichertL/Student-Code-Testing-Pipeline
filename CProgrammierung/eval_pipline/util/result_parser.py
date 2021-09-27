@@ -42,6 +42,9 @@ class ResultParser:
             testcase_result.cpu_time = float(ls[0]) + float(ls[1])
             testcase_result.mrss = 1024 * int(ls[2])
             testcase_result.return_code = int(ls[3])
+            if testcase_result.return_code== -11 or  testcase_result.return_code== -1:
+                    testcase_result.segfault = True
+                continue
             realtime = float(ls[4])
             break
 

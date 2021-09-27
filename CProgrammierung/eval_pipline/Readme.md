@@ -155,6 +155,8 @@ The image below represents the currently implemented structure of the evaluation
   - Guessing a students name based on input
   
 
+### 3.3 Limitations
+- Return codes of tested submissions need to be larger or equal zero (see python subprocess() call)
 ## 4 Future Development
 In this section we'll describe planned future reworks and structural improvements for future work.
 
@@ -167,5 +169,6 @@ In this section we'll describe planned future reworks and structural improvement
 
 - Better pair-wise similarity analysis with j-plag
 - Test coverage for eval pipeline in the Gitlab CI
+
 
 

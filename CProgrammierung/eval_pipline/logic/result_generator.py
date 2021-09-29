@@ -43,8 +43,8 @@ class ResultGenerator:
         """
 
         passed_students = Student.get_students_passed()
-        with open(self.csv_path, "w") as result_file:
-            result_writer = csv.writer(result_file, delimiter=",")
+        with open(self.csv_path, "w", encoding='utf-8') as result_file:
+            result_writer = csv.writer(result_file, delimiter=";")
             header = ["ID", "Name", "Punkte"]
             result_writer.writerow(header)
             for s in passed_students:
@@ -53,7 +53,7 @@ class ResultGenerator:
 
 
         with open(self.abtestat_done_path, "w") as result_file:
-            result_writer = csv.writer(result_file, delimiter=",")
+            result_writer = csv.writer(result_file, delimiter=";")
 
             abtestat_done = Student.get_abtestat_done()
             if len(abtestat_done) > 0:

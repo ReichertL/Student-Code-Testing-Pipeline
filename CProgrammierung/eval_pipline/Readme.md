@@ -59,8 +59,11 @@ There are example `.config` files included in the `resource.templates` directory
 
 If you want to use the automatic email functionality you might want to define a `mail_templates` directory,
 where you define all relevant error messages that can be part of an email to a student.
+THE DEFAULT TEXT PIECES SHOULD BE ADAPTED before sending out feedback to students.
+
 It's worth to note, that these template massages can contain placeholder tokens,
 which can be replaced during runtime. These tokens should be follow the format `$placeholder_token$`. 
+
 
 
 ### 1.4 Moodel Course
@@ -157,6 +160,7 @@ The image below represents the currently implemented structure of the evaluation
 
 ### 3.3 Limitations
 - Return codes of tested submissions need to be larger or equal zero (see python subprocess() call)
+
 ## 4 Future Development
 In this section we'll describe planned future reworks and structural improvements for future work.
 

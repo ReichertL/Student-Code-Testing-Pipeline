@@ -44,7 +44,6 @@ class ResultParser:
             testcase_result.return_code = int(ls[3])
             if testcase_result.return_code== -11 or  testcase_result.return_code== -1:
                     testcase_result.segfault = True
-                continue
             realtime = float(ls[4])
             break
 

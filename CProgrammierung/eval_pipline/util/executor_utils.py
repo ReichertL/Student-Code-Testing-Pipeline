@@ -1,5 +1,5 @@
 """
-This module manages all test case execution and evaluation
+This module contains utility functions  relevant for testcase execution and evaluation
 """
 import os
 import tempfile
@@ -17,7 +17,8 @@ logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 def unlink_safe(path):
     """
     Removes a file
-    :param path: file to remove
+    Parametes:
+        path (string): file to remove
     """
     try:
         os.unlink(path)
@@ -28,8 +29,9 @@ def unlink_safe(path):
 def unlink_as_cpr(path, sudo):
     """
     Removes a file as sudo
-    :param path: the file to remove
-    :param sudo: call params as sudo
+    Parametes:
+        path (string): the file to remove
+        sudo (string): path to sude executable
     """
     if os.path.exists(path):
         subprocess.call(sudo + ['rm', path])
@@ -37,19 +39,23 @@ def unlink_as_cpr(path, sudo):
 
 def getmtime(path):
     """
-    returns the mtime for a file
-    :param path: the configuration to the file
-    :return: the mtime
+    Returns the  mtime for a file. mtime is the file modification time.
+    Parametes:
+        path (string): the configuration to the file
+    Returns:
+        mtime (int)
     """
     return int(os.path.getmtime(path))
 
 
 def sort_first_arg_and_diff(f1, f2):
     """
-    Sorts and compares two files
-    :param f1: file 1
-    :param f2: file 2
-    :return: whether the content is equal or not
+    Sorts and compares two files.
+    Paremetes:
+        f1 (string): path to file 1
+        f2 (string): path to file 2
+    Returns:
+        res (bool): Contains whether the contents are equal or not.
     """
     f1_sorted = tempfile.mktemp()
     f2_sorted = tempfile.mktemp()
@@ -66,7 +72,8 @@ def sort_first_arg_and_diff(f1, f2):
 def sudokill(process):
     """
     Calls kill on a process as sudo
-    :param process: the process to kill
+    Parametes: 
+        process (subprocess.Popen object):the process to kill
     """
     subprocess.call(['sudo', 'kill', str(process.pid)],
                     stderr=subprocess.DEVNULL)

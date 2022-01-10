@@ -4,6 +4,14 @@ from pathlib import Path
 
 
 def resolve_absolute_path(s):
+    """
+    Resolves relative paths to absolute paths
+    Parameters: 
+        s (string): realtive path
+    Returns:
+        config_path (stirng): absolute path
+    
+    """
     file_name = os.path.realpath(sys.argv[0])
     file_name = file_name.replace("__main__.py", "").replace(".", "").replace("checkpy", "")
     if not len(file_name) > 0:

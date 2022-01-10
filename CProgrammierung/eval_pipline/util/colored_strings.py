@@ -1,3 +1,9 @@
+
+"""
+Contains Class ColoredStrings which is used by functions in colored_messages.py to store
+strings with color.
+"""
+
 class ColoredString(object):
     def __init__(self, s, length):
         self.s = s

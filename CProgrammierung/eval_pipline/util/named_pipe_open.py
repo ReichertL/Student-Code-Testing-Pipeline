@@ -1,13 +1,21 @@
 import os
 import subprocess
-
+ """
+ Functions creating a named Pipe. Used to store output of subprocesses.
+ Contains class NamedPipeOpen and NamedPipeCopy.
+ """
 
 class NamedPipeOpen(object):
     def __init__(self, path):
+        """
+        Parameters: 
+            path (string): Path to file where the contents of the Pipe are placed.
+        
+        """
         if not os.path.exists(path):
             raise FileNotFoundError(path)
         self.fifo_path = './stdin_pipe_' + os.path.basename(path)
-        self.npc = named_pipe_copy(path, self.fifo_path)
+        self.npc = NamedPipeCopy(path, self.fifo_path)
         self.npc.__enter__()
         self.f = open(self.fifo_path, 'br')
 
@@ -22,7 +30,7 @@ class NamedPipeOpen(object):
         self.npc.__exit__()
 
 
-class named_pipe_copy(object):
+class NamedPipeCopy(object):
     """Create a named pipe "to" and write the content of "frm" to "to" using cat."""
 
     def __init__(self, frm, to):

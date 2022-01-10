@@ -1,4 +1,8 @@
 
+"""
+This code creates a lock file to ensure that only one instance of the eval_pipline can be run at the same time. This is to ensure that there will be no consistency issues with the sqlite database. 
+"""
+
 import json
 import os
 import os.path
@@ -6,6 +10,18 @@ from subprocess import run, PIPE
 import sys
 
 def pid_to_comm_stime(pid):
+    """
+    Gets informations regarding a process with specific PID.
+    
+    Parameters:
+        pid (int): PID of process
+
+    Returns: Tupel of
+        comm (string): command of the process. If None, the process has terminated.
+        stime (string): How long the process has been run.
+    
+    
+    """
     cp = run(['ps', '-q', str(pid), '-o', '%c|', '-o', 'stime'],
              stdout=PIPE, text=True)
     lines = cp.stdout.splitlines()
@@ -15,12 +31,18 @@ def pid_to_comm_stime(pid):
         return tuple(s.strip() for s in lines[1].split('|', 1))
 
 class LockFile:
+    """
+    Creates and manages the lock file.
+    """
     def __init__(self, path):
         self.path = os.path.abspath(path)
         self.argv = sys.argv
         self.acquired = False
 
     def __enter__(self):
+        """
+        Creates lock at self.path.
+        """
         try:
             with open(self.path, 'x') as f:
                 self.acquired = True
@@ -43,5 +65,12 @@ class LockFile:
             raise FileExistsError(errormsg)
 
     def __exit__(self, exc_type, exc_value, traceback):
+        """
+        Releases lock.
+        Parameters: Passed automatically 
+            exception_type: indicates class of exception.
+            exception_value: indicates type of exception . like divide_by_zero error, floating_point_error, which are types of arithmetic exception.
+            exception_traceback: traceback is a report which has all of the information needed to solve the exception
+        """
         if self.acquired:
             os.unlink(self.path)

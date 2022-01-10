@@ -1,7 +1,23 @@
 import sys
 
+"""
+Functionalities for user interaction.
+"""
 
 def select_option_interactive(options,pos=False):
+    """
+    Tool to allow user to select on of the options passed to the function.
+    
+    Parameters:
+        options (list):  List of strings or objects (works as long as str(object) works)
+        pos (bool): If only the position of the answer is of interest.  Optional, default is False.
+    
+    Returns:
+        Option (so string or object) selected by the user. 
+        If pos=True, then only the index of the selected option is returned.
+
+    """
+
      print(f"\n Please select one of the following options!")
      for index, option in zip(range(0,len(options)),options):
         print(f"[{index + 1}]: {option}")

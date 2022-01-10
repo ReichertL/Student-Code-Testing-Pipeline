@@ -9,9 +9,10 @@ import argparse
 class ArgumentExtractor:
     """
     Encapsulates reading arguments from the command line
-    implements:
-    init_parser(self)
-    get_arguments(self)
+    implements.
+    Usage:
+        init_parser(self)
+        get_arguments(self)
     """
 
     def __init__(self):
@@ -20,10 +21,10 @@ class ArgumentExtractor:
 
     def init_parser(self):
         """
-        implements the initialization of an argument parser
+        Implements the initialization of an argument parser
         if you need to read additional commandline arguments,
         please add them here!
-        :return:
+
         """
         self \
             .parser \
@@ -195,12 +196,6 @@ class ArgumentExtractor:
                           help='If used together with '
                                '--details, set exit status'
                                ' to 0 iff displayed abgabe passes')
-#        self \
-#            .parser \
-#            .add_argument('--debug',
-#                          action='store_true',
-#                          help='Enables sending mail only to '
-#                               '"C Programmierprojekt Team" moodle account')
         
         self \
             .parser \
@@ -252,6 +247,7 @@ class ArgumentExtractor:
     def get_arguments(self):
         """
         getter for the parsed arguments as a dictionary
-        :return: parsed args
+        Returns:
+            parsed argsuments
         """
         return self.parser.parse_args()

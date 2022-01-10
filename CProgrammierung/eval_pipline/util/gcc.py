@@ -25,23 +25,22 @@ class DockerError(RuntimeError):
 
 def native_gcc(gcc_args, src, dest):
     """Call gcc to compile C file `src` procuding executable `dest`
+    
+    Parametes:
 
-    arguments:
+        gcc_args (string): all gcc args up to `src -o dest`
 
-    gcc_args : str
-      all gcc args up to `src -o dest`
+        src (string): path of c file
 
-    src : str
-      path of c file
+        dest (string): path of executable
 
-    dest : str
-      path of executable
-
-    RETURNS:
-
-    A tuple
-
-    (commandline : str, return_code : int, gcc_stderr : str)
+    Returns: A tuple
+        
+        commandline (string): Command that was used
+        
+        return_code (int): Return code
+        
+        gcc_stderr (string): Error output of the gcc 
     """
 
     directory = os.path.dirname(dest)
@@ -56,7 +55,6 @@ def native_gcc(gcc_args, src, dest):
              errors='ignore',
              cwd=directory, check=False)
     os.unlink(tmp_c_path)
-    #logging.info('native_gcc "{}" -> {}'.format(src, cp.returncode))
     return ' '.join(all_args), cp.returncode, cp.stderr
 
 
@@ -73,25 +71,26 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     Apart from the additional docker specific arguments, this function's
     interface is identical to `native_gcc`.
 
-    arguments:
+    Parametes::
 
-    gcc_args : str
-      all gcc args up to `src -o dest`
+        gcc_args (string): all gcc args up to `src -o dest`
+        
+        src (string): path of c file
+       
+       dest (string): path of executable
 
-    src : str
-      path of c file
+    Returns: A tuple
+        
+        commandline (string): Command that was used
+        
+        return_code (int): Return code
 
-    dest : str
-      path of executable
-
-    RETURNS:
-
-    A tuple
-
-    (commandline : str, return_code : int, gcc_stderr : str)
+        gcc_stderr (string):  Error output of the gcc 
+    
+    
     """
-    # create shared directory, if it does not exist already:
-
+    
+    # create shared directory, if it does not exist already
     try:
          os.remove(dest)
     except:
@@ -103,10 +102,6 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         pass
     
     if os.listdir(directory):
-        #files= [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
-        #for file in files:
-        #    os.remove(file)
-        #logger.error(f"Directory not empty: '{directory}'")
         raise OSError(f"Directory not empty: '{directory}'")
     
     # create docker container, if it does not exist already
@@ -117,7 +112,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         stdout=DEVNULL,
         stderr=DEVNULL)
    
-    # start docker container if required#
+    # start docker container if required
     cp = run(SUDO_DOCKER + ['start', docker_container], stdout=DEVNULL, stderr=sys.stderr)
     if cp.returncode != 0:
         logging.info(cp)
@@ -138,7 +133,6 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
          f'{commandline} 2> gcc.stderr ; '
          'echo $? > gcc.return ;'
          f'chown {OWN_UID_GID} gcc.stderr gcc.return {os.path.basename(dest)}']
-    #logging.debug(command_full)
     cp=run(command_full,
         stdout=DEVNULL,
         stderr=DEVNULL)
@@ -157,18 +151,35 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         except FileNotFoundError:
             pass
     # clean up copy of c file
-    os.unlink(tmp_c_path)
-    # directory should now be back in its original state, most likely empty
-    #logging.info('docker_gcc "{}" -> {}'.format(src, gcc_returncode))
-    
-    #cp = run(SUDO_DOCKER + ['stop', docker_container],stdout=sys.stdout, stderr=sys.stderr)
-    #if cp.returncode!=0:
-    #   	logging.error(cp)
-    #    logging.error(f'Unable to stop docker container {docker_container} based on docker image {docker_image}.')
+    os.unlink(tmp_c_path))
     return commandline, gcc_returncode, gcc_stderr
 
+
 def hybrid_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
-    #print(gcc_args)
+    """
+    Tests in a docker if the code an be compiled without error warnings.
+    This is because warnings can differ between the same version of docker for different operating systems. 
+    The public reference system available to the students runs a different os than the machine used for evaluation.
+    If there were  no warnings and compilation was successfull, the code is compiled with native gcc.
+    
+    
+    Parametes:
+
+        gcc_args (string):all gcc args up to `src -o dest`
+
+        src (string):path of c file
+
+        dest (sting): path of executable
+
+    Returns: A tuple
+
+        commandline (string): Command that was used
+        
+        return_code (int): Return code
+
+        gcc_stderr (string):  Error output of the gcc 
+    
+    """
     commandline, gcc_returncode, gcc_stderr = docker_gcc(
         gcc_args, src, dest, docker_image, docker_container, directory)
     if gcc_returncode == 0:

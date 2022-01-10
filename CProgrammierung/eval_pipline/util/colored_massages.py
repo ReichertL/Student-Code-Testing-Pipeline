@@ -2,6 +2,11 @@ import sys
 
 from util.colored_strings import ColoredString
 
+"""
+A set of functions for coloring strings for e.g. Passed,Warnings,Failed.
+Colors: red, green ,yellow
+"""
+
 if sys.stdout.isatty():
 
     def red(s):

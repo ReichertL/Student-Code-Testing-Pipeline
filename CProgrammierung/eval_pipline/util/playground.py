@@ -6,6 +6,10 @@ import logging
 from database.students import Student
 from database.submissions import Submission
 
+"""
+Playground to testing new functionalities.
+callable with the -P flag.
+"""
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)

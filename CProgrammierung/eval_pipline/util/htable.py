@@ -27,34 +27,38 @@ _RE_FORMAT_SPEC = re.compile(r'(?:(?P<fill>.)?(?P<align>[<>=^]))?'
 
 def _parse_format_spec(format_spec):
     """
-Parse the string format_spec and return a dict with the following entries:
+    Parse the string format_spec and return a dict with the  entries describing the format.
+    Default values for test_case_type and alignment are set appropriately.
 
-  fill             fill character for padding
-  align            alignment in '<^>='
-  sign             sign in '+- '
-  alternate        alternate form specified
-  zero             whether to pad with zeros
-  width : int      minimum width
-  comma            use comma as thousands seperator
-  precision : int  number of digits after decimal point
-  test_case_type             character describing conversion test_case_type
+    Usage:
 
-Default values for test_case_type and alignment are set appropriately.
+        >>> next(fmt_parse('abc{num!a:>d}'))
+        ('abc', 'num', '>d', 'a')
 
-Examples:
+        >>> _parse_format_spec('d')
+        {'fill': '', 'align': '>', 'sign': None, 'alternate': None, 'zero': None,\
+        'width': None, 'comma': None, 'precision': None, 'test_case_type': 'd'}
 
->>> next(fmt_parse('abc{num!a:>d}'))
-('abc', 'num', '>d', 'a')
+        >>> _parse_format_spec('=^-#06,.3f')
+        {'fill': '=', 'align': '^', 'sign': '-', 'alternate': '#', 'zero': '0',\
+        'width': '6', 'comma': ',', 'precision': '3', 'test_case_type': 'f'}
 
->>> _parse_format_spec('d')
-{'fill': '', 'align': '>', 'sign': None, 'alternate': None, 'zero': None,\
- 'width': None, 'comma': None, 'precision': None, 'test_case_type': 'd'}
+    Parameters:
+        format_spec (string): sring containing format description.
+    
+    Returns: dict containing
+        fill (string):           fill character for padding
+        align (string):          alignment in '<^>='
+        sign (string)            sign in '+- '
+        alternate (string):      alternate form specified
+        zero (bool):             whether to pad with zeros
+        width (int):             minimum width
+        comma (string):          use comma as thousands seperator
+        precision (int):         number of digits after decimal point
+        test_case_type (string): character describing conversion test_case_type
 
->>> _parse_format_spec('=^-#06,.3f')
-{'fill': '=', 'align': '^', 'sign': '-', 'alternate': '#', 'zero': '0',\
- 'width': '6', 'comma': ',', 'precision': '3', 'test_case_type': 'f'}
 
-"""
+    """
 
     match_object = _RE_FORMAT_SPEC.match(format_spec)
     if match_object is None:
@@ -74,16 +78,24 @@ Examples:
 
 def _pad(s: str, width: int, alignment: str, fill):
     """Pad the string s to the given width, using alignemnt and fill.
->>> _pad('abc', 5, '>', '')
-'  abc'
->>> _pad('abc', 5, '<', '')
-'abc  '
->>> _pad('abc', 5, '^', '#')
-'#abc#'
->>> _pad('ab', 1, '>', '')
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-ValueError: "ab" is longer than 1
+    Usage:
+        >>> _pad('abc', 5, '>', '')
+        '  abc'
+        >>> _pad('abc', 5, '<', '')
+        'abc  '
+        >>> _pad('abc', 5, '^', '#')
+        '#abc#'
+        >>> _pad('ab', 1, '>', '')
+        Traceback (most recent call last):
+        File "<stdin>", line 1, in <module>
+        ValueError: "ab" is longer than 1
+    
+    Parameters:
+        s (string): string to be padded. Has to be shorter than width.
+        width (int): Width to which the string is padded.
+        alignemnt (string):  TODO
+        fill (string): TODO
+    
     """
     if width < len(s):
         raise ValueError('"{}" is longer than {:d}'.format(s, width))
@@ -92,13 +104,21 @@ ValueError: "ab" is longer than 1
 
 def _format_is_float(fspec):
     """Return if test_case_type is 'f' and precision unequal to zero.
-
->>> _format_is_float({'test_case_type': 'f', 'precision': None})
-True
->>> _format_is_float({'test_case_type': 'f', 'precision': '0'})
-False
->>> _format_is_float({'test_case_type': 'f', 'precision': '1'})
-True
+    Usage:
+    
+        >>> _format_is_float({'test_case_type': 'f', 'precision': None})
+        True
+        >>> _format_is_float({'test_case_type': 'f', 'precision': '0'})
+        False
+        >>> _format_is_float({'test_case_type': 'f', 'precision': '1'})
+        True
+    
+    Parameters:
+        fspec (dict) : Dict containing test_case_type and precision
+    
+    Returns: 
+        "f" or None
+    
     """
     prec = fspec['precision']
     return fspec['test_case_type'] == 'f' and (prec is None or int(prec) > 0)
@@ -106,8 +126,19 @@ True
 
 def list_from_dict(keys, dictionary):
     """
->>> list_from_dict([1,3,2], {1: 'a', 2: 'b', 3: 'c'})
-['a', 'c', 'b']
+    Creates List from dict.
+    
+    Usage:
+        >>> list_from_dict([1,3,2], {1: 'a', 2: 'b', 3: 'c'})
+        ['a', 'c', 'b']
+    
+    Parameters:
+        keys (list): Keys of the dict (can also only be a subset)
+        
+        dictionary (dict) : dict which contains the keys and values.
+        
+    Returns:
+        list of values which correspond to the keys 
     """
     if isinstance(dictionary, dict):
         return [dictionary[k] for k in keys if k]
@@ -115,9 +146,22 @@ def list_from_dict(keys, dictionary):
 
 
 def format_or_empty(value, fmt, spec):
-    """Format `value` according to `fmt`. Return `''` if `value` is `None`.
-
+    """
+    Format `value` according to `fmt`. Return `''` if `value` is `None`.
     If spec['test_case_type'] is 's' (string), just return value.
+    
+    Parameters:
+        
+        value (): TODO
+        
+        fmt (string): format string
+        
+        spec (dict): contains the specification of a testcase
+        
+    returns:
+    
+        '' or value or value formatted with fmt
+    
     """
     if value is None:
         return ''
@@ -128,54 +172,68 @@ def format_or_empty(value, fmt, spec):
 
 def table_format(row_fmt, rows, titles=None, html=False, highlight=None):
     """
-Create an ASCII (or HTML) table using python format string syntax.
+    Create an ASCII (or HTML) table using python format string syntax.
 
-Given one format string fmt and a sequence of value dicts rows = [d0, d1, ...],
-such that fmt.format(**d0), fmt.format(**d1), ... produce the desired
-output. `tableformat(fmt, rows, ...)` will return an ASCII table with constant
-width columns.
+    Given one format string fmt and a sequence of value dicts rows = [d0, d1, ...],
+    such that fmt.format(**d0), fmt.format(**d1), ... produce the desired
+    output. `tableformat(fmt, rows, ...)` will return an ASCII table with constant
+    width columns.
 
-Additional features:
-    - `rows` may be a list of lists as well (positional format strings)
-    - a titles row may be added
-    - html output can be generated
+    Additional features:
+        - `rows` may be a list of lists as well (positional format strings)
+        - a titles row may be added
+        - html output can be generated
 
-Examples:
->>> fmt = '| {num:3d} | {string:>5s} |'
->>> val = [{'num': 23, 'string': 'abcdef'}, \
-           {'num': 123456, 'string': 'ghi'}]
->>> print(fmt.format(**val[0]))
-|  23 | abcdef |
+    Usage:
+        >>> fmt = '| {num:3d} | {string:>5s} |'
+        >>> val = [{'num': 23, 'string': 'abcdef'}, \
+                {'num': 123456, 'string': 'ghi'}]
+        >>> print(fmt.format(**val[0]))
+        |  23 | abcdef |
 
->>> print(fmt.format(**val[1]))
-| 123456 |   ghi |
+        >>> print(fmt.format(**val[1]))
+        | 123456 |   ghi |
 
->>> print(table_format(fmt, val))
-|     23 | abcdef |
-| 123456 |    ghi |
-<BLANKLINE>
+        >>> print(table_format(fmt, val))
+        |     23 | abcdef |
+        | 123456 |    ghi |
+        <BLANKLINE>
 
->>> print(table_format(fmt, val, titles='auto'))
-|    num | string |
--------------------
-|     23 | abcdef |
-| 123456 |    ghi |
-<BLANKLINE>
+        >>> print(table_format(fmt, val, titles='auto'))
+        |    num | string |
+        -------------------
+        |     23 | abcdef |
+        | 123456 |    ghi |
+        <BLANKLINE>
 
->>> print(table_format(fmt, val, titles=['first', 'second']))
-|  first | second |
--------------------
-|     23 | abcdef |
-| 123456 |    ghi |
-<BLANKLINE>
+        >>> print(table_format(fmt, val, titles=['first', 'second']))
+        |  first | second |
+        -------------------
+        |     23 | abcdef |
+        | 123456 |    ghi |
+        <BLANKLINE>
 
-Using pure positional format strings:
->>> fmt_list = '| {:3d} | {:>5s} |'
->>> val_list = [[23, 'abcdef'], [123456, 'ghi']]
->>> print(table_format(fmt_list, val_list))
-|     23 | abcdef |
-| 123456 |    ghi |
-<BLANKLINE>
+        Using pure positional format strings:
+        >>> fmt_list = '| {:3d} | {:>5s} |'
+        >>> val_list = [[23, 'abcdef'], [123456, 'ghi']]
+        >>> print(table_format(fmt_list, val_list))
+        |     23 | abcdef |
+        | 123456 |    ghi |
+        <BLANKLINE>
+        
+    Parameters:
+        row_fmt (string): format string. 
+        
+        rows (list of dicts):  Each dict is one row of information.
+        
+        titles (list of strings): Tiltes for the table rows. Optional, default is None.
+        
+        html (bool): Weather to return an html table. Optional, default is False. 
+        
+        highlight (bool): When html  is true. Which column to highlight. Optional, default is None. TODO
+        
+    Returns:
+        table as string
 
     """
     if not row_fmt.endswith('\n'):
@@ -213,7 +271,7 @@ Using pure positional format strings:
                 reslist.append(_pad(s, length, fspec['align'], fspec['fill']))
             reslist.append(formats[-1][0])
         return ''.join(reslist)
-    # this html mode is a pile of crap
+    # Todo: improve html mode here
     table = HtmlTable(fspecs, highlight=highlight)
     table.add_titles(titles)
     for row in rows:
@@ -235,7 +293,7 @@ def css_align(fspec) -> str:
 
 
 class HtmlTable:
-    """Ugly html table formatter.
+    """Html table formatter.
 
     Inline CSS is required, because we want to be able to paste it into
     moodle.

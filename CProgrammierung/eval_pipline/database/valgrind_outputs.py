@@ -51,6 +51,13 @@ class Valgrind_Output(Base):
 
     @classmethod
     def create_or_get(self, tcr_id):
+        """
+        Creates a new Valgrind_Output in table "Valgrind_Output" or returns the existing entry with the same testcase result ID.
+        Parameters:
+            tcr_id (int): ID of a Testcase_Result in table "Testcase_Result"
+        Returns:
+            Valgrind_Output object
+        """
         output=dbm.session.query(Valgrind_Output).filter(Valgrind_Output.testcase_result_id==tcr_id).first()
         if output==None:
             output=Valgrind_Output(tcr_id)

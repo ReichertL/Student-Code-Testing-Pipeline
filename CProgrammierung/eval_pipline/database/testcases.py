@@ -16,7 +16,13 @@ logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 class Testcase(Base):
     __tablename__ = 'Testcase'
-    type_options= ["GOOD","BAD","PERFORMANCE", "BAD_OR_OUTPUT", "EXTRA"]
+    # GOOD testcases: Students code should produce correct result for this testcase. 
+    # BAD testcases: Students code should fail gracefully for this testcase.
+    # BAD_OR_OUTPUT: Students code should either produce the correct output or fail greacefully. 
+    # PERFORMANCE: Testcases for performance evaluation. TODO not fully implemented.
+    # UNSPEZIFIED: If type of testcase could not be decerned when parsing the corresponding files.
+    type_options= ["GOOD","BAD","PERFORMANCE", "BAD_OR_OUTPUT", "PERFORMANCE", "UNSPEZIFIED"]
+    
     #Columns for the table "Testcase"
     id = Column(Integer, primary_key =  True)
     path = Column(String, nullable=False)
@@ -24,7 +30,7 @@ class Testcase(Base):
     short_id = Column(String,nullable=False, unique=True)
     description = Column(String,nullable=False)
     hint = Column(String,nullable=False)
-    type = Column(String,nullable=False)
+    type = Column(String,nullable=False) #Descibes what the expected outcome of the testcase is. Either GOOD, BAD or BAD_OR_OUTPUT 
     rlimit=Column(Integer)  
     test_case_results = relationship("Testcase_Result")
    
@@ -50,6 +56,19 @@ class Testcase(Base):
     
 
     def update( self,path, short_id, description, hint, type, valgrind_needed, rlimit):
+        """
+        Update a testcase object. Does not commit to database! 
+        Parameters:
+            path (string): path to testcase
+            short_id (string): short name of testcase
+            description (string): description of testcase
+            hint (string) : Hint used for creating mails for students
+            type (string) : Descibes what the expected outcome of the testcase is. Either GOOD, BAD or BAD_OR_OUTPUT
+            valgrind_needed (bool): If it is necessary to check valgrind output for this testcase.
+            rlimit (int):  the memory limit for this testcase
+        Returns:
+            Nothing
+        """
         self.path=path
         self.valgrind_needed=valgrind_needed
         self.short_id=short_id
@@ -60,35 +79,23 @@ class Testcase(Base):
         
 
     @classmethod    
-    def get_all(cls):
-        testcases=dbm.session.query(Testcase).all()
-        return testcases  
-
-        
-    @classmethod    
-    def get_all_bad (cls):
-        testcases=dbm.session.query(Testcase).filter(Testcase.type=="BAD").all()
-        return testcases        
-
-       
-    @classmethod    
-    def get_all_good(cls):
-        testcases=dbm.session.query(Testcase).filter_by(type="GOOD").all()
-        return testcases    
-
-    @classmethod    
-    def get_all_bad_or_output(cls):
-        testcases=dbm.session.query(Testcase).filter_by(type="BAD_OR_OUTPUT").all()
-        return testcases   
-        
-    @classmethod        
-    def get_all_performance(cls):
-        testcases=dbm.session.query(Testcase).filter_by(type="PERFORMANCE").all()
-        return testcases    
-
-    @classmethod    
     def create_or_update(cls,path, short_id, description, hint, type, valgrind=True,rlimit=None):
-        #logging.debug("create or update")
+        """
+        Updates testcase or creates it if it does not exist in the database. 
+        Checks by using path,short_id, description, hint, type, valgrind_needed, and rlimit.
+        
+        Parameters:
+            path (string): path to testcase
+            short_id (string): short name of testcase
+            description (string): description of testcase
+            hint (string) : Hint used for creating mails for students
+            type (string) : Descibes what the expected outcome of the testcase is. Either GOOD, BAD or BAD_OR_OUTPUT
+            valgrind_needed (bool): If it is necessary to check valgrind output for this testcase. Optional.
+            rlimit (int): The memory limit for this testcase. Optional.
+        Returns:
+            Nothing
+        """
+
         tc_exists=dbm.session.query(Testcase).filter(Testcase.short_id==short_id,Testcase.path==path, Testcase.valgrind_needed==valgrind, Testcase.description==description, Testcase.hint==hint, Testcase.type==type, Testcase.rlimit==rlimit).count()
         if tc_exists==0:
             similar=dbm.session.query(Testcase).filter(Testcase.short_id==short_id).first()
@@ -101,14 +108,86 @@ class Testcase(Base):
                 dbm.session.add(new_testcase)
                 dbm.session.commit()            
             logging.info("New testcase inserted or altered one upgedated.")
+            
+    @classmethod    
+    def get_all(cls):
+        """
+        Returns all testcases.
+        Parameters:None
+        Returns:
+            List of Testcase objects
+        """
+        testcases=dbm.session.query(Testcase).all()
+        return testcases  
+
+        
+    @classmethod    
+    def get_all_bad (cls):
+        """
+        Returns all testcases with type "BAD".
+        Parameters:None
+        Returns:
+            List of Testcase objects
+        """
+        testcases=dbm.session.query(Testcase).filter(Testcase.type=="BAD").all()
+        return testcases        
+
+       
+    @classmethod    
+    def get_all_good(cls):
+        """
+        Returns all testcases with type "GOOD".
+        Parameters:None
+        Returns:
+            List of Testcase objects
+        """
+        testcases=dbm.session.query(Testcase).filter_by(type="GOOD").all()
+        return testcases    
+
+    @classmethod    
+    def get_all_bad_or_output(cls):
+        """
+        Returns all testcases with type "BAD_OR_OUTPUT".
+        Parameters:None
+        Returns:
+            List of Testcase objects
+        """
+        testcases=dbm.session.query(Testcase).filter_by(type="BAD_OR_OUTPUT").all()
+        return testcases   
+        
+    @classmethod        
+    def get_all_performance(cls):
+        """
+        Returns all testcases with type "PERFORMANCE".
+        Parameters:None
+        Returns:
+            List of Testcase objects
+        """
+        testcases=dbm.session.query(Testcase).filter_by(type="PERFORMANCE").all()
+        return testcases    
+
 
     @classmethod
     def get_by_ID(id):
+        """
+        Returns a testcase given a testcase ID
+        Parameters:
+            id (int) : ID of the testcase
+        Returns:
+            Single Testcase objects or None if ID does not exist.
+        """
         testcase=dbm.session.query(Testcase).filter(Testcase.id==id).first()
-        return testcases
+        return testcase
             
     @classmethod
     def get_by_shortID(short_id):
+        """
+        Returns a testcase given a testcase short IDs.
+        Parameters:
+            short_id (string) : name of the testcase
+        Returns:
+            Single Testcase objects or None if short ID not found.
+        """
         testcase=dbm.session.query(Testcase).filter(Testcase.short_id==short_id).first()
         return testcases
 

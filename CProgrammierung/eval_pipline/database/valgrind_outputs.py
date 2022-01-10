@@ -1,13 +1,16 @@
+"""
+SQL Alchemy classed used to create table "Valgrind_Output". Also contains functions that query the database for table "Valgrind_Output".
+"""
+
 from sqlalchemy import *
 from database.base import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
-
 import database.database_manager as dbm
 
 class Valgrind_Output(Base):
     __tablename__ = 'Valgrind_Output'
-   
+    # Columns for the table "Valgrind_Output"
     id = Column(Integer, primary_key =  True)
     testcase_result_id=Column(Integer,  ForeignKey("Testcase_Result.id"),nullable=False)
     ok=Column(Boolean, default=False,server_default=expression.false())               #

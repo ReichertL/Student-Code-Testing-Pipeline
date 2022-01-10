@@ -1,10 +1,13 @@
-import logging
+"""
+SQL Alchemy classed used to create table "Testcase". Also contains functions that query the database for table "Testcase".
+"""
 
+
+import logging
 from sqlalchemy import *
 from database.base import Base 
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
-
 import database.database_manager as dbm
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
@@ -13,9 +16,8 @@ logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 class Testcase(Base):
     __tablename__ = 'Testcase'
-    type_options= ["GOOD","BAD","PERFORMANCE", "BAD_OR_OUTPUT", "EXTRA"]    
-
-
+    type_options= ["GOOD","BAD","PERFORMANCE", "BAD_OR_OUTPUT", "EXTRA"]
+    #Columns for the table "Testcase"
     id = Column(Integer, primary_key =  True)
     path = Column(String, nullable=False)
     valgrind_needed = Column(Boolean,default=True,server_default=expression.true())

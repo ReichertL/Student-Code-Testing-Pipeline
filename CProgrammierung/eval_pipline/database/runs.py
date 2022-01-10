@@ -1,12 +1,13 @@
+"""
+SQL Alchemy classed used to create table "Run". Also contains functions that query the database for table "Run".
+"""
+
 import logging
 from functools import cmp_to_key
-
 from sqlalchemy import *
 from database.base import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
-
-
 import database.database_manager as dbm
 from database.testcase_results import Testcase_Result
 from database.valgrind_outputs import Valgrind_Output
@@ -21,7 +22,7 @@ logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 class Run(Base):
     __tablename__ = 'Run'
-   
+    #Columns of table "Run"
     id = Column(Integer, primary_key =  True)
     submission_id=Column(Integer,  ForeignKey("Submission.id"),nullable=False)
     careless_flag = Column(Boolean, default=False,server_default=expression.false())
@@ -36,6 +37,15 @@ class Run(Base):
     testcase_results = relationship("Testcase_Result", backref="Run.id")
    
     def __init__(self, submission_id, command_line, careless_flag, compilation_return_code,compiler_output):   
+        """
+        Create new row for table "Run".
+        Parameters:
+            submission_id (int): ID of the submission corresponding to this run.
+            command_line (string): Command used to compile submission.
+            careless_flag (bool): If the careless flag was set to true.  This means warnings are ignored.
+            compilation_return_code (int): Return code from compiling the submission
+            compiler_output (string): Output of compiler when finished. If there are warnings and erros, they will be contained in this string.
+        """
         self.submission_id = submission_id
         self.command_line=command_line
         self.careless_flag=careless_flag
@@ -57,6 +67,13 @@ class Run(Base):
    
     @classmethod
     def is_passed(cls,r):
+        """
+        Check for run r if it is  passed.
+        Parameters:
+            r (Run object)
+        Returns:
+            Boolean
+        """
         count=dbm.session.query(Testcase_Result)\
             .join(Valgrind_Output, isouter=True)\
             .filter(Testcase_Result.run_id==r.id)\
@@ -67,6 +84,14 @@ class Run(Base):
 
     @classmethod
     def insert_run(cls,run):
+        """
+        Inserts a run into table "Run" if it does not already exist. Checks submission_id, command_line and careless_flag.
+        Parameters:
+            rum (Run object)
+        Returns:
+            run if it did not exist or the existing run from the database.
+        """
+        
         exists=dbm.session.query(Run).filter(Run.submission_id==run.submission_id, Run.command_line==run.command_line, Run.careless_flag==run.careless_flag).first()
         if exists==None:
             dbm.session.add(run)
@@ -76,6 +101,13 @@ class Run(Base):
     
     @classmethod
     def get_last_for_submission(cls,submission):
+        """
+        Gets last run for a specific submission which passed. 
+        Parameters:
+            submission (Submission object)
+        Returns:
+            run or None        
+        """
         run=dbm.session.query(Run).filter(Run.submission_id==submission.id, Run.passed==True).order_by(Run.execution_time.desc()).first()
         if run==None:
             run=dbm.session.query(Run).filter(Run.submission_id==submission.id).order_by(Run.execution_time.desc()).first()
@@ -83,27 +115,44 @@ class Run(Base):
 
     @staticmethod
     def comperator_performance(run1,run2):
-        t1=Testcase_Result.get_avg_runtime_performance(run1)
-        t2=Testcase_Result.get_avg_runtime_performance(run2)
+        """
+        Compares performance of two runs using the avarage runtime (over all testcases). WARNING: This function probalby has issues.
+        Parameters:
+            run1 (Run object)
+            run2 (Run object)
+        returns
+            Difference of avarage runtimes for the two runs.
+        """
+        t1=Testcase_Result.get_avg_runtime_performance(run1) # TODO requires keylist
+        t2=Testcase_Result.get_avg_runtime_performance(run2) # TODO requires keylist
         return t2-t1
           
    
 
     @classmethod
     def get_fastest_run_for_student(self,name, keylist):
+        """
+        Gets the fastest run for a student.
+        Parameters:
+            name (string): name of the student as in database.
+            keylist (list of ints): List of testcase IDs to use for calculating the avarage runtime
+            
+        Returns:
+            None if no runs are found or if there are no runs which were not manually set to "Passed"
+            else, the fastest_run (Run object) the fastest run for this student 
+                
+        """
         logging.debug(name)
         results=dbm.session.query(Run, sub.Submission)\
             .join(sub.Submission).join(stud.Student)\
             .filter(Run.passed==True)\
             .filter(sub.Submission.is_fast==True, stud.Student.name==name).all()
         performance=list()
-        #logging.debug(results)
         for run,submission in results:
             time=Testcase_Result.get_avg_runtime_performance(run, keylist)
             space=Testcase_Result.get_avg_space_performance(run, keylist)
             if run.manual_overwrite_passed!=True:
                 performance.append([run, submission, time, space])
-        #logging.debug(performance)
         if len(performance)>0:
             fastest_run=performance[0]
             fastest_time=Testcase_Result.get_avg_runtime_performance(run, keylist)

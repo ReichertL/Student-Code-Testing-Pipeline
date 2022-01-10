@@ -1,9 +1,12 @@
-import logging
+"""
+SQL Alchemy classed used to create table "Testcase_Result". Also contains functions that query the database for table "Testcase_Result".
+"""
 
+
+import logging
 from sqlalchemy import *
 from database.base import Base
 from sqlalchemy.orm import relationship
-
 from database.testcases import Testcase
 from database.valgrind_outputs import Valgrind_Output
 import database.database_manager as dbm
@@ -14,7 +17,7 @@ logging.basicConfig(format=FORMAT,level=logging.DEBUG)
 
 class Testcase_Result(Base):
     __tablename__ = 'Testcase_Result'
-   
+    # Columns for the table "Testcase_Result"
     id = Column(Integer, primary_key =  True)
     run_id=Column(Integer,  ForeignKey("Run.id"),nullable=False)
     testcase_id=Column(Integer,  ForeignKey("Testcase.id"),nullable=False)

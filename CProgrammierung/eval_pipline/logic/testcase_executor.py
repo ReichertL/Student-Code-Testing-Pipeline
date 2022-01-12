@@ -390,7 +390,20 @@ class TestCaseExecutor:
         return result, valgrind_output
 
     def get_limits(self, testcase):
-        if not self.args.final and testcase.rlimit==None:
+        """
+        Returns resource limits based on command line flags and the testcase.
+        Testcases can have their individual resource limits which can be set in the .json file
+        which corresponds to the testcase.
+
+        Parameters:
+            testcase (Testcase object): Testcase for which the
+
+        Returns:
+            List of Integers, representing limits for the data segment of the process, the stack size
+            and the available CPU resources
+
+        """
+        if not self.args.final and testcase.rlimit is None:
             return [self.configuration["RLIMIT_DATA"], self.configuration["RLIMIT_STACK"],
                     self.configuration["RLIMIT_CPU"]]
         elif not self.args.final:
@@ -403,9 +416,10 @@ class TestCaseExecutor:
 
     def set_limits(self):
         """
-        Sets runtime ressources depending on the possible
-        final flag
-        nothing
+        Sets runtime resources for a process using the global variable limits.
+        Run for the subprocess before a testcase is executed for a submission.
+        Parameters: None
+        Returns: Nothing
         """
         global limits
         resource.setrlimit(resource.RLIMIT_DATA, 2*(limits[0],))

@@ -1,7 +1,7 @@
 import re
 import logging
 
-from database.valgrind_outputs import Valgrind_Output
+from database.valgrind_outputs import ValgrindOutput
 
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
 logging.basicConfig(format=FORMAT,level=logging.DEBUG)
@@ -72,10 +72,10 @@ class ResultParser:
         Parses valgrind output created by executing a students submission.
         
         Parameters:
-            res (Valgrind_Output object):
+            res (ValgrindOutput object):
             lines (): Contents of valgrind output
         Returns:
-            res (Valgrind_Output object). Sets in res the values:
+            res (ValgrindOutput object). Sets in res the values:
                 - ok
                 - in_use_at_exit_bytes
                 - total_heap_usage_allocs

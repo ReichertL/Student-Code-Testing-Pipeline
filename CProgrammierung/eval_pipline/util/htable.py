@@ -22,13 +22,13 @@ _RE_FORMAT_SPEC = re.compile(r'(?:(?P<fill>.)?(?P<align>[<>=^]))?'
                              r'(?P<width>\d+)?'
                              r'(?P<comma>,)?'
                              r'(?:\.(?P<precision>\d+))?'
-                             r'(?P<test_case_type>[a-zA-Z%])?')
+                             r'(?P<testcase_type>[a-zA-Z%])?')
 
 
 def _parse_format_spec(format_spec):
     """
     Parse the string format_spec and return a dict with the  entries describing the format.
-    Default values for test_case_type and alignment are set appropriately.
+    Default values for testcase_type and alignment are set appropriately.
 
     Usage:
 
@@ -37,11 +37,11 @@ def _parse_format_spec(format_spec):
 
         >>> _parse_format_spec('d')
         {'fill': '', 'align': '>', 'sign': None, 'alternate': None, 'zero': None,\
-        'width': None, 'comma': None, 'precision': None, 'test_case_type': 'd'}
+        'width': None, 'comma': None, 'precision': None, 'testcase_type': 'd'}
 
         >>> _parse_format_spec('=^-#06,.3f')
         {'fill': '=', 'align': '^', 'sign': '-', 'alternate': '#', 'zero': '0',\
-        'width': '6', 'comma': ',', 'precision': '3', 'test_case_type': 'f'}
+        'width': '6', 'comma': ',', 'precision': '3', 'testcase_type': 'f'}
 
     Parameters:
         format_spec (string): sring containing format description.
@@ -55,7 +55,7 @@ def _parse_format_spec(format_spec):
         width (int):             minimum width
         comma (string):          use comma as thousands seperator
         precision (int):         number of digits after decimal point
-        test_case_type (string): character describing conversion test_case_type
+        testcase_type (string): character describing conversion testcase_type
 
 
     """
@@ -64,12 +64,12 @@ def _parse_format_spec(format_spec):
     if match_object is None:
         raise ValueError()
     res = match_object.groupdict()
-    if res['test_case_type'] is None:  # the default test_case_type is 's'
-        res['test_case_type'] = 's'
+    if res['testcase_type'] is None:  # the default testcase_type is 's'
+        res['testcase_type'] = 's'
     if res['fill'] is None:
         res['fill'] = ''
     if res['align'] is None:  # assign the default alignment
-        if res['test_case_type'] in 'bcdoxXneEfFgGn%':
+        if res['testcase_type'] in 'bcdoxXneEfFgGn%':
             res['align'] = '>'
         else:
             res['align'] = '<'
@@ -103,25 +103,25 @@ def _pad(s: str, width: int, alignment: str, fill):
 
 
 def _format_is_float(fspec):
-    """Return if test_case_type is 'f' and precision unequal to zero.
+    """Return if testcase_type is 'f' and precision unequal to zero.
     Usage:
     
-        >>> _format_is_float({'test_case_type': 'f', 'precision': None})
+        >>> _format_is_float({'testcase_type': 'f', 'precision': None})
         True
-        >>> _format_is_float({'test_case_type': 'f', 'precision': '0'})
+        >>> _format_is_float({'testcase_type': 'f', 'precision': '0'})
         False
-        >>> _format_is_float({'test_case_type': 'f', 'precision': '1'})
+        >>> _format_is_float({'testcase_type': 'f', 'precision': '1'})
         True
     
     Parameters:
-        fspec (dict) : Dict containing test_case_type and precision
+        fspec (dict) : Dict containing testcase_type and precision
     
     Returns: 
         "f" or None
     
     """
     prec = fspec['precision']
-    return fspec['test_case_type'] == 'f' and (prec is None or int(prec) > 0)
+    return fspec['testcase_type'] == 'f' and (prec is None or int(prec) > 0)
 
 
 def list_from_dict(keys, dictionary):
@@ -148,7 +148,7 @@ def list_from_dict(keys, dictionary):
 def format_or_empty(value, fmt, spec):
     """
     Format `value` according to `fmt`. Return `''` if `value` is `None`.
-    If spec['test_case_type'] is 's' (string), just return value.
+    If spec['testcase_type'] is 's' (string), just return value.
     
     Parameters:
         
@@ -165,7 +165,7 @@ def format_or_empty(value, fmt, spec):
     """
     if value is None:
         return ''
-    if spec['test_case_type'] in 's':
+    if spec['testcase_type'] in 's':
         return value
     return format(value, fmt)
 

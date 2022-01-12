@@ -23,7 +23,7 @@ from moodle.moodle_session import MoodleSession
 from database.submissions import Submission
 from database.students import Student
 from database.runs import Run
-from database.testcase_results import Testcase_Result
+from database.testcase_results import TestcaseResult
 
 import database.database_manager as dbm
 
@@ -109,18 +109,18 @@ class MoodleReporter:
                 good_failed_desc = {}
                 bad_or_out_failed_desc ={}
 
-                failed_bad=Testcase_Result.get_failed_bad(run)
+                failed_bad=TestcaseResult.get_failed_bad(run)
                 failed_bad.sort(key=lambda x: x[1].short_id)
                 for result,testcase,valgrind in failed_bad:
                     bad_failed_desc=self.get_failed_description( result,testcase, valgrind, bad_failed_desc)
                     #logging.debug(bad_failed_desc)
 
-                failed_good=Testcase_Result.get_failed_good(run)
+                failed_good=TestcaseResult.get_failed_good(run)
                 failed_good.sort(key=lambda x: x[1].short_id)
                 for result,testcase,valgrind in failed_good:
                     good_failed_desc=self.get_failed_description( result,testcase,valgrind,good_failed_desc)
 
-                failed_bad_or_out=Testcase_Result.get_failed_output_bad_or_output(run)
+                failed_bad_or_out=TestcaseResult.get_failed_output_bad_or_output(run)
                 failed_bad_or_out.sort(key=lambda x: x[1].short_id)
                 for result,testcase in failed_bad_or_out:
                     bad_or_out_failed_desc=self.get_failed_description( result,testcase,valgrind,bad_or_out_failed_desc)
@@ -305,7 +305,7 @@ class MoodleReporter:
             if self.args.verbose:
                 logging.info("Mailing everybody who hasn't "
                       "received a mail for the latest submission yet")
-            to_mail = Submission.get_sumbissions_for_notification()
+            to_mail = Submission.get_submissions_for_notification()
                 
         
         if len(self.args.mailto) > 0:

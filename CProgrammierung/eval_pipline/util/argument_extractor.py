@@ -204,16 +204,16 @@ class ArgumentExtractor:
                           action='store_true',
                           help='Generates a full .csv file with grading for moodle'
                                'and a separate .csv file for students '
-                               'which passed the abtestat')
+                               'which passed the oral exam')
 
         self \
             .parser \
-            .add_argument('-A', '--Abtestat',
-                          dest="abtestat",
+            .add_argument('-E', '--exam',
+                          dest="oralexam",
                           nargs='*',
                           type=str,
                           default=[],
-                          help='Sets a list of students as abtestat done.'
+                          help='Record for a list of students that they have completed the oral exam.'
                                 ' Usage: check -A "Firstname Lastname"' )
 
         self \
@@ -223,7 +223,7 @@ class ArgumentExtractor:
                           nargs='*',
                           type=str,
                           default=[],
-                          help='Reverts abtestat state for the students given.' 
+                          help='Record for a list of students that they have NOT completed the oral exam. This can be used to revert an earlier operation with the -A flag.' 
                           ' Usage: check -R "Firstname Lastname"')
 
         self \

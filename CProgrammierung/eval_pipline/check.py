@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
 """
-driver program, that encapsulates business logic and controls based on
+This is a driver program, that encapsulates business logic and controls based on
 commandline arguments the behavior of the evaluation of student
-submissionsParameter: none, reads commandline arguments to determine behavior
+submissions.
+
+Parameters: 
+    none, reads commandline arguments to determine behavior
 """
 import os
 import traceback
@@ -14,95 +17,99 @@ from datetime import datetime
 from moodle.database_integrator import DatabaseIntegrator
 from moodle.moodle_reporter import MoodleReporter
 from moodle.moodle_submission_fetcher import MoodleSubmissionFetcher
-from database.database_manager import DatabaseManager 
+from database.database_manager import DatabaseManager
 from logic.performance_evaluator import PerformanceEvaluator
 from logic.result_generator import ResultGenerator
-from logic.test_case_executor import TestCaseExecutor
-from logic.abtestat_functions import AbtestatFunctions
+from logic.testcase_executor import TestCaseExecutor
+from logic.oralexam_functions import OralExamFunctions
 from logic.mark_manual import Manual
-from logic.execute_single import execute_singel_testcase
+from logic.execute_single import execute_single_testcase
 from util.argument_extractor import ArgumentExtractor
 from util.lockfile import LockFile
 from util.playground import Playground
 
-
-LOCK_FILE_PATH = '/run/lock/check.lock'
+LOCK_FILE_PATH='/run/lock/check.lock'
 FORMAT="[%(filename)s:%(lineno)s - %(funcName)s() ] %(message)s"
-logging.basicConfig(format=FORMAT,level=logging.DEBUG)
-
+logging.basicConfig(format=FORMAT, level=logging.DEBUG)
 
 args=None
 
+
 def run():
     """
-    Reading commandline arguments,
-    due to readability extracted to separate module and invokes
-    in args specified functionality
+    Reading commandline arguments.
+    Uses separate module and  the passed commandline arguments to run the specified functionality.
     """
     now=datetime.now()
-    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    dt_string=now.strftime("%d/%m/%Y %H:%M:%S")
 
-    logging.info(f"\n-----------------------------------------------------------\nEval Pipline  (Current Time: {dt_string})")
-    
+    logging.info(
+        f"\n-----------------------------------------------------------\nEval Pipline  (Current Time: {dt_string})")
+
     try:
-
-                
-        argument_extractor = ArgumentExtractor()
+        # extracting commandline arguments
+        argument_extractor=ArgumentExtractor()
         global args
-        args = argument_extractor.get_arguments()
-        database_manager=DatabaseManager()        
-        ##database_manager = SQLiteDatabaseManager()
-        ##database_manager.create()
+        args=argument_extractor.get_arguments()
+        database_manager=DatabaseManager()
+
+        # If -f or --fetch-only: Fetch new submission from moodle.
+        # If not fetch only also executes and evaluates them
         if args.fetch or args.fetch_only:
-            # Execute Submission Fetching if needed determined by the provided args
-            fetcher = MoodleSubmissionFetcher(args)
+            fetcher=MoodleSubmissionFetcher(args)
             fetcher.run()
-            database_integrator = DatabaseIntegrator()
+            database_integrator=DatabaseIntegrator()
             database_integrator.integrate_submission_dir()
 
             if not args.fetch_only:
-                # Execute test cases if needed determined by the provided args
-                executor = TestCaseExecutor(args)
+                # Execute test cases 
+                executor=TestCaseExecutor(args)
                 executor.run()
-        # Send Moodle feedback to students if needed determined by args
-        if args.mail_to_all or len(args.mailto) > 0:
-            reporter = MoodleReporter(args)
+
+        # Send Moodle feedback to students. Requires flag -m or flag -M  and a student name. 
+        if args.mail_to_all or len(args.mailto)>0:
+            reporter=MoodleReporter(args)
             reporter.run()
 
-        # marks students as abtestat done or reverts this operation
-        if len(args.abtestat) > 0:
-            abtestat_func=AbtestatFunctions(args)
-            abtestat_func.abtestat_mark_as_done(args.abtestat)
-            
-        if len(args.revert) > 0:
-            abtestat_func=AbtestatFunctions(args)
-            abtestat_func.abtestat_revert( args.revert)
+        # Marks oral exam  as done for a specific student. Requires flag -A and student name
+        if len(args.oralexam)>0:
+            oralexam_func=OralExamFunctions(args)
+            oralexam_func.oralexam_mark_as_done(args.oralexam)
 
-        if len(args.mark_manual) > 0:
+        # Mark oral exam as NOT completed for a specific student. Requires flag -R and student name
+        if len(args.revert)>0:
+            oralexam_func=OralExamFunctions(args)
+            oralexam_func.oralexam_revert(args.revert)
+
+        # Manually mark a submission of a student as passed. Requires flag -D and student name
+        if len(args.mark_manual)>0:
             man=Manual(args)
             man.mark_passed_manually(args.mark_manual)
 
-        result_generator = ResultGenerator()
-        # generates a csv dump for moodle grading
+        # Generates a csv dump for moodle grading
+        result_generator=ResultGenerator()
+        # If flag -g, generate csv dump
         if args.generate:
             result_generator.generate_csv_dump()
-        # prints short statistics for all submissions
+        # If flag -s, prints short statistics for all submissions
         if args.stats:
             result_generator.print_summary_stats_small(args)
 
-        # prints detailed information about a specific student submission
-        if len(args.details) > 0:
+        # If flag -d , prints detailed information about a specific student submission
+        if len(args.details)>0:
             result_generator.print_details(args.details)
 
-        # evaluates and shows performance statistics for all students which have passed
+        # Evaluates and shows performance statistics for all students which have passed
         if args.show_performance:
-            performance_evaluator = PerformanceEvaluator()
+            performance_evaluator=PerformanceEvaluator()
             performance_evaluator.evaluate()
-            
-        if len(args.test)>0:
-            execute_singel_testcase(args)            
 
-        # optional playground to try new implemented features
+        # Allows the execution of a single testcase for a student. Requires flag -t and a students name.
+        # Helpful here are flags -o to show the output of the test and -v for valgrind output.
+        if len(args.test)>0:
+            execute_single_testcase(args)
+
+            # Optional playground to try new implemented features
         if args.playground:
             playground=Playground()
             playground.run()
@@ -115,6 +122,6 @@ def run():
             pass
 
 
-if __name__ == "__main__":
+if __name__=="__main__":
     with LockFile(LOCK_FILE_PATH):
         run()

@@ -51,7 +51,7 @@ which contains:
   - `config_database_integrator.config`
   - `config_database_manager.config`
   - `config_submission_fetcher.config`
-  - `config_test_case_executor.config`
+  - `config_testcase_executor.config`
   - `config_performance_evaluator.config`
 
 These files are used to set relevant constants.
@@ -71,9 +71,9 @@ Set up a Moodel Course with an excercise where students can submit a `.c` file.
 Set the maximal possible grade for this excersie to 2:
 The grading for the C project is as follows:
 
-   - 0=not passed
-   - 1=submission passed
-   - 2= abtestat passed
+   - 0 = not passed
+   - 1 = submission passed
+   - 2 = submission and oral exam passed
 
 Retrieve the course ID, submission ID and ID of the account that sould be used by the pipline for logging  into Moodle.
 This can be done by opening the respective page in the web browser an copying the Id from the url. 
@@ -119,13 +119,13 @@ During the semester:
 * `check -d "Firstname Lastname"`: Get information about the last submissions of a single student.
 * `check -D "Firstname Lastname"` : Manually mark a submission as correct. Student will be automatically marked as passed. The database records manual change in a corresponding flag. This can be done if there are errors with the pipline and student code was successfully run on gruenau.
 
-For Abtestate:
+For oral exams:
 * `check -db "Firstname Lastname"`: Get information about the best submissions of a single student.
 * `check -s` : List for all students that have submitted a solution if they have passed. Useful when reevaluating the bar for passing.
 * `check -F` : Reruns all submission while ignoring the compiler warnings (and maybe some other stuff too). 
 * `check -uF` : check all unpassed students (and all their submissions) while lowering the bar for passing.
-* `check -A "Firstname Lastname"` : Record a successful Abtestat for this student. Marks the student as passed if not passed in the database.
-* `check -R "Firstname Lastname"` : Revert the desicion on an Abtestat. Allows to remove the passed status of a student.
+* `check -E "Firstname Lastname"` : Record a successful oral exam for this student. Marks the student as passed if not passed in the database.
+* `check -R "Firstname Lastname"` : Revert the desicion on an oral exam. Allows to remove the passed status of a student.
 * `check -g`: Generates .csv files of students that have passed for the Prüfungsbüro.  
 
 
@@ -151,7 +151,7 @@ The image below represents the currently implemented structure of the evaluation
   - Persist student data and submission information in a sqlite database 
   - Run a specific set of Testcases, consisting of input and output, for all submissions 
   - Evaluate the results with regards to correctness and runtime  
-  - Marking students as passed, and also mark whether they passed an "abtestat"
+  - Marking students as passed, and also mark whether they passed an oral exam
   - Send evaluation feedback to the students after running tests
   - evaluate performance (time and space) to evaluate possible competitions
   - dump relevant grading lists via csv and Moodle Grader API

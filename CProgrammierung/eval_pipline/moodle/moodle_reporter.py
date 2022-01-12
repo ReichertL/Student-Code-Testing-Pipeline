@@ -450,4 +450,3 @@ class MoodleReporter:
         with open(path, "a+") as mail_log:
             mail_log.write(str(datetime.now())+" Mail sent to "+str(student.name)+"for submission from the "+str(
                 submission.submission_time)+". The sent mail was: \n"+str(text))
-            

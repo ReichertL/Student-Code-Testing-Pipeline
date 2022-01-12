@@ -67,7 +67,7 @@ class MoodleSubmissionFetcher:
             MoodleSession(username,
                           session_state,
                           self.configuration)
-        self.moodle_session.update_teilnehmer()
+        self.moodle_session.update_students()
         mkdir(self.submission_base_dir)
         self.fetch_abgaben()
 

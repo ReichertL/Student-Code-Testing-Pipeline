@@ -61,7 +61,7 @@ class MoodleSession:
         Here the MoodleSession class is initialized.
         Parameters:
             username (string): username used for logging in
-            session_state (): contains information about the status of the session
+            session_state (dict): contains information about the status of the session
             configuration
             interactive (Boolean): . Optional. Default True.
         """

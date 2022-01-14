@@ -1,0 +1,18 @@
+# Project exclude paths
+gcc.return
+gcc.stderr
+/venv/
+resources/*
+*/moodelsessions
+*/mail_log
+*.db
+*/submissions/
+/util/constants.py
+/.idea/
+test.*
+*html
+*.swp
+*.pyc
+*.db
+moodle_success_mailed_dump.csv
+*.csv

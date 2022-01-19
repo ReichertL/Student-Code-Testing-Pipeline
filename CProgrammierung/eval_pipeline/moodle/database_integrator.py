@@ -6,7 +6,7 @@ To integrate new submissions into the database, the zip is unpacked and checked 
 corresponding file has already been handed in by the student.
 """
 
-import datetime
+from datetime import datetime
 import os
 import re
 import shutil
@@ -68,25 +68,16 @@ class DatabaseIntegrator:
                 .replace(os.path.sep, "") \
                 .replace("_assignsubmission_file_", "")
             student_name=student_details[0:student_details.find("_")]
-            wired_id=student_details[student_details.find("_")+1:] #TODO is this the moodle ID?
-            if len(student_name)>0 and len(wired_id)>0:
+            moodle_id=student_details[student_details.find("_")+1:] 
+            
+            if len(student_name)>0 and len(moodle_id)>0:
                 student=Student.get_student_by_name(student_name)
             for file in files:
                 if file.__str__().find(".swp")>0:
                     continue
                 filename=file
-
-                if not file.startswith("loesung_202"):
-                    timestamp_extension=datetime.datetime.fromtimestamp(
-                        int(os.path.getmtime(root+os.path.sep+file))) \
-                        .__str__()
-                    regex_timestamp=re.sub("-|:|\s", "_",
-                                           timestamp_extension)
-                    filename=f"loesung_{regex_timestamp}.c"
-                    new_file=os.path.join(root, filename)
-                    old_file=os.path.join(root, file)
-                    shutil.move(old_file, new_file)
+                
                 path=root+os.path.sep+filename
                 time_from_filename=filename[8:-2]
-                ts=datetime.datetime.strptime(time_from_filename, "%Y_%m_%d_%H_%M_%S")
+                ts=datetime.strptime(time_from_filename, "%Y_%m_%d_%H_%M_%S")
                 Submission.insert_submission(student, path, ts)

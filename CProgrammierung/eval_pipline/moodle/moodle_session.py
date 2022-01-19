@@ -10,7 +10,6 @@ import re
 import subprocess
 import sys
 import time
-from pwd import getpwnam
 from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
@@ -77,20 +76,11 @@ class MoodleSession:
         self.session = requests.Session()
         self.domain = configuration["MOODLE_DOMAIN"]
         DEFAULT_SESSION_HEADERS['Host'] = self.domain
-        self.proto='https://'
-       
-        docker=os.environ['DOCKER_ENV']
-        if docker == "TRUE":
-            self.proto='http://'
-
         self.session.headers.update(DEFAULT_SESSION_HEADERS)
         self.read_users_cached()
         self.username = username
         self.session_state = session_state
-        #logging.info(session_state)
-        #logging.info(session_state.get('logged_in'))
-        if session_state and session_state.get('logged_in') is True:
-            #logging.info("si")
+        if session_state and session_state.get('logged_in'):
             self.session.cookies.set('MoodleSession', session_state['cookie'],
                                      path='/', domain=self.domain)
             self.query_logged_in()
@@ -99,8 +89,6 @@ class MoodleSession:
                 self.login()
         self._grader_contextid = None
         self._grader_assignmentid = None
-        
-            
 
     def read_users_cached(self):
         """Read in the users list found in a cache file 'teilnehmer.json' in
@@ -115,7 +103,7 @@ class MoodleSession:
         Returns:
             URL string
         """
-        return self.proto + self.domain
+        return 'https://' + self.domain
 
     def update_students(self):
         """
@@ -177,45 +165,27 @@ class MoodleSession:
 
         Even though the password is not written to disk explicitly, who knows
         where it is cached to by python.
-        
-        For this to work, a login token is required.
-        The function gets the logintoken from the Moodle login form.
-        If login fails, the pipeline terminates with an error code.
-
 
         Parameters: None
         Returns: Nothing
         """
 
-        login_url = self.proto + self.domain + '/login/index.php'
-
-        r = self.session.get(login_url)
-        soup = BeautifulSoup(r.text, 'html.parser')
-        hidden_tags = soup.find_all("input", type="hidden")
-        for tag in hidden_tags:
-            if tag['name']=="logintoken":
-                logintoken=tag['value']
-                logging.info(tag['value'])
-                break
-                
+        login_url = 'https://' + self.domain + '/login/index.php'
         d = {'username': self.username,
              'password': self.configuration
                  .get("MOODLE_PASSWORDS", {})
-                 .get(self.username),
-            'logintoken': logintoken
-                 }
+                 .get(self.username)}
         if d['password'] is None:
             d['password'] = getpass.getpass(
                 f'[logging in as {self.username}] Password: ')
-        logging.info(f'INFO: logging in as "{self.username}" ')
+        print(f'INFO: logging in as {self.username} ... ', end='', flush=True)
 
         self._last_request = self.session.post(login_url, data=d)
         self.session_state['cookie'] = self.session.cookies['MoodleSession']
         if self.query_logged_in():
-            logging.info(f'OK, your full name is "{self.full_name:s}"')
+            print(f'OK, your full name is "{self.full_name:s}"')
         else:
-            logging.error(f'Login FAILED. Post data {d}. Post URL {login_url}.')
-            exit(1)
+            print('FAILED')
 
     @staticmethod
     def dump_dashboard(r):
@@ -254,10 +224,7 @@ class MoodleSession:
                 raise MoodleScrapeError(
                     'cannot find <div class=\'logininfo\' .../>')
             # extract the full name
-            try:
-                self.full_name = div[0].find_all('a')[0].text
-            except IndexError:
-                logging.warning("Could not find Full Name")
+            self.full_name = div[0].find_all('a')[0].text
             # extract the moodle user id
             url = div[0].find_all('a')[0]['href']
             if (mo := re.match(r'(.*?=)(\d+)', url)) is not None:
@@ -534,7 +501,7 @@ class MoodleSession:
         """
         headers = dict(AJAX_HEADERS)
         if referer:
-            headers.update({'Referer': self.proto+ self.domain + referer})
+            headers.update({'Referer': 'https://' + self.domain + referer})
         data = [{"index": 0,
                  "methodname": methodname,
                  "args": args}]

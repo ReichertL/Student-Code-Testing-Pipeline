@@ -18,12 +18,12 @@ def select_option_interactive(options,pos=False):
 
     """
 
-    print(f"\n Please select one of the following options!")
-    for index, option in zip(range(0,len(options)),options):
+     print(f"\n Please select one of the following options!")
+     for index, option in zip(range(0,len(options)),options):
         print(f"[{index + 1}]: {option}")
-    answer_accepted = False
-    answer = 0
-    while not answer_accepted:       
+     answer_accepted = False
+     answer = 0
+     while not answer_accepted:       
         answer = sys.stdin.readline()[:-1]
         try:
             answer = int(answer) - 1

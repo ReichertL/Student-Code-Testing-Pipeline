@@ -20,9 +20,10 @@ from moodle.moodle_submission_fetcher import MoodleSubmissionFetcher
 from database.database_manager import DatabaseManager
 from logic.performance_evaluator import PerformanceEvaluator
 from logic.result_generator import ResultGenerator
-from logic.testcase_pipeline import TestcasePipeline
+from logic.testcase_executor import TestCaseExecutor
 from logic.oralexam_functions import OralExamFunctions
 from logic.mark_manual import Manual
+from logic.execute_single import execute_single_testcase
 from util.argument_extractor import ArgumentExtractor
 from util.lockfile import LockFile
 from util.playground import Playground
@@ -59,12 +60,11 @@ def run():
             fetcher.run()
             database_integrator=DatabaseIntegrator()
             database_integrator.integrate_submission_dir()
-            if args.fetch_only:
-                exit(0)
 
-        if args.check or args.all or args.unpassed:
-            pipeline=TestcasePipeline(args)
-            pipeline.run()
+            if not args.fetch_only:
+                # Execute test cases 
+                executor=TestCaseExecutor(args)
+                executor.run()
 
         # Send Moodle feedback to students. Requires flag -m or flag -M  and a student name. 
         if args.mail_to_all or len(args.mailto)>0:
@@ -107,8 +107,7 @@ def run():
         # Allows the execution of a single testcase for a student. Requires flag -t and a students name.
         # Helpful here are flags -o to show the output of the test and -v for valgrind output.
         if len(args.test)>0:
-            pipeline=TestcasePipeline(args)
-            pipeline.check_single_testcase()
+            execute_single_testcase(args)
 
             # Optional playground to try new implemented features
         if args.playground:

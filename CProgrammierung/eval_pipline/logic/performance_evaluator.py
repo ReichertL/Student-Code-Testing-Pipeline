@@ -57,6 +57,7 @@ class PerformanceEvaluator:
         key_list=self.configuration["PERFORMANCE_TESTCASES_TIME"]
         performances=list()
         students=Student.get_students_passed()
+        logging.debug(students)
         for student in students:
             fastest=Run.get_fastest_run_for_student(student.name, key_list)
             if fastest is not None:
@@ -75,10 +76,6 @@ class PerformanceEvaluator:
             os.unlink("performances.txt")
         except FileNotFoundError:
             pass
-        
-        if performances == []:
-            logging.info(f'There are now performances that are both passed and fast. Therefore no table  can be created.')
-            exit(0)
 
         row_format=' | '.join(['{name}']+['{{{}:.3f}}'.format(col)
                                           for col in

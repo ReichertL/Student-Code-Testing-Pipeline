@@ -87,18 +87,18 @@ class ArgumentExtractor:
             .parser \
             .add_argument('-C', '--compile',
                           dest='compile',
-                        action='store_true',
-                         help='Just compile a submission. Example usage: check -Crc "student name" to verify that a students submission did not compile.')
-        
-        #self \
-        #    .parser \
-        #    .add_argument('-e', '--extra',
-        #                  nargs='*',
-        #                  dest='extra_sources',
-        #                  type=str,
-        #                  default=[],
-        #                  help='Run extra tests for each submission'
-        #                       'that has not been tested so far')
+                          type=str,
+                          default='',
+                          help='Just compile this configuration')
+        self \
+            .parser \
+            .add_argument('-e', '--extra',
+                          nargs='*',
+                          dest='extra_sources',
+                          type=str,
+                          default=[],
+                          help='Run extra tests for each submission'
+                               'that has not been tested so far')
         self \
             .parser \
             .add_argument('-s', '--stats',
@@ -155,25 +155,22 @@ class ArgumentExtractor:
                          action='store_true',
                          help='Combined with -d:'
                               ' shows best submission'
-                              ' instead of latest. Usage: check -bd "student name"')
+                              ' instead of latest')
         self \
             .parser \
             .add_argument('-p', '--performance',
                           dest='show_performance',
-                          action='store_true',
-                          help='Shows performance statistics for all students. Ir ranks them by their run time for performance testcases and their overall memory usage.')
+                          action='store_true')
 
-        #self \
-        #    .parser \
-        #    .add_argument('-H', '--html',
-        #                  dest='html_performance_output',
-        #                  action='store_true')
+        self \
+            .parser \
+            .add_argument('-H', '--html',
+                          dest='html_performance_output',
+                          action='store_true')
         self \
             .parser \
             .add_argument('-F', '--final',
-                          action='store_true',
-                          help='Relaxes the requirements for submissions to pass.'\
-                          'Submissions with compiler warnings are checked. Resource limits are relaxed.')
+                          action='store_true')
         self \
             .parser \
             .add_argument('-r', '--rerun',

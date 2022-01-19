@@ -3,13 +3,11 @@ This module provides functions to compile a single c file using gcc.
 
 The host's native gcc can be used as less as a gcc inside a docker container.
 """
-import glob
 import os
 import shutil
 import logging
-import subprocess
 from pwd import getpwnam
-from subprocess import DEVNULL, PIPE
+from subprocess import run, DEVNULL, PIPE
 import sys
 import shutil
 
@@ -50,7 +48,7 @@ def native_gcc(gcc_args, src, dest):
     shutil.copy(src, tmp_c_path)
     all_args = gcc_args + ['-o', os.path.basename(dest),
                            os.path.basename(dest) + '.c']
-    cp = subprocess.run(all_args,
+    cp = run(all_args,
              stdout=DEVNULL,
              stderr=PIPE,
              universal_newlines=True,
@@ -103,14 +101,11 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
     except:
         pass
     
-    if  len(os.listdir(directory)) != 0:
-        logging.info(f"clearing {directory}")
-        files = glob.glob(f'{directory}/*')
-        for f in files:
-            os.remove(f)
+    if os.listdir(directory):
+        raise OSError(f"Directory not empty: '{directory}'")
     
     # create docker container, if it does not exist already
-    subprocess.run(SUDO_DOCKER + ['create',
+    run(SUDO_DOCKER + ['create',
                        '--name', docker_container,
                        '-v', f'{os.path.abspath(directory)}:/host',
                        docker_image],
@@ -118,7 +113,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         stderr=DEVNULL)
    
     # start docker container if required
-    cp = subprocess.run(SUDO_DOCKER + ['start', docker_container], stdout=DEVNULL, stderr=sys.stderr)
+    cp = run(SUDO_DOCKER + ['start', docker_container], stdout=DEVNULL, stderr=sys.stderr)
     if cp.returncode != 0:
         logging.info(cp)
         raise DockerError(f'Unable to start docker container {docker_container} based on docker image {docker_image}.')
@@ -138,7 +133,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
          f'{commandline} 2> gcc.stderr ; '
          'echo $? > gcc.return ;'
          f'chown {OWN_UID_GID} gcc.stderr gcc.return {os.path.basename(dest)}']
-    cp= subprocess.run(command_full,
+    cp=run(command_full,
         stdout=DEVNULL,
         stderr=DEVNULL)
     # collect gcc's stderr
@@ -156,7 +151,7 @@ def docker_gcc(gcc_args, src, dest, docker_image, docker_container, directory):
         except FileNotFoundError:
             pass
     # clean up copy of c file
-    os.unlink(tmp_c_path)
+    os.unlink(tmp_c_path))
     return commandline, gcc_returncode, gcc_stderr
 
 

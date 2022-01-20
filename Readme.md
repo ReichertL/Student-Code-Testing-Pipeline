@@ -10,10 +10,10 @@ It can generate relevant grading for Moodle via csv and also via the moodle grad
 Contributors are: Daniel Cagara, Holger Döbler, Mark Spitzner and Leonie Reichert.
 
 ## Content
-1. [Option 1: Testsetup with docker](#installation)
+1. [Option 1: Testsetup with docker](#installation-with-docker)
 2. [Option 2: Installation without docker](#installation)
 3. [Usage](#usage)
-4. [Current State of the Eval Pipeline](#current-state-of-the-eval-pipline)
+4. [Current State of the Eval Pipeline](#current-state-of-the-eval-pipeline)
 
 
 ## 1. Option 1: Setting up a testing environment with docker
@@ -56,7 +56,7 @@ Build Docker File:
 
 ### 2.3 Resources, Config Files and Templates
 
-There needs to be a resource directory inside the `eval_pipline directory`
+There needs to be a resource directory inside the `eval_pipeline directory`
 which contains:
 
   - `config_database_integrator.config`
@@ -86,14 +86,14 @@ The grading for the C project is as follows:
    - 1 = submission passed
    - 2 = submission and oral exam passed
 
-Retrieve the course ID, submission ID and ID of the account that sould be used by the pipline for logging  into Moodle.
+Retrieve the course ID, submission ID and ID of the account that sould be used by the pipeline for logging  into Moodle.
 This can be done by opening the respective page in the web browser an copying the Id from the url. 
-With these values update the entries in `C Programmierprojekt/eval_pipline_rework/resources` the file named `config_submission_fetcher.config`. For testing purposes, the settings for an example course can be found in `resources-example/`. To use it, rename the folder to `resources/`.
-As account for logging into Moodle and having multiple people receive responses from students, the following mailing list was created: "informatik.cprogrammierprojekt@lists.hu-berlin.de". The account used by the eval-pipline should/can use this email for logging in. 
-Changes to the mailinglist can be made via  `https://sympa.cms.hu-berlin.de/sympa/info/informatik.cprogrammierprojekt`. This might be necessary in case a new person in responsible for the pipline.
+With these values update the entries in `C Programmierprojekt/eval_pipeline_rework/resources` the file named `config_submission_fetcher.config`. For testing purposes, the settings for an example course can be found in `resources-example/`. To use it, rename the folder to `resources/`.
+As account for logging into Moodle and having multiple people receive responses from students, the following mailing list was created: "informatik.cprogrammierprojekt@lists.hu-berlin.de". The account used by the eval-pipeline should/can use this email for logging in. 
+Changes to the mailinglist can be made via  `https://sympa.cms.hu-berlin.de/sympa/info/informatik.cprogrammierprojekt`. This might be necessary in case a new person in responsible for the pipeline.
 
 ### 2.5 Shortcut
-For convenience, put a symbolic link in `/usr/bin` so that the pipline can be called by simply running `check [args]` in the terminal:
+For convenience, put a symbolic link in `/usr/bin` so that the pipeline can be called by simply running `check [args]` in the terminal:
 ```
 sudo ln -s /path/to/eval_pipeline/__main__.py /usr/bin/check
 ```
@@ -128,7 +128,7 @@ During the semester:
 * `check -t "Firstname Lastname"` : Run a single (selectable) testcase for the named student.
 * `check -tOV "Firstname Lastname"` : Run single testcase for student but also print output and Valgrind result. 
 * `check -d "Firstname Lastname"`: Get information about the last submissions of a single student.
-* `check -D "Firstname Lastname"` : Manually mark a submission as correct. Student will be automatically marked as passed. The database records manual change in a corresponding flag. This can be done if there are errors with the pipline and student code was successfully run on gruenau.
+* `check -D "Firstname Lastname"` : Manually mark a submission as correct. Student will be automatically marked as passed. The database records manual change in a corresponding flag. This can be done if there are errors with the pipeline and student code was successfully run on gruenau.
 
 For oral exams:
 * `check -db "Firstname Lastname"`: Get information about the best submissions of a single student.
@@ -145,7 +145,7 @@ For oral exams:
 To automate the the checking of student code, create a cronjob for the following command:
 `check -favm >> ~/log_cpp 2>&1`
 
-## 4 Current State of the Eval Pipeline
+## 4 Current State of the Pipeline
 This section describes the current state of the eval pipeline. 
 We start with the currently usable switches and their behavior, [here](#stable-commandline-arguments). 
 Followed by a description of the [current structure](#implemented-structure) and finish with a short summary of 

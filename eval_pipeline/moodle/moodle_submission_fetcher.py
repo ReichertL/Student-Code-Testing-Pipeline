@@ -9,6 +9,7 @@ import json
 import os
 import re
 import shutil
+import filecmp
 import subprocess
 from subprocess import DEVNULL
 import sys
@@ -130,8 +131,7 @@ class MoodleSubmissionFetcher:
         The zip (downloaded or local) is then unpacked.
         The submissions are renamed, so they include their modification time and integrated into a directory structure.
         Each student has their own subdirectory containing the most recent submission.
-        This timestamp should not be changed to e.g. the current time as the pipline uses file modification time to
-        differentiate between different submissions from the same person.
+        The file is integrated by checking with the cmp command, if it already exists in the directory. This checks the content of the file!
 
         Parameters:
             dryrun: Optional, default is False. If set it is only checked if a local zip file exists but Moodle is not queried.
@@ -198,8 +198,17 @@ class MoodleSubmissionFetcher:
             dest=os.path.join(dest_dir, f'loesung_{regex_timestamp}.c')
             if not os.path.isdir(dest_dir):
                 os.mkdir(dest_dir)
-
-            shutil.move(src, dest)
+            
+            files=glob.glob(f"{dest_dir}/*.c")
+            exists=False
+            for f in files:
+                exists=filecmp.cmp(f, src)
+            
+            if not exists:
+                shutil.move(src, dest)
+            
+            
+            
 
     @staticmethod
     def dirname_to_student(d):

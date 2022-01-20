@@ -73,14 +73,18 @@ class Manual:
                               f"please select again!")
                 selected=submissions[answer]
 
+
             elif len(submissions)==1:
                 selected=submissions[0]
-
+                
             for run in selected.runs:
-                if student.grade==(0 or None):
-                    student.grade=1
-                    reporter=MoodleReporter(self.args)
-                    reporter.update_grade_on_moodle(student, student.grade)
                 run.passed=True
                 run.manual_overwrite_passed=True
                 dbm.session.commit()
+
+            if student.grade not in [1,2]:
+                student.grade=1
+                dbm.session.commit()
+                reporter=MoodleReporter(self.args)
+                reporter.update_grade_on_moodle(student, student.grade)
+            

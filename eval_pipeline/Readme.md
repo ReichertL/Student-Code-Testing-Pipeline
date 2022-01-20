@@ -16,7 +16,7 @@ csv and also via the moodle grading api.
 ### 1.0 Preparing VM
 Tested on an Ubuntu 18.04
     * Ensure sudo does not require a password (required to run docker and unshare)
-    * Create additional user with name cpr
+    * Create additional user with name 'cpr'
     * Ensure unshare is installed (if path is not `/usr/bin/unshare` it needs to be changed in config files)
     * Compile htime in folder `c_util`. Move executable htime to `/user/bin/htime`.
 

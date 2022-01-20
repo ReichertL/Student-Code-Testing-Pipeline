@@ -1,9 +1,11 @@
+"""
+Functions creating a named Pipe. Used to store output of subprocesses.
+Contains class NamedPipeOpen and NamedPipeCopy.
+"""
+
+
 import os
 import subprocess
- """
- Functions creating a named Pipe. Used to store output of subprocesses.
- Contains class NamedPipeOpen and NamedPipeCopy.
- """
 
 class NamedPipeOpen(object):
     def __init__(self, path):

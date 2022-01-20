@@ -24,6 +24,7 @@ def retrieve_pending_submissions(args):
 
     if args.check and args.rerun:
         for name in args.check:
+            logging.debug(args.check)
             submissions_student=Submission.get_last_for_name(name)
             if submissions_student is not None:
                 submissions.append(submissions_student)

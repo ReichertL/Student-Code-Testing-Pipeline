@@ -1,26 +1,37 @@
-# Reworked python eval pipeline for evaluating c-programming project submissions
+# Pipeline for checking student programming exercises
 
-This python script is intended to automatically fetch submissions from a moodle page, compile these submissions for each
-student and evaluate the correctness along with the performance. 
-Further it is able to persist relevant information, send feedback e-mails and generate relevant grading for moodle via 
-csv and also via the moodle grading api.   
+This tool was written by members of the chair of technical computer science at HU Berlin to facilitate the checking of programming exercises handed in by students via Moodle.
+
+It automatically fetches submissions from a moodle page, compiles these submissions for each
+student and evaluates the correctness along with the performance. 
+Further it is able to persist relevant information, send feedback e-mails via Moodle.
+It can generate relevant grading for Moodle via csv and also via the moodle grading api. 
+
+Contributors are: Daniel Cagara, Holger Döbler, Mark Spitzner and Leonie Reichert.
 
 ## Content
-1. [Installation](#installation)
-2. [Usage](#usage)
-3. [Current State of the Eval Pipeline](#current-state-of-the-eval-pipline)
-4. [Future Development](#future-development)
+1. [Option 1: Testsetup with docker](#installation)
+2. [Option 2: Installation without docker](#installation)
+3. [Usage](#usage)
+4. [Current State of the Eval Pipeline](#current-state-of-the-eval-pipline)
 
 
-## 1. Installation
-### 1.0 Preparing VM
+## 1. Option 1: Setting up a testing environment with docker
+
+
+## 2. Option 2: Installation directly on a server 
+This is an explenation of how to install the pipeline directly on a server without running all components in dockers. 
+But docker is still necessary to emulate the gcc compiler of the reference system which is available for the students for testing. This can also be changed by editing the code.
+To follow this installation it is assumed that a functioning Moodle server already exists. 
+
+### 2.0 Preparing VM
 Tested on an Ubuntu 18.04
     * Ensure sudo does not require a password (required to run docker and unshare)
     * Create additional user with name 'cpr'
     * Ensure unshare is installed (if path is not `/usr/bin/unshare` it needs to be changed in config files)
     * Compile htime in folder `c_util`. Move executable htime to `/user/bin/htime`.
 
-### 1.1 Packages
+### 2.1 Packages
 Install Docker and Valgrind:
 
   - `sudo apt install docker.io`
@@ -38,12 +49,12 @@ Install required packet bs4 for python3.8 by using:
 
 
 
-### 1.2 Docker
+### 2.2 Docker
 
 Build Docker File:
   - `./dockerfiles/build.sh`
 
-### 1.3 Resources, Config Files and Templates
+### 2.3 Resources, Config Files and Templates
 
 There needs to be a resource directory inside the `eval_pipline directory`
 which contains:
@@ -66,7 +77,7 @@ which can be replaced during runtime. These tokens should be follow the format `
 
 
 
-### 1.4 Moodel Course
+### 2.4 Moodel Course
 Set up a Moodel Course with an excercise where students can submit a `.c` file. 
 Set the maximal possible grade for this excersie to 2:
 The grading for the C project is as follows:
@@ -81,7 +92,7 @@ With these values update the entries in `C Programmierprojekt/eval_pipline_rewor
 As account for logging into Moodle and having multiple people receive responses from students, the following mailing list was created: "informatik.cprogrammierprojekt@lists.hu-berlin.de". The account used by the eval-pipline should/can use this email for logging in. 
 Changes to the mailinglist can be made via  `https://sympa.cms.hu-berlin.de/sympa/info/informatik.cprogrammierprojekt`. This might be necessary in case a new person in responsible for the pipline.
 
-### 1.5 Shortcut
+### 2.5 Shortcut
 For convenience, put a symbolic link in `/usr/bin` so that the pipline can be called by simply running `check [args]` in the terminal:
 ```
 sudo ln -s /path/to/eval_pipeline/__main__.py /usr/bin/check
@@ -89,7 +100,7 @@ sudo ln -s /path/to/eval_pipeline/__main__.py /usr/bin/check
 
 
 
-## 2 Usage
+## 3 Usage
 Thanks to `__init__.py` and `__main__.py`
 it can be called by executing:
 
@@ -103,7 +114,7 @@ It can then be called by:
 
 `check [args]`
 
-### 2.1 Usefull Commands
+### 3.1 Usefull Commands
 
 During the semester:
 
@@ -129,24 +140,24 @@ For oral exams:
 * `check -g`: Generates .csv files of students that have passed for the Prüfungsbüro.  
 
 
-### 2.2 Automation
+### 3.2 Automation
 
 To automate the the checking of student code, create a cronjob for the following command:
 `check -favm >> ~/log_cpp 2>&1`
 
-## 3 Current State of the Eval Pipeline
+## 4 Current State of the Eval Pipeline
 This section describes the current state of the eval pipeline. 
 We start with the currently usable switches and their behavior, [here](#stable-commandline-arguments). 
 Followed by a description of the [current structure](#implemented-structure) and finish with a short summary of 
 the [current features](#implemented-features).   
 
 
-### 3.1 Implemented Structure:
+### 4.1 Implemented Database Structure:
 The image below represents the currently implemented structure of the evaluation pipeline. 
 ![current structure](Database_Schema.svg)
 
 
-### 3.2 Implemented Features:  
+### 4.2 Implemented Features:  
   - Fetching submissions from moodle or a local dir 
   - Persist student data and submission information in a sqlite database 
   - Run a specific set of Testcases, consisting of input and output, for all submissions 
@@ -158,21 +169,5 @@ The image below represents the currently implemented structure of the evaluation
   - Guessing a students name based on input
   
 
-### 3.3 Limitations
+### 4.3 Limitations
 - Return codes of tested submissions need to be larger or equal zero (see python subprocess() call)
-
-## 4 Future Development
-In this section we'll describe planned future reworks and structural improvements for future work.
-
-
-### 4.1 Planned Features
-
-- Rework format of -s/--stats 
-
-### 4.2 Planned Integration 
-
-- Better pair-wise similarity analysis with j-plag
-- Test coverage for eval pipeline in the Gitlab CI
-
-
-

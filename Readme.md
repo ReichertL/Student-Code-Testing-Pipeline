@@ -154,7 +154,7 @@ the [current features](#implemented-features).
 
 ### 4.1 Implemented Database Structure:
 The image below represents the currently implemented structure of the evaluation pipeline. 
-![current structure](Database_Schema.svg)
+![current structure](student-code-testing-pipeline/eval-pipeline/Database_Schema.svg)
 
 
 ### 4.2 Implemented Features:  

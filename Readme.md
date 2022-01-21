@@ -1,4 +1,4 @@
-# Pipeline for checking student programming exercises
+# Pipeline for Checking Student Programming Exercises
 
 This tool was written by members of the chair of technical computer science at HU Berlin to facilitate the checking of programming exercises handed in by students via Moodle.
 
@@ -7,7 +7,7 @@ student and evaluates the correctness along with the performance.
 Further it is able to persist relevant information, send feedback e-mails via Moodle.
 It can generate relevant grading for Moodle via csv and also via the moodle grading api. 
 
-Contributors are: Daniel Cagara, Holger Döbler, Mark Spitzner and Leonie Reichert.
+People that have contributed to the code: Daniel Cagara, Holger Döbler, Mark Spitzner and Leonie Reichert.
 
 ## Content
 1. [Option 1: Testsetup with docker](#installation-with-docker)
@@ -16,7 +16,7 @@ Contributors are: Daniel Cagara, Holger Döbler, Mark Spitzner and Leonie Reiche
 4. [Current State of the Eval Pipeline](#current-state-of-the-eval-pipeline)
 
 
-## 1. Option 1: Setting up a testing environment with docker
+## 1. Option 1: Setting up a Testing Environment with Docker
 
 This section explains how to create a setup consisting only of Docker containers which talk with one another.
 
@@ -33,7 +33,7 @@ This section explains how to create a setup consisting only of Docker containers
 Both containers access a newly created `/tmp/dockershared` folder to exchange files.
 For degubbing, it is possible to simply edit the code in `student-code-testing-pipeline/eval-pipeline` as this is folder is shared between the host OS and the pipeline container.
 
-### Step 2: Setup a local moodle instance 
+### Step 2: Setup a Local Moodle Instance 
 
 * To create a local Moodle instance which already contains students, a course and submissions, use the local `moodle/docker-compose.yml` file. To create the containers, run: 
 
@@ -49,7 +49,7 @@ For degubbing, it is possible to simply edit the code in `student-code-testing-p
 Moodle now runs on localhost on port 80.
 Login information for Moodle is username `user` with pasword `bitnami` (or check the corresponding `docker-compose.yml` file.
     
-## 2. Option 2: Installation directly on a server 
+## 2. Option 2: Installation Directly on a Server 
 This is an explenation of how to install the pipeline directly on a server without running all components in dockers. 
 But docker is still necessary to emulate the gcc compiler of the reference system which is available for the students for testing. This can also be changed by editing the code.
 To follow this installation it is assumed that a functioning Moodle server already exists. 

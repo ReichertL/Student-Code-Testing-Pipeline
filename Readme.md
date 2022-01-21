@@ -18,7 +18,37 @@ Contributors are: Daniel Cagara, Holger Döbler, Mark Spitzner and Leonie Reiche
 
 ## 1. Option 1: Setting up a testing environment with docker
 
+This section explains how to create a setup consisting only of Docker containers which talk with one another.
 
+* There is one container running the pipeline for testing student code.
+* Another container is used to compile student code with the gcc compiler of the reference system to ensure they do not generate any warnings.
+* Two containers are required to create a local Moodle setup. If you have access to a Moodle server where you can create courses, then those two  containers are not necessary. 
+
+### Step 1: Setup the Testing Pipeline
+
+* Execute ./build.sh : This builds the reference-clone and the pipeline
+* Execute ./run.sh : This creats/starts both containers with the relevant options
+* Use `sudo docker exec -it pipeline /bin/bash` to start a shell on the pipeline container
+
+Both containers access a newly created `/tmp/dockershared` folder to exchange files.
+For degubbing, it is possible to simply edit the code in `student-code-testing-pipeline/eval-pipeline` as this is folder is shared between the host OS and the pipeline container.
+
+### Step 2: Setup a local moodle instance 
+
+* To create a local Moodle instance which already contains students, a course and submissions, use the local `moodle/docker-compose.yml` file. To create the containers, run: 
+
+    `cd moodle`
+    `sudo docker-compose up -d`
+
+
+* Another option is to use a blank Moodle setup. Moodle will not have any couses installed, so those would have to be created manually. After installing docker-compose, run:
+
+    `curl -sSL https://raw.githubusercontent.com/bitnami/bitnami-docker-moodle/master/docker-compose.yml > docker-compose.yml`
+    `sudo docker-compose up -d` 
+
+Moodle now runs on localhost on port 80.
+Login information for Moodle is username `user` with pasword `bitnami` (or check the corresponding `docker-compose.yml` file.
+    
 ## 2. Option 2: Installation directly on a server 
 This is an explenation of how to install the pipeline directly on a server without running all components in dockers. 
 But docker is still necessary to emulate the gcc compiler of the reference system which is available for the students for testing. This can also be changed by editing the code.
@@ -128,7 +158,7 @@ During the semester:
 * `check -t "Firstname Lastname"` : Run a single (selectable) testcase for the named student.
 * `check -tOV "Firstname Lastname"` : Run single testcase for student but also print output and Valgrind result. 
 * `check -d "Firstname Lastname"`: Get information about the last submissions of a single student.
-* `check -D "Firstname Lastname"` : Manually mark a submission as correct. Student will be automatically marked as passed. The database records manual change in a corresponding flag. This can be done if there are errors with the pipeline and student code was successfully run on gruenau.
+* `check -D "Firstname Lastname"` : Manually mark a submission as correct. Student will be automatically marked as passed. The database records manual change in a corresponding flag. This can be done if there are errors with the pipeline and student code was successfully run on the reference system.
 
 For oral exams:
 * `check -db "Firstname Lastname"`: Get information about the best submissions of a single student.
